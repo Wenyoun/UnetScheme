@@ -4,7 +4,7 @@ using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
 {
-    public class ObjectRegisterHandler
+    public class ClientObjectRegisterHandler
     {
         public static void Register()
         {

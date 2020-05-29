@@ -14,14 +14,14 @@ namespace Zyq.Game.Server
         public void Init()
         {
             m_Registers = new Dictionary<int, IProtocolRegister>();
-            ObjectRegisterHandler.Register();
+            ServerObjectRegisterHandler.Register();
         }
 
         public void Dispose()
         {
             m_Registers.Clear();
             m_Registers = null;
-            ObjectRegisterHandler.Unregister();
+            ServerObjectRegisterHandler.Unregister();
         }
 
         public void OnStartServer()

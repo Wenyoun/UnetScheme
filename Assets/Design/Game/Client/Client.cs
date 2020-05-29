@@ -15,7 +15,7 @@ namespace Zyq.Game.Client
         public void Init()
         {
             m_Registers = new Dictionary<System.Type, IProtocolRegister>();
-            ObjectRegisterHandler.Register();
+            ClientObjectRegisterHandler.Register();
         }
 
         public void Dispose()
@@ -23,7 +23,7 @@ namespace Zyq.Game.Client
             Net = null;
             m_Registers.Clear();
             m_Registers = null;
-            ObjectRegisterHandler.Unregister();
+            ClientObjectRegisterHandler.Unregister();
         }
 
         public void OnStartClient()

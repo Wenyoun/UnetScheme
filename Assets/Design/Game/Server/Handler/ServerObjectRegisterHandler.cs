@@ -4,18 +4,16 @@ using UnityEngine.Networking;
 
 namespace Zyq.Game.Server
 {
-    public class ObjectRegisterHandler
+    public class ServerObjectRegisterHandler
     {
         public static void Register()
         {
             ObjectEventRegister.Ins.Register(ObjectEventRegister.AddObject, (NetworkBehaviour behaviour) =>
             {
-                Debug.Log("Server:1111111111111111111111111111");
             });
 
             ObjectEventRegister.Ins.Register(ObjectEventRegister.RemoveObject, (NetworkBehaviour behaviour) =>
             {
-                Debug.Log("Server:1111111111111111111111111111");
             });
         }
 
