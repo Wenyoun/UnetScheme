@@ -1,8 +1,5 @@
-﻿using UnityEngine.Networking;
-
-using Zyq.Game.Base;
-
-using System.Collections.Generic;
+﻿using Zyq.Game.Base;
+using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
 {

@@ -13,6 +13,7 @@ namespace Zyq.Game.Client
             ObjectEventRegister.Ins.Register(ObjectEventRegister.AddObject, (NetworkBehaviour behaviour) =>
             {
                 //EntityMgr.AddEntity(EntityFactory.CreateTank(behaviour.netId.Value, Group.Tank, 100, ));
+                Debug.Log("Client:11111111111111111111111111111");
             });
 
             ObjectEventRegister.Ins.Register(ObjectEventRegister.RemoveObject, (NetworkBehaviour behaviour) =>

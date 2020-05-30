@@ -10,10 +10,12 @@ namespace Zyq.Game.Server
         {
             ObjectEventRegister.Ins.Register(ObjectEventRegister.AddObject, (NetworkBehaviour behaviour) =>
             {
+                Debug.Log("Server:111111111111111111111111111");
             });
 
             ObjectEventRegister.Ins.Register(ObjectEventRegister.RemoveObject, (NetworkBehaviour behaviour) =>
             {
+                Debug.Log("Server:22222222222222222222222222");
             });
         }
 
