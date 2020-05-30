@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
 {
-    public class ClientProtocolRegister : IProtocolRegister
+    public class ClientProtocolHandler : IProtocolHandler
     {
         public void Register(NetworkConnection net)
         {

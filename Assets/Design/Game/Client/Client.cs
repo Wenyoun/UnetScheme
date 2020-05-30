@@ -10,20 +10,17 @@ namespace Zyq.Game.Client
     {
         public static Client Ins = new Client();
 
-        private Dictionary<System.Type, IProtocolRegister> m_Registers;
-
         public void Init()
         {
-            m_Registers = new Dictionary<System.Type, IProtocolRegister>();
             ClientObjectRegisterHandler.Register();
         }
 
         public void Dispose()
         {
-            Net = null;
-            m_Registers.Clear();
-            m_Registers = null;
+            Connection.Dispose();
             ClientObjectRegisterHandler.Unregister();
+
+            Connection = null;
         }
 
         public void OnStartClient()
@@ -36,30 +33,20 @@ namespace Zyq.Game.Client
 
         public void OnServerConnect(NetworkConnection net)
         {
-            Net = net;
-            RegisterProtocol<ClientProtocolRegister>(Net);
+            Connection = new Connection(net);
+            RegisterProtocols(Connection);
         }
 
         public void OnServerDisconnect(NetworkConnection net)
         {
-            foreach (IProtocolRegister register in m_Registers.Values)
-            {
-                register.Unregister(net);
-            }
-            m_Registers.Clear();
+            Connection.ClearProtocols();
         }
 
-        private void RegisterProtocol<T>(NetworkConnection net) where T : IProtocolRegister, new()
+        private void RegisterProtocols(Connection connection)
         {
-            System.Type type = typeof(T);
-            if (!m_Registers.ContainsKey(type))
-            {
-                IProtocolRegister register = new T();
-                register.Register(net);
-                m_Registers.Add(type, register);
-            }
+            connection.RegisterProtocol<ClientProtocolHandler>();
         }
 
-        public NetworkConnection Net { get; private set; }
+        public Connection Connection { get; private set; }
     }
 }

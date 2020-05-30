@@ -2,7 +2,7 @@
 
 namespace Zyq.Game.Base
 {
-    public interface IProtocolRegister
+    public interface IProtocolHandler
     {
         void Register(NetworkConnection net);
 

@@ -2,6 +2,8 @@
 using Zyq.Game.Base;
 using UnityEngine.Networking;
 
+using Game;
+
 namespace Zyq.Game.Client
 {
     public class ClientObjectRegisterHandler
@@ -10,7 +12,7 @@ namespace Zyq.Game.Client
         {
             ObjectEventRegister.Ins.Register(ObjectEventRegister.AddObject, (NetworkBehaviour behaviour) =>
             {
-                Debug.Log("Client:1111111111111111111111111111");
+                //EntityMgr.AddEntity(EntityFactory.CreateTank(behaviour.netId.Value, Group.Tank, 100, ));
             });
 
             ObjectEventRegister.Ins.Register(ObjectEventRegister.RemoveObject, (NetworkBehaviour behaviour) =>

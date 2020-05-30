@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 
 namespace Zyq.Game.Server
 {
-    public class ServerProtocolRegister : IProtocolRegister
+    public class ServerProtocolHandler : IProtocolHandler
     {
         public void Register(NetworkConnection net)
         {
@@ -13,7 +13,14 @@ namespace Zyq.Game.Server
             {
                 LoginRepProtocol req = msg.ReadMessage<LoginRepProtocol>();
                 Debug.Log("登陆请求: Username=" + req.Username + ",Password=" + req.Password);
-                net.Send(MsgId.Msg_Login_Res, new LoginResProtocol(req.Username + "用户名", req.Password + "密码"));
+                if (req.Username == "yinhuayong" && req.Password == "huayong")
+                {
+                    net.Send(MsgId.Msg_Login_Res, new LoginResProtocol(ProtocolResult.Success, req.Username + "用户名", req.Password + "密码"));
+                }
+                else
+                {
+                    net.Send(MsgId.Msg_Login_Res, new LoginResProtocol(ProtocolResult.Error, string.Empty, string.Empty));
+                }
             });
         }
 

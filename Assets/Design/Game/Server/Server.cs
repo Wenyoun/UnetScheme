@@ -9,19 +9,25 @@ namespace Zyq.Game.Server
     {
         public static Server Ins = new Server();
 
-        private Dictionary<int, IProtocolRegister> m_Registers;
+        private Dictionary<int, Connection> m_Connections;
 
         public void Init()
         {
-            m_Registers = new Dictionary<int, IProtocolRegister>();
+            m_Connections = new Dictionary<int, Connection>();
             ServerObjectRegisterHandler.Register();
         }
 
         public void Dispose()
         {
-            m_Registers.Clear();
-            m_Registers = null;
+            foreach (Connection connection in m_Connections.Values)
+            {
+                connection.Dispose();
+            }
+
+            m_Connections.Clear();
             ServerObjectRegisterHandler.Unregister();
+            
+            m_Connections = null;
         }
 
         public void OnStartServer()
@@ -34,31 +40,37 @@ namespace Zyq.Game.Server
 
         public void OnClientConnect(NetworkConnection net)
         {
-            RegisterProtocol<ServerProtocolRegister>(net);
+            AddConnection(net);
         }
 
         public void OnClientDisconnect(NetworkConnection net)
         {
-            UnregisterProtocol(net);
+            RemoveConnection(net);
         }
 
-        private void RegisterProtocol<T>(NetworkConnection net) where T : IProtocolRegister, new()
+        private void AddConnection(NetworkConnection net)
         {
-            if (!m_Registers.ContainsKey(net.connectionId))
+            if(!m_Connections.ContainsKey(net.connectionId))
             {
-                IProtocolRegister register = new T();
-                register.Register(net);
-                m_Registers.Add(net.connectionId, register);
+                Connection connection = new Connection(net);
+                RegisterProtocols(connection);
+                m_Connections.Add(net.connectionId, connection);
             }
         }
-        private void UnregisterProtocol(NetworkConnection net)
+
+        private void RemoveConnection(NetworkConnection net)
         {
-            IProtocolRegister register = null;
-            if (m_Registers.TryGetValue(net.connectionId, out register))
+            Connection connection = null;
+            if(m_Connections.TryGetValue(net.connectionId, out connection))
             {
-                register.Unregister(net);
-                m_Registers.Remove(net.connectionId);
+                connection.Dispose();
+                m_Connections.Remove(net.connectionId);
             }
+        }
+
+        private void RegisterProtocols(Connection connection)
+        {
+            connection.RegisterProtocol<ServerProtocolHandler>();
         }
     }
 }
