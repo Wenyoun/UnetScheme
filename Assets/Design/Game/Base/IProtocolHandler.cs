@@ -1,11 +1,8 @@
-﻿using UnityEngine.Networking;
-
-namespace Zyq.Game.Base
+﻿namespace Zyq.Game.Base
 {
     public interface IProtocolHandler
     {
-        void Register(NetworkConnection net);
-
-        void Unregister(NetworkConnection net);
+        void Register(Connection connection);
+        void Unregister(Connection connection);
     }
 }

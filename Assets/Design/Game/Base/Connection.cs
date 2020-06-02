@@ -6,10 +6,12 @@ namespace Zyq.Game.Base
 {
     public class Connection : IDisposable
     {
+        private NetworkConnection m_Net;
         private List<IProtocolHandler> m_Handlers;
 
         public Connection(NetworkConnection net)
         {
+            m_Net = net;
             Net = net;
             m_Handlers = new List<IProtocolHandler>();
         }
@@ -17,7 +19,7 @@ namespace Zyq.Game.Base
         public void RegisterProtocol<T>() where T : IProtocolHandler, new()
         {
             IProtocolHandler handler = new T();
-            handler.Register(Net);
+            handler.Register(this);
             m_Handlers.Add(handler);
         }
 
@@ -25,7 +27,7 @@ namespace Zyq.Game.Base
         {
             for (int i = 0; i < m_Handlers.Count; ++i)
             {
-                m_Handlers[i].Unregister(Net);
+                m_Handlers[i].Unregister(this);
             }
             m_Handlers.Clear();
         }

@@ -7,20 +7,20 @@ namespace Zyq.Game.Client
 {
     public class ClientProtocolHandler : IProtocolHandler
     {
-        public void Register(NetworkConnection net)
+        public void Register(Connection connection)
         {
-            net.RegisterHandler(MsgId.Msg_Login_Res, (NetworkMessage msg) =>
+            connection.Net.RegisterHandler(MsgId.Msg_Login_Res, (NetworkMessage msg) =>
             {
                 LoginResProtocol res = msg.ReadMessage<LoginResProtocol>();
                 Debug.Log("登陆结果: Username=" + res.Username + ",Password=" + res.Password);
             });
 
-            net.Send(MsgId.Msg_Login_Req, new LoginRepProtocol("yinhuayong", "huayong"));
+            connection.Net.Send(MsgId.Msg_Login_Req, new LoginRepProtocol("yinhuayong", "huayong"));
         }
 
-        public void Unregister(NetworkConnection net)
+        public void Unregister(Connection connection)
         {
-            net.UnregisterHandler(MsgId.Msg_Login_Res);
+            connection.Net.UnregisterHandler(MsgId.Msg_Login_Res);
         }
     }
 }

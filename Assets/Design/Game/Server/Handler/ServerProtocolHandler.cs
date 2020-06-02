@@ -7,26 +7,26 @@ namespace Zyq.Game.Server
 {
     public class ServerProtocolHandler : IProtocolHandler
     {
-        public void Register(NetworkConnection net)
+        public void Register(Connection connection)
         {
-            net.RegisterHandler(MsgId.Msg_Login_Req, (NetworkMessage msg) =>
+            connection.Net.RegisterHandler(MsgId.Msg_Login_Req, (NetworkMessage msg) =>
             {
                 LoginRepProtocol req = msg.ReadMessage<LoginRepProtocol>();
                 Debug.Log("登陆请求: Username=" + req.Username + ",Password=" + req.Password);
                 if (req.Username == "yinhuayong" && req.Password == "huayong")
                 {
-                    net.Send(MsgId.Msg_Login_Res, new LoginResProtocol(ProtocolResult.Success, req.Username + "用户名", req.Password + "密码"));
+                    connection.Net.Send(MsgId.Msg_Login_Res, new LoginResProtocol(ProtocolResult.Success, req.Username + "用户名", req.Password + "密码"));
                 }
                 else
                 {
-                    net.Send(MsgId.Msg_Login_Res, new LoginResProtocol(ProtocolResult.Error, string.Empty, string.Empty));
+                    connection.Net.Send(MsgId.Msg_Login_Res, new LoginResProtocol(ProtocolResult.Error, string.Empty, string.Empty));
                 }
             });
         }
 
-        public void Unregister(NetworkConnection net)
+        public void Unregister(Connection connection)
         {
-            net.UnregisterHandler(MsgId.Msg_Login_Req);
+            connection.Net.UnregisterHandler(MsgId.Msg_Login_Req);
         }
     }
 }

@@ -67,4 +67,12 @@ namespace Zyq.Game.Protocol
             writer.Write(Password);
         }
     }
+
+    public class CreateLocalPlayerProtocol : MessageBase
+    {
+    }
+
+    public class CreateRemotePlayerProtocol : MessageBase
+    {
+    }
 }
