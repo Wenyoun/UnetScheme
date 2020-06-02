@@ -34,6 +34,7 @@ namespace Zyq.Game.Base
         public void Dispose()
         {
             ClearProtocols();
+            m_Net.Dispose();
             m_Net = null;
             m_Handlers = null;
         }

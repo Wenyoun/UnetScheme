@@ -39,32 +39,24 @@ namespace Zyq.Game.Protocol
     public class LoginResProtocol : MessageBase
     {
         public short Result = -1;
-        public string Username = string.Empty;
-        public string Password = string.Empty;
 
         public LoginResProtocol()
         {
         }
 
-        public LoginResProtocol(short result, string username, string password)
+        public LoginResProtocol(short result)
         {
             Result = result;
-            Username = username;
-            Password = password;
         }
 
         public override void Deserialize(NetworkReader reader)
         {
             Result = reader.ReadInt16();
-            Username = reader.ReadString();
-            Password = reader.ReadString();
         }
 
         public override void Serialize(NetworkWriter writer)
         {
             writer.Write(Result);
-            writer.Write(Username);
-            writer.Write(Password);
         }
     }
 
