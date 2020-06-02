@@ -9,18 +9,18 @@ namespace Zyq.Game.Client
     {
         public void Register(Connection connection)
         {
-            connection.Net.RegisterHandler(MsgId.Msg_Login_Res, (NetworkMessage msg) =>
+            connection.RegisterHandler(MsgId.Msg_Login_Res, (NetworkMessage msg) =>
             {
                 LoginResProtocol res = msg.ReadMessage<LoginResProtocol>();
                 Debug.Log("登陆结果: Username=" + res.Username + ",Password=" + res.Password);
             });
 
-            connection.Net.Send(MsgId.Msg_Login_Req, new LoginRepProtocol("yinhuayong", "huayong"));
+            connection.Send(MsgId.Msg_Login_Req, new LoginRepProtocol("yinhuayong", "huayong"));
         }
 
         public void Unregister(Connection connection)
         {
-            connection.Net.UnregisterHandler(MsgId.Msg_Login_Res);
+            connection.UnregisterHandler(MsgId.Msg_Login_Res);
         }
     }
 }

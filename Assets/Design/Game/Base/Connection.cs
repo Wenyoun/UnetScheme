@@ -12,7 +12,6 @@ namespace Zyq.Game.Base
         public Connection(NetworkConnection net)
         {
             m_Net = net;
-            Net = net;
             m_Handlers = new List<IProtocolHandler>();
         }
 
@@ -35,10 +34,23 @@ namespace Zyq.Game.Base
         public void Dispose()
         {
             ClearProtocols();
-            Net = null;
+            m_Net = null;
             m_Handlers = null;
         }
 
-        public NetworkConnection Net { get; private set; }
+        public void RegisterHandler(short id, NetworkMessageDelegate handler)
+        {
+            m_Net.RegisterHandler(id, handler);
+        }
+
+        public void UnregisterHandler(short id)
+        {
+            m_Net.UnregisterHandler(id);
+        }
+
+        public bool Send(short id, MessageBase msg)
+        {
+            return m_Net.Send(id, msg);
+        }
     }
 }
