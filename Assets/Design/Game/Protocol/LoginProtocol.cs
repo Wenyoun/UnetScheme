@@ -62,9 +62,57 @@ namespace Zyq.Game.Protocol
 
     public class CreateLocalPlayerProtocol : MessageBase
     {
+        public int Eid;
+        public int Gid;
+
+        public CreateLocalPlayerProtocol()
+        {
+        }
+
+        public CreateLocalPlayerProtocol(int eid, int gid)
+        {
+            Eid = eid;
+            Gid = gid;
+        }
+
+        public override void Deserialize(NetworkReader reader)
+        {
+            Eid = reader.ReadInt32();
+            Gid = reader.ReadInt32();
+        }
+
+        public override void Serialize(NetworkWriter writer)
+        {
+            writer.Write(Eid);
+            writer.Write(Gid);
+        }
     }
 
     public class CreateRemotePlayerProtocol : MessageBase
     {
+        public int Eid;
+        public int Gid;
+
+        public CreateRemotePlayerProtocol()
+        {
+        }
+
+        public CreateRemotePlayerProtocol(int eid, int gid)
+        {
+            Eid = eid;
+            Gid = gid;
+        }
+
+        public override void Deserialize(NetworkReader reader)
+        {
+            Eid = reader.ReadInt32();
+            Gid = reader.ReadInt32();
+        }
+
+        public override void Serialize(NetworkWriter writer)
+        {
+            writer.Write(Eid);
+            writer.Write(Gid);
+        }
     }
 }
