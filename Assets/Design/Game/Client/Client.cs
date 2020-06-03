@@ -30,8 +30,7 @@ namespace Zyq.Game.Client
 
         public void OnServerConnect(NetworkConnection net)
         {
-            Connection = new Connection(net);
-            RegisterProtocols(Connection);
+            Connection = RegisterProtocols(new Connection(net));
         }
 
         public void OnServerDisconnect(NetworkConnection net)
@@ -39,9 +38,10 @@ namespace Zyq.Game.Client
             Connection.ClearProtocols();
         }
 
-        private void RegisterProtocols(Connection connection)
+        private Connection RegisterProtocols(Connection connection)
         {
             connection.RegisterProtocol<ClientProtocolHandler>();
+            return connection;
         }
 
         public Connection Connection { get; private set; }
