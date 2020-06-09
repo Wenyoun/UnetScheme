@@ -37,7 +37,7 @@ namespace Game
             {
                 m_LastPosition = position;
                 m_LastEuler = euler;
-                m_Transform.SyncTransform(position, m_Object.transform.rotation);
+                //m_Transform.SyncTransform(position, m_Object.transform.rotation);
             }
         }
 

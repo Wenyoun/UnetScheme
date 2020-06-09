@@ -1,0 +1,14 @@
+{
+    "name": "Zyq.Game.Server",
+    "references": [
+        "Zyq.Game.Base"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

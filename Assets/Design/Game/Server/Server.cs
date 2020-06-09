@@ -14,7 +14,6 @@ namespace Zyq.Game.Server
         public void Init()
         {
             m_Connections = new Dictionary<int, Connection>();
-            ServerObjectRegisterHandler.Register();
         }
 
         public void Dispose()
@@ -25,8 +24,6 @@ namespace Zyq.Game.Server
             }
 
             m_Connections.Clear();
-            ServerObjectRegisterHandler.Unregister();
-            
             m_Connections = null;
         }
 

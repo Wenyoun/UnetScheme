@@ -1,9 +1,9 @@
-﻿namespace Zyq.Game.Base
-{
-    public interface IProtocolHandler
-    {
-        void Register(Connection connection);
+﻿namespace Zyq.Game.Base {
+    public interface IProtocolHandler {
+        Connection Connection { get; set; }
 
-        void Unregister(Connection connection);
+        void Register();
+
+        void Unregister();
     }
 }

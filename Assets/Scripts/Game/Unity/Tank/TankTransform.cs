@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Game
-{
-    public class TankTransform : NetworkBehaviour
-    {
+namespace Game {
+    public class TankTransform : NetworkBehaviour {
+        /**
         [SyncVar(hook = "OnChangePosition")]
         private Vector3 m_Position;
 
@@ -36,5 +35,6 @@ namespace Game
         {
             EntityMgr.Dispatcher(MessageConstants.Sync_Rotation, netId.Value, QuaternionBody.Default.Init(rotation));
         }
+        **/
     }
 }

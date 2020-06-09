@@ -9,14 +9,11 @@ namespace Zyq.Game.Client
 
         public void Init()
         {
-            ClientObjectRegisterHandler.Register();
         }
 
         public void Dispose()
         {
             Connection.Dispose();
-            ClientObjectRegisterHandler.Unregister();
-
             Connection = null;
         }
 

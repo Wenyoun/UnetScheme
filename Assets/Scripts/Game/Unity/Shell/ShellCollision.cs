@@ -1,13 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Game
-{
-    public class ShellCollision : NetworkBehaviour
-    {
-        [Server]
-        private void OnTriggerEnter(Collider collider)
-        {
+namespace Game {
+    public class ShellCollision : NetworkBehaviour {
+        //[Server]
+        private void OnTriggerEnter(Collider collider) {
             /**
             if (collider.gameObject.layer == Layer.Player)
             {

@@ -5,12 +5,14 @@ namespace Game
 {
     public class TankShooting : NetworkBehaviour
     {
+        /**
         [SerializeField]
         private Transform m_ShootingSpawn;
         [SerializeField]
         private GameObject m_BulletPrefab;
+        **/
 
-        [Command]
+        //[Command]
         public void CmdShooting(float force)
         {
             /**
@@ -23,14 +25,15 @@ namespace Game
             **/
         }
 
-        [Command]
+
+        //[Command]
         public void CmdForce(float force)
         {
             force = CheckForce(force);
             RpcForce(force);
         }
 
-        [ClientRpc]
+        //[ClientRpc]
         private void RpcForce(float force)
         {
             EntityMgr.Dispatcher(MessageConstants.Update_Force, netId.Value, FloatBody.Default.Init(force));
