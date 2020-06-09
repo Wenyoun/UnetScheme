@@ -78,11 +78,9 @@ namespace Zyq.Weaver {
 
         private static bool WeaveModule(ModuleDefinition module) {
             if (module.Name.EndsWith("Zyq.Game.Client.dll")) {
-                ClientWeaver.Weave(module);
-                return true;
+                return ClientWeaver.Weave(module);
             } else if (module.Name.EndsWith("Zyq.Game.Server.dll")) {
-                ServerWeaver.Weave(module);
-                return true;
+                return ServerWeaver.Weave(module);
             }
             return false;
         }

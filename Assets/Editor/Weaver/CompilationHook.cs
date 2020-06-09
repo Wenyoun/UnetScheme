@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Mono.CecilX;
-using Mono.CecilX.Cil;
 using UnityEditor;
 using UnityEditor.Compilation;
-using UnityEngine;
-using UnityEngine.Networking;
 using Zyq.Game.Base;
 
 namespace Zyq.Weaver {
-    public class CompilationFinishedHook {
-        private static string SendAttributeString = typeof(SendAttribute).FullName;
-        private static string RecvAttributeString = typeof(RecvAttribute).FullName;
-        private static string ProtocolAttributeString = typeof(ProtocolAttribute).FullName;
-
+    public class CompilationHook {
         [InitializeOnLoadMethod]
         private static void OnInitializeOnLoad() {
             CompilationPipeline.assemblyCompilationFinished += OnAssemblyCompilationFinished;
@@ -38,7 +29,8 @@ namespace Zyq.Weaver {
         private static void OnAssemblyCompilationFinished(string assemblyPath, CompilerMessage[] messages) {
             if (EditorApplication.isPlaying ||
                 assemblyPath.IndexOf(".Editor") >= 0 ||
-                assemblyPath.IndexOf("-Editor") >= 0) {
+                assemblyPath.IndexOf("-Editor") >= 0 ||
+                assemblyPath.IndexOf("Zyq.Game.Base") >= 0) {
                 return;
             }
 

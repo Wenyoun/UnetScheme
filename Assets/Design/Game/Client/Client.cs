@@ -1,42 +1,31 @@
-﻿using Zyq.Game.Base;
-using UnityEngine.Networking;
+﻿using UnityEngine.Networking;
+using Zyq.Game.Base;
 
-namespace Zyq.Game.Client
-{
-    public class Client
-    {
+namespace Zyq.Game.Client {
+    public class Client {
         public static Client Ins = new Client();
 
-        public void Init()
-        {
-        }
+        public void Init() { }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             Connection.Dispose();
             Connection = null;
         }
 
-        public void OnStartClient()
-        {
-        }
+        public void OnStartClient() { }
 
-        public void OnStopClient()
-        {
-        }
+        public void OnStopClient() { }
 
-        public void OnServerConnect(NetworkConnection net)
-        {
+        public void OnServerConnect(NetworkConnection net) {
             Connection = RegisterProtocols(new Connection(net));
+            SendServer.LoginReq(Connection, "yinhuayon", "hong");
         }
 
-        public void OnServerDisconnect(NetworkConnection net)
-        {
+        public void OnServerDisconnect(NetworkConnection net) {
             Connection.ClearProtocols();
         }
 
-        private Connection RegisterProtocols(Connection connection)
-        {
+        private Connection RegisterProtocols(Connection connection) {
             connection.RegisterProtocol<ClientProtocolHandler>();
             return connection;
         }

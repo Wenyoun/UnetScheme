@@ -1,14 +1,11 @@
-﻿using UnityEngine;
-using UnityEngine.Networking;
-using Zyq.Game.Base;
+﻿using Zyq.Game.Base;
 
 namespace Zyq.Game.Client {
+    [Protocol]
     public class ClientProtocolHandler : IProtocolHandler {
         public Connection Connection { get; set; }
 
-        public void Register() {
-            SendServer.Login(Connection, "jfljalfjlajka", 10);
-        }
+        public void Register() { }
 
         public void Unregister() { }
     }
