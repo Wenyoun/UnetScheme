@@ -18,7 +18,7 @@ namespace Zyq.Game.Client {
 
         public void OnServerConnect(NetworkConnection net) {
             Connection = RegisterProtocols(new Connection(net));
-            SendServer.LoginReq(Connection, "yinhuayon", "hong");
+            SendServer.LoginReq(Connection, "yinhuayo", "hong");
         }
 
         public void OnServerDisconnect(NetworkConnection net) {
