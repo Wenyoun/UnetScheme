@@ -1,7 +1,6 @@
-﻿namespace Base
-{
-    public interface IView : ILifecycle, IUpdate, ICanUpdate
-    {
+﻿using Zyq.Base;
+namespace Base {
+    public interface IView : ILifecycle, IUpdate, ICanUpdate {
         void OnStart();
 
         void OnRegEvent();

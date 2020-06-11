@@ -1,44 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using Zyq.Base;
 
-namespace Base
-{
-    public class ViewMgr : IDisposable, IUpdate
-    {
+namespace Base {
+    public class ViewMgr : IDisposable, IUpdate {
         private Dictionary<int, int> mStartDys;
         private Dictionary<int, AbsView> mViewDys;
         private Dictionary<int, AbsView> mVisibleDys;
 
-        public ViewMgr()
-        {
+        public ViewMgr() {
             mStartDys = new Dictionary<int, int>();
             mViewDys = new Dictionary<int, AbsView>();
             mVisibleDys = new Dictionary<int, AbsView>();
         }
 
-        public void OnUpdate(float delta)
-        {
+        public void OnUpdate(float delta) {
             Dictionary<int, AbsView>.Enumerator enumerator = mViewDys.GetEnumerator();
-            while (enumerator.MoveNext())
-            {
+            while (enumerator.MoveNext()) {
                 AbsView view = enumerator.Current.Value;
-                if (view.IsUpdate)
-                {
+                if (view.IsUpdate) {
                     view.OnUpdate(delta);
                 }
             }
         }
 
-        public void Show(int id, object body)
-        {
+        public void Show(int id, object body) {
             AbsView view = null;
-            if (mViewDys.TryGetValue(id, out view))
-            {
-                if (IsHide(id))
-                {
+            if (mViewDys.TryGetValue(id, out view)) {
+                if (IsHide(id)) {
                     mVisibleDys.Add(id, view);
-                    if (!mStartDys.ContainsKey(id))
-                    {
+                    if (!mStartDys.ContainsKey(id)) {
                         mStartDys.Add(id, id);
                         view.OnStart();
                     }
@@ -46,21 +37,16 @@ namespace Base
                     view.OnShow(body);
                     view.Root.transform.SetAsLastSibling();
                     view.IsVisible = true;
-                }
-                else
-                {
+                } else {
                     view.OnRepeat(body);
                 }
             }
         }
 
-        public void Hide(int id, object body)
-        {
-            if (IsShow(id))
-            {
+        public void Hide(int id, object body) {
+            if (IsShow(id)) {
                 AbsView view = null;
-                if (mViewDys.TryGetValue(id, out view))
-                {
+                if (mViewDys.TryGetValue(id, out view)) {
                     mVisibleDys.Remove(id);
                     view.OnHideBefore();
                     view.OnHide(body);
@@ -69,31 +55,25 @@ namespace Base
             }
         }
 
-        public void RegView(int id, AbsView view)
-        {
-            if (!mViewDys.ContainsKey(id))
-            {
+        public void RegView(int id, AbsView view) {
+            if (!mViewDys.ContainsKey(id)) {
                 mViewDys.Add(id, view);
                 view.OnInit();
                 view.OnRegEvent();
             }
         }
 
-        public void UnRegView(int id)
-        {
+        public void UnRegView(int id) {
             AbsView view = null;
-            if (mViewDys.TryGetValue(id, out view))
-            {
+            if (mViewDys.TryGetValue(id, out view)) {
                 mViewDys.Remove(id);
                 mVisibleDys.Remove(id);
                 view.OnRemove();
             }
         }
 
-        public void Dispose()
-        {
-            foreach (AbsView view in mViewDys.Values)
-            {
+        public void Dispose() {
+            foreach (AbsView view in mViewDys.Values) {
                 view.OnRemove();
             }
             mViewDys.Clear();
@@ -101,13 +81,11 @@ namespace Base
             mVisibleDys.Clear();
         }
 
-        private bool IsShow(int id)
-        {
+        private bool IsShow(int id) {
             return mVisibleDys.ContainsKey(id);
         }
 
-        private bool IsHide(int id)
-        {
+        private bool IsHide(int id) {
             return !mVisibleDys.ContainsKey(id);
         }
     }
