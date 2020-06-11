@@ -1,31 +1,62 @@
 ﻿using System;
+using System.Collections.Generic;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Zyq.Weaver {
     public static class InstructionFactory {
-        public static Instruction CreateReadTypeInstruction(ModuleDefinition module, ILProcessor processor, string type) {
-            if (type == "System.Int16") {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadInt16", Type.EmptyTypes)));
-            } else if (type == "System.Int32") {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadInt32", Type.EmptyTypes)));
-            } else if (type == "System.Int64") {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadInt64", Type.EmptyTypes)));
-            } else if (type == "System.UInt16") {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadUInt16", Type.EmptyTypes)));
-            } else if (type == "System.UInt32") {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadUInt32", Type.EmptyTypes)));
-            } else if (type == "System.UInt64") {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadUInt64", Type.EmptyTypes)));
-            } else if (type == "System.Single") {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadSingle", Type.EmptyTypes)));
-            } else if (type == "System.Double") {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadDouble", Type.EmptyTypes)));
-            } else if (type == "System.String") {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadString", Type.EmptyTypes)));
+        private class TypeWrapper {
+            public Type type;
+            public string readMethod;
+            public string writeMethod;
+
+            public TypeWrapper(Type _type, string _readMethod, string _writeMethod) {
+                type = _type;
+                readMethod = _readMethod;
+                writeMethod = _writeMethod;
             }
-            throw new Exception("无法确定的类型:" + type);
+        }
+
+        private static Dictionary<string, TypeWrapper> ReadMappers = new Dictionary<string, TypeWrapper>();
+
+        static InstructionFactory() {
+            ReadMappers.Add("System.Byte", new TypeWrapper(typeof(byte), "ReadByte", "Write"));
+            ReadMappers.Add("System.Boolean", new TypeWrapper(typeof(bool), "ReadBoolean", "Write"));
+            ReadMappers.Add("System.Int16", new TypeWrapper(typeof(short), "ReadInt16", "Write"));
+            ReadMappers.Add("System.Int32", new TypeWrapper(typeof(int), "ReadInt32", "Write"));
+            ReadMappers.Add("System.Int64", new TypeWrapper(typeof(long), "ReadInt64", "Write"));
+            ReadMappers.Add("System.UInt16", new TypeWrapper(typeof(ushort), "ReadUInt16", "Write"));
+            ReadMappers.Add("System.UInt32", new TypeWrapper(typeof(uint), "ReadUInt32", "Write"));
+            ReadMappers.Add("System.UInt64", new TypeWrapper(typeof(ulong), "ReadUInt64", "Write"));
+            ReadMappers.Add("System.Single", new TypeWrapper(typeof(float), "ReadSingle", "Write"));
+            ReadMappers.Add("System.Double", new TypeWrapper(typeof(double), "ReadDouble", "Write"));
+            ReadMappers.Add("System.String", new TypeWrapper(typeof(string), "ReadString", "Write"));
+            ReadMappers.Add("UnityEngine.Vector2", new TypeWrapper(typeof(Vector2), "ReadVector2", "Write"));
+            ReadMappers.Add("UnityEngine.Vector3", new TypeWrapper(typeof(Vector3), "ReadVector3", "Write"));
+            ReadMappers.Add("UnityEngine.Vector4", new TypeWrapper(typeof(Vector4), "ReadVector4", "Write"));
+            ReadMappers.Add("UnityEngine.Quaternion", new TypeWrapper(typeof(Quaternion), "ReadQuaternion", "Write"));
+        }
+
+        public static Instruction CreateReadTypeInstruction(ModuleDefinition module, ILProcessor processor, string type) {
+            TypeWrapper wrapper = null;
+
+            if (ReadMappers.TryGetValue(type, out wrapper)) {
+                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod(wrapper.readMethod, Type.EmptyTypes)));
+            }
+
+            throw new Exception("CreateReadTypeInstruction中无法确定的类型:" + type);
+        }
+
+        public static Instruction CreateWriteTypeInstruction(ModuleDefinition module, ILProcessor processor, string type) {
+            TypeWrapper wrapper = null;
+
+            if (ReadMappers.TryGetValue(type, out wrapper)) {
+                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkWriter).GetMethod(wrapper.writeMethod, new Type[] { wrapper.type })));
+            }
+
+            throw new Exception("CreateWriteTypeInstruction中无法确定的类型:" + type);
         }
     }
 }

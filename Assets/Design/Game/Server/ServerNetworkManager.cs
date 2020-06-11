@@ -1,51 +1,52 @@
-﻿using UnityEngine.Networking;
+﻿using UnityEngine;
+using UnityEngine.Networking;
 
-namespace Zyq.Game.Server
-{
-    public class ServerNetworkManager : NetworkManager
-    {
+namespace Zyq.Game.Server {
+    public class ServerNetworkManager : NetworkManager {
         public static ServerNetworkManager Ins;
 
-        private void Awake()
-        {
+        private void Awake() {
             Ins = this;
 
             Server.Ins.Init();
         }
 
-        private void OnDestroy()
-        {
+        private void OnDestroy() {
             Ins = null;
 
             Server.Ins.Dispose();
         }
 
-        public override void OnStartServer()
-        {
+        public override void OnStartServer() {
             base.OnStartServer();
 
             Server.Ins.OnStartServer();
+
+            Debug.Log("OnStartServer");
         }
 
-        public override void OnStopServer()
-        {
+        public override void OnStopServer() {
             base.OnStopServer();
 
             Server.Ins.OnStopServer();
+
+            Debug.Log("OnStopServer");
         }
 
-        public override void OnServerConnect(NetworkConnection net)
-        {
+        public override void OnServerConnect(NetworkConnection net) {
             base.OnServerConnect(net);
 
             Server.Ins.OnClientConnect(net);
+
+            Debug.Log("OnServerConnect");
         }
 
-        public override void OnServerDisconnect(NetworkConnection net)
-        {
+        public override void OnServerDisconnect(NetworkConnection net) {
             base.OnServerDisconnect(net);
 
             Server.Ins.OnClientDisconnect(net);
+
+            Debug.Log("OnServerDisconnect");
         }
     }
 }

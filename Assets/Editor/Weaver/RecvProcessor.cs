@@ -24,38 +24,38 @@ namespace Zyq.Weaver {
                 protocol.Methods.Add(protoMethodImpl);
                 protoMethodImpl.Parameters.Add(new ParameterDefinition(module.ImportReference(typeof(NetworkMessage))));
 
-                ILProcessor pro = protoMethodImpl.Body.GetILProcessor();
-                pro.Emit(OpCodes.Nop);
-                pro.Emit(OpCodes.Ret);
+                ILProcessor processor = protoMethodImpl.Body.GetILProcessor();
+                processor.Emit(OpCodes.Nop);
+                processor.Emit(OpCodes.Ret);
                 Instruction first = protoMethodImpl.Body.Instructions[0];
-                pro.InsertBefore(first, pro.Create(OpCodes.Ldarg_1));
-                pro.InsertBefore(first, pro.Create(OpCodes.Ldfld, module.ImportReference(typeof(NetworkMessage).GetField("reader"))));
+                processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_1));
+                processor.InsertBefore(first, processor.Create(OpCodes.Ldfld, module.ImportReference(typeof(NetworkMessage).GetField("reader"))));
 
                 int index = 0;
                 protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(NetworkReader))));
                 foreach (ParameterDefinition pd in method.Parameters) {
                     if (index > 0) {
                         protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(pd.ParameterType)));
-                        pro.InsertBefore(first, pro.Create(OpCodes.Stloc, index - 1));
-                        pro.InsertBefore(first, pro.Create(OpCodes.Ldloc_0));
-                        pro.InsertBefore(first, InstructionFactory.CreateReadTypeInstruction(module, pro, pd.ParameterType.FullName));
+                        processor.InsertBefore(first, processor.Create(OpCodes.Stloc, index - 1));
+                        processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
+                        processor.InsertBefore(first, InstructionFactory.CreateReadTypeInstruction(module, processor, pd.ParameterType.FullName));
                     }
                     index++;
                 }
 
-                pro.InsertBefore(first, pro.Create(OpCodes.Stloc, index - 1));
-                pro.InsertBefore(first, pro.Create(OpCodes.Ldarg_0));
-                pro.InsertBefore(first, pro.Create(OpCodes.Call, module.ImportReference(protocol.Methods.Single(m => m.FullName.IndexOf("get_Connection") >= 0))));
+                processor.InsertBefore(first, processor.Create(OpCodes.Stloc, index - 1));
+                processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_0));
+                processor.InsertBefore(first, processor.Create(OpCodes.Call, module.ImportReference(protocol.Methods.Single(m => m.FullName.IndexOf("get_Connection") >= 0))));
 
                 index = 0;
                 foreach (ParameterDefinition pd in method.Parameters) {
                     if (index > 0) {
-                        pro.InsertBefore(first, pro.Create(OpCodes.Ldloc, index));
+                        processor.InsertBefore(first, processor.Create(OpCodes.Ldloc, index));
                     }
                     index++;
                 }
 
-                pro.InsertBefore(first, pro.Create(OpCodes.Call, method));
+                processor.InsertBefore(first, processor.Create(OpCodes.Call, method));
 
                 registerProcessor.InsertBefore(firstRegisterInstruction, registerProcessor.Create(OpCodes.Ldarg_0));
                 registerProcessor.InsertBefore(firstRegisterInstruction, registerProcessor.Create(OpCodes.Call, protocol.Methods.Single(m => m.FullName.IndexOf("get_Connection") >= 0)));
