@@ -2,9 +2,9 @@
 using Zyq.Game.Base;
 
 namespace Zyq.Game.Client {
-    public static class SendServer {
+    public static class Sender{
         [Send(MsgId.Msg_Login_Req)]
-        public static void LoginReq(Connection connection,
+        public static void Login(Connection connection,
             byte v1,
             bool v2,
             short v3,
