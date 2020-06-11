@@ -38,17 +38,7 @@ namespace Zyq.Weaver {
                         protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(pd.ParameterType)));
                         pro.InsertBefore(first, pro.Create(OpCodes.Stloc, index - 1));
                         pro.InsertBefore(first, pro.Create(OpCodes.Ldloc_0));
-                        if (pd.ParameterType.FullName == "System.String") {
-                            pro.InsertBefore(first, pro.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadString", Type.EmptyTypes))));
-                        } else if (pd.ParameterType.FullName == "System.Int32") {
-                            pro.InsertBefore(first, pro.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadInt32", Type.EmptyTypes))));
-                        } else if (pd.ParameterType.FullName == "System.Single") {
-                            pro.InsertBefore(first, pro.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadSingle", Type.EmptyTypes))));
-                        } else if (pd.ParameterType.FullName == "System.Byte") {
-                            pro.InsertBefore(first, pro.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadByte", Type.EmptyTypes))));
-                        } else if (pd.ParameterType.FullName == "System.Int16") {
-                            pro.InsertBefore(first, pro.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod("ReadInt16", Type.EmptyTypes))));
-                        }
+                        pro.InsertBefore(first, InstructionFactory.CreateReadTypeInstruction(module, pro, pd.ParameterType.FullName));
                     }
                     index++;
                 }

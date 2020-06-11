@@ -19,7 +19,7 @@ namespace Zyq.Game.Base {
             m_Handlers.Add(handler);
         }
 
-        public void ClearProtocols() {
+        public void ClearRegisterProtocols() {
             for (int i = 0; i < m_Handlers.Count; ++i) {
                 m_Handlers[i].Unregister();
             }
@@ -27,7 +27,7 @@ namespace Zyq.Game.Base {
         }
 
         public void Dispose() {
-            ClearProtocols();
+            ClearRegisterProtocols();
 
             m_Net.Dispose();
             m_Handlers.Clear();
@@ -51,7 +51,5 @@ namespace Zyq.Game.Base {
         public void Send(NetworkWriter writer) {
             m_Net.SendWriter(writer, 0);
         }
-
-        public NetworkConnection Net => m_Net;
     }
 }

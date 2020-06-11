@@ -47,9 +47,9 @@ namespace Zyq.Game.Host
         {
             base.OnServerConnect(net);
 
-            Server.Server.Ins.OnClientConnect(net);
-
             Debug.Log("OnServerConnect");
+
+            Server.Server.Ins.OnClientConnect(net);
         }
 
         public override void OnServerDisconnect(NetworkConnection net)
@@ -65,9 +65,9 @@ namespace Zyq.Game.Host
         {
             base.OnClientConnect(net);
 
-            Client.Client.Ins.OnServerConnect(net);
-
             Debug.Log("OnClientConnect");
+
+            Client.Client.Ins.OnServerConnect(net);
         }
 
         public override void OnClientDisconnect(NetworkConnection net)

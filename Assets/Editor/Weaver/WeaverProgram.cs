@@ -25,6 +25,7 @@ namespace Zyq.Weaver {
         public static TypeReference ProtocolType;
         #endregion
 
+        #region 基本类型
         public static TypeReference singleType;
         public static TypeReference voidType;
         public static TypeReference doubleType;
@@ -35,6 +36,7 @@ namespace Zyq.Weaver {
         public static TypeReference uint32Type;
         public static TypeReference objectType;
         public static TypeReference typeType;
+        #endregion
 
         public static bool WeaveAssemblies(string unityEngineDLL, string networkingDLL, string baseModuleRuntimeDLL, string assemblyPath, string[] depAssemblyPaths) {
             using(UnityAssembly = AssemblyDefinition.ReadAssembly(unityEngineDLL))
