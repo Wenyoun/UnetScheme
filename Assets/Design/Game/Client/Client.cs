@@ -1,4 +1,5 @@
-﻿using UnityEngine.Networking;
+﻿using UnityEngine;
+using UnityEngine.Networking;
 using Zyq.Game.Base;
 
 namespace Zyq.Game.Client {
@@ -18,6 +19,7 @@ namespace Zyq.Game.Client {
 
         public void OnServerConnect(NetworkConnection net) {
             Connection = RegisterProtocols(new Connection(net));
+            Sender.Login(Client.Ins.Connection, 1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity);
         }
 
         public void OnServerDisconnect(NetworkConnection net) {
