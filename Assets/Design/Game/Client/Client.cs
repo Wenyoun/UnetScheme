@@ -19,7 +19,8 @@ namespace Zyq.Game.Client {
 
         public void OnServerConnect(NetworkConnection net) {
             Connection = RegisterProtocols(new Connection(net));
-            Sender.Login(Connection, 1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity);
+            Sender.Login(Connection, 1, true, 2, 3, 4, 5, 6, 7, 8, 9, "huayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity);
+
         }
 
         public void OnServerDisconnect(NetworkConnection net) {

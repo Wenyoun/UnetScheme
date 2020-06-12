@@ -47,7 +47,5 @@ namespace Zyq.Game.Base {
         public void Send(NetworkWriter writer) {
             m_Net.SendWriter(writer, 0);
         }
-
-        public int ConnectionId => m_Net.connectionId;
     }
 }

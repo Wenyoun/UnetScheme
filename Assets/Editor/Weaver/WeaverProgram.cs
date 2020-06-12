@@ -26,19 +26,6 @@ namespace Zyq.Weaver {
         public static TypeReference BroadcastType;
         #endregion
 
-        #region 基本类型
-        public static TypeReference singleType;
-        public static TypeReference voidType;
-        public static TypeReference doubleType;
-        public static TypeReference boolType;
-        public static TypeReference int64Type;
-        public static TypeReference uint64Type;
-        public static TypeReference int32Type;
-        public static TypeReference uint32Type;
-        public static TypeReference objectType;
-        public static TypeReference typeType;
-        #endregion
-
         public static bool WeaveAssemblies(string unityEngineDLL, string networkingDLL, string baseModuleRuntimeDLL, string assemblyPath, string[] depAssemblyPaths) {
             using(UnityAssembly = AssemblyDefinition.ReadAssembly(unityEngineDLL))
             using(NetworkingAssembly = AssemblyDefinition.ReadAssembly(networkingDLL))
@@ -102,17 +89,6 @@ namespace Zyq.Weaver {
         }
 
         private static void SetupTargetTypes() {
-            voidType = ImportCorlibType("System.Void");
-            singleType = ImportCorlibType("System.Single");
-            doubleType = ImportCorlibType("System.Double");
-            boolType = ImportCorlibType("System.Boolean");
-            int64Type = ImportCorlibType("System.Int64");
-            uint64Type = ImportCorlibType("System.UInt64");
-            int32Type = ImportCorlibType("System.Int32");
-            uint32Type = ImportCorlibType("System.UInt32");
-            objectType = ImportCorlibType("System.Object");
-            typeType = ImportCorlibType("System.Type");
-
             SendType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.SendAttribute");
             RecvType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.RecvAttribute");
             ProtocolType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ProtocolAttribute");

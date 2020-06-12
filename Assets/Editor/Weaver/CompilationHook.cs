@@ -40,12 +40,14 @@ namespace Zyq.Weaver {
             string networkingRuntimeDLL = Helpers.FindNetworkingRuntime();
 
             string unityEngineCoreModuleRuntimeDLL = UnityEditorInternal.InternalEditorUtility.GetEngineCoreModuleAssemblyPath();
-
             string baseModuleRuntimeDLL = Helpers.FindBaseRuntime();
 
             HashSet<string> dependencyPaths = Helpers.GetDependecyPaths(assemblyPath);
 
-            if (!Program.Process(unityEngineCoreModuleRuntimeDLL, networkingRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray())) {
+            if (Program.Process(unityEngineCoreModuleRuntimeDLL, networkingRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray())) {
+                SessionState.SetBool("MIRROR_WEAVE_SUCCESS", true);
+                UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
+            } else {
                 SessionState.SetBool("MIRROR_WEAVE_SUCCESS", false);
             }
         }

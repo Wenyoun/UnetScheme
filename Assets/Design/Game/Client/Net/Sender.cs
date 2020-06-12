@@ -2,7 +2,7 @@
 using Zyq.Game.Base;
 
 namespace Zyq.Game.Client {
-    public static class Sender{
+    public static class Sender {
         [Send(MsgId.Msg_Login_Req)]
         public static void Login(Connection connection,
             byte v1,
