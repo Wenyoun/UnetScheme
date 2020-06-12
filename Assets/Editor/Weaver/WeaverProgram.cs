@@ -62,8 +62,8 @@ namespace Zyq.Weaver {
                     WriterParameters writeParams = new WriterParameters { WriteSymbols = true };
                     CurrentAssembly.Write(writeParams);
                 }
+                return result;
             }
-            return true;
         }
 
         private static bool WeaveModule(ModuleDefinition module) {

@@ -12,34 +12,37 @@ namespace Zyq.Weaver {
                 MethodDefinition method = defs[key];
                 ILProcessor processor = method.Body.GetILProcessor();
 
+                method.Body.Variables.Clear();
                 method.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(NetworkWriter))));
 
-                Instruction first = method.Body.Instructions[0];
+                method.Body.Instructions.Clear();
 
-                processor.InsertBefore(first, processor.Create(OpCodes.Nop));
-                processor.InsertBefore(first, processor.Create(OpCodes.Newobj, module.ImportReference(typeof(NetworkWriter).GetConstructor(Type.EmptyTypes))));
-                processor.InsertBefore(first, processor.Create(OpCodes.Stloc_0));
-                processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
-                processor.InsertBefore(first, processor.Create(OpCodes.Ldc_I4, key));
+                processor.Append(processor.Create(OpCodes.Nop));
+                processor.Append(processor.Create(OpCodes.Newobj, module.ImportReference(typeof(NetworkWriter).GetConstructor(Type.EmptyTypes))));
+                processor.Append(processor.Create(OpCodes.Stloc_0));
+                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                processor.Append(processor.Create(OpCodes.Ldc_I4, key));
 
-                processor.InsertBefore(first, processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkWriter).GetMethod("StartMessage", new Type[] { typeof(short) }))));
+                processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkWriter).GetMethod("StartMessage", new Type[] { typeof(short) }))));
                 int index = 0;
                 foreach (ParameterDefinition pd in method.Parameters) {
                     if (index > 0) {
-                        processor.InsertBefore(first, processor.Create(OpCodes.Nop));
-                        processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
-                        processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_S, pd));
-                        processor.InsertBefore(first, InstructionFactory.CreateWriteTypeInstruction(module, processor, pd.ParameterType.ToString()));
+                        processor.Append(processor.Create(OpCodes.Nop));
+                        processor.Append(processor.Create(OpCodes.Ldloc_0));
+                        processor.Append(processor.Create(OpCodes.Ldarg_S, pd));
+                        processor.Append(InstructionFactory.CreateWriteTypeInstruction(module, processor, pd.ParameterType.ToString()));
                     }
                     index++;
                 }
-                processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
-                processor.InsertBefore(first, processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkWriter).GetMethod("FinishMessage", Type.EmptyTypes))));
+                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkWriter).GetMethod("FinishMessage", Type.EmptyTypes))));
 
-                processor.InsertBefore(first, processor.Create(OpCodes.Nop));
-                processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_0));
-                processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
-                processor.InsertBefore(first, processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(Connection).GetMethod("Send", new Type[] { typeof(NetworkWriter) }))));
+                processor.Append(processor.Create(OpCodes.Nop));
+                processor.Append(processor.Create(OpCodes.Ldarg_0));
+                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(Connection).GetMethod("Send", new Type[] { typeof(NetworkWriter) }))));
+                processor.Append(processor.Create(OpCodes.Nop));
+                processor.Append(processor.Create(OpCodes.Ret));
             }
         }
     }

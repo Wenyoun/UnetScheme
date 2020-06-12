@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEditor.Compilation;
 
 namespace Zyq.Weaver {
-    public class CompilationHook {
+    public static class CompilationHook {
         [InitializeOnLoadMethod]
         private static void OnInitializeOnLoad() {
             CompilationPipeline.assemblyCompilationFinished += OnAssemblyCompilationFinished;
@@ -29,11 +29,8 @@ namespace Zyq.Weaver {
             if (EditorApplication.isPlaying ||
                 assemblyPath.IndexOf(".Editor") >= 0 ||
                 assemblyPath.IndexOf("-Editor") >= 0 ||
-                assemblyPath.IndexOf("Zyq.Game.Base") >= 0) {
-                return;
-            }
-
-            if (assemblyPath.IndexOf("Zyq.Game") == -1) {
+                assemblyPath.IndexOf("Zyq.Game.Base") >= 0 ||
+                assemblyPath.IndexOf("Zyq.Game") == -1) {
                 return;
             }
 
@@ -44,10 +41,7 @@ namespace Zyq.Weaver {
 
             HashSet<string> dependencyPaths = Helpers.GetDependecyPaths(assemblyPath);
 
-            if (Program.Process(unityEngineCoreModuleRuntimeDLL, networkingRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray())) {
-                SessionState.SetBool("MIRROR_WEAVE_SUCCESS", true);
-                UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
-            } else {
+            if (!Program.Process(unityEngineCoreModuleRuntimeDLL, networkingRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray())) {
                 SessionState.SetBool("MIRROR_WEAVE_SUCCESS", false);
             }
         }
