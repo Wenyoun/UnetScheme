@@ -23,6 +23,7 @@ namespace Zyq.Weaver {
         public static TypeReference SendType;
         public static TypeReference RecvType;
         public static TypeReference ProtocolType;
+        public static TypeReference BroadcastType;
         #endregion
 
         #region 基本类型
@@ -115,6 +116,7 @@ namespace Zyq.Weaver {
             SendType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.SendAttribute");
             RecvType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.RecvAttribute");
             ProtocolType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ProtocolAttribute");
+            BroadcastType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.BroadcastAttribute");
         }
 
         private static TypeReference ImportCorlibType(string fullName) {

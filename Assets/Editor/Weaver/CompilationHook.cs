@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Compilation;
-using Zyq.Game.Base;
 
 namespace Zyq.Weaver {
     public class CompilationHook {

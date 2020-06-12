@@ -7,8 +7,9 @@ namespace Zyq.Weaver {
             TypeDefinition protocol = null;
             Dictionary<short, MethodDefinition> sendAttributeMethods;
             Dictionary<short, MethodDefinition> recvAttributeMethods;
+            Dictionary<short, MethodDefinition> broadcastAttributeMethods;
 
-            ParseAttribute.Parse(module, ref protocol, out sendAttributeMethods, out recvAttributeMethods);
+            ParseAttribute.Parse(module, ref protocol, out sendAttributeMethods, out recvAttributeMethods, out broadcastAttributeMethods);
 
             if (sendAttributeMethods.Count > 0) {
                 SendProcessor.Weave(module, sendAttributeMethods);

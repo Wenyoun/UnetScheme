@@ -23,11 +23,13 @@ namespace Zyq.Game.Server {
 
             Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" + v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15);
 
-            if (v2) {
-                Sender.LoginResult(connection, "yinhuayong", "huayong", true);
-            } else {
-                Sender.LoginResult(connection, "yinhuayong", "huayong", false);
-            }
+            Sender.LoginResult(connection, "yinhuayong", "huayong", true);
+
+            Entity entity = EntityFactory.CreatePlayer();
+
+            EntityMgr.AddEntity(entity);
+
+            Sender.CreatePlayer(connection, entity.Eid, entity.Gid);
         }
     }
 }
