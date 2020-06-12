@@ -72,7 +72,7 @@ namespace Zyq.Weaver {
 
                 processor.Append(processor.Create(OpCodes.Call, method));
                 processor.Append(processor.Create(OpCodes.Nop));
-                processor.Emit(OpCodes.Ret);
+                processor.Append(processor.Create(OpCodes.Ret));
 
                 registerProcessor.InsertBefore(firstRegisterInstruction, registerProcessor.Create(OpCodes.Ldarg_0));
                 registerProcessor.InsertBefore(firstRegisterInstruction, registerProcessor.Create(OpCodes.Call, protocol.Methods.Single(m => m.FullName.IndexOf("get_Connection") >= 0)));
