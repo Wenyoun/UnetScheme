@@ -1,9 +1,13 @@
 ﻿using System.Collections.Generic;
 using Mono.CecilX;
+using UnityEngine.Networking;
 
-namespace Zyq.Weaver {
-    public static class ClientWeaver {
-        public static bool Weave(ModuleDefinition module) {
+namespace Zyq.Weaver
+{
+    public static class ClientWeaver
+    {
+        public static bool Weave(ModuleDefinition module)
+        {
             TypeDefinition protocol = null;
             Dictionary<short, MethodDefinition> sendAttributeMethods;
             Dictionary<short, MethodDefinition> recvAttributeMethods;
@@ -11,11 +15,13 @@ namespace Zyq.Weaver {
 
             ParseAttribute.Parse(module, ref protocol, out sendAttributeMethods, out recvAttributeMethods, out broadcastAttributeMethods);
 
-            if (sendAttributeMethods.Count > 0) {
+            if (sendAttributeMethods.Count > 0)
+            {
                 SendProcessor.Weave(module, sendAttributeMethods);
             }
 
-            if (recvAttributeMethods.Count > 0) {
+            if (recvAttributeMethods.Count > 0)
+            {
                 RecvProcessor.Weave(module, recvAttributeMethods, protocol);
             }
 

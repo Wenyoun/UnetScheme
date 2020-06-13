@@ -44,6 +44,10 @@ namespace Zyq.Game.Base {
             m_Net.UnregisterHandler(id);
         }
 
+        public void Send(short id, MessageBase msg) {
+            m_Net.Send(id, msg);
+        }
+
         public void Send(NetworkWriter writer) {
             m_Net.SendWriter(writer, 0);
         }

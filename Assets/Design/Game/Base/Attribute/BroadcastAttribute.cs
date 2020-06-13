@@ -1,11 +1,14 @@
 ﻿using System;
 
-namespace Zyq.Game.Base {
+namespace Zyq.Game.Base
+{
     [AttributeUsage(AttributeTargets.Method)]
-    public class BroadcastAttribute : Attribute {
+    public class BroadcastAttribute : Attribute
+    {
         public short MsgId;
 
-        public BroadcastAttribute(short msgId) {
+        public BroadcastAttribute(short msgId)
+        {
             MsgId = msgId;
         }
     }

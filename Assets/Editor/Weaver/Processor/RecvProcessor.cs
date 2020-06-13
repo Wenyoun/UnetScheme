@@ -6,73 +6,89 @@ using Mono.CecilX.Cil;
 using UnityEngine.Networking;
 using Zyq.Game.Base;
 
-namespace Zyq.Weaver {
-    public static class RecvProcessor {
-        public static void Weave(ModuleDefinition module, Dictionary<short, MethodDefinition> defs, TypeDefinition protocol) {
-            if (module == null || defs.Count == 0 || protocol == null) {
+namespace Zyq.Weaver
+{
+    public static class RecvProcessor
+    {
+        public static void Weave(ModuleDefinition module, Dictionary<short, MethodDefinition> defs, TypeDefinition protocol)
+        {
+            if (module == null || defs.Count == 0 || protocol == null)
+            {
                 return;
             }
 
             MethodDefinition registerMethod = protocol.Methods.Single(m => m.FullName.IndexOf("Register()") >= 0);
+            registerMethod.Body.Variables.Clear();
+            registerMethod.Body.Instructions.Clear();
+
             ILProcessor registerProcessor = registerMethod.Body.GetILProcessor();
+            registerProcessor.Append(registerProcessor.Create(OpCodes.Nop));
+            registerProcessor.Append(registerProcessor.Create(OpCodes.Ret));
             Instruction firstRegisterInstruction = registerMethod.Body.Instructions[0];
 
-            foreach (short key in defs.Keys) {
+            foreach (short key in defs.Keys)
+            {
                 MethodDefinition method = defs[key];
 
                 string name = "OnProtocol_" + key;
 
                 MethodDefinition protoMethodImpl = null;
-                foreach (MethodDefinition m in protocol.Resolve().Methods) {
-                    if (m.Name == name) {
+                foreach (MethodDefinition m in protocol.Methods)
+                {
+                    if (m.Name == name)
+                    {
                         protoMethodImpl = m;
                         break;
                     }
                 }
 
-                if (protoMethodImpl == null) {
+                if (protoMethodImpl == null)
+                {
                     protoMethodImpl = new MethodDefinition(name, MethodAttributes.Private | MethodAttributes.HideBySig, module.ImportReference(typeof(void)));
                     protocol.Methods.Add(protoMethodImpl);
+                    protoMethodImpl.Parameters.Add(new ParameterDefinition(module.ImportReference(typeof(NetworkMessage))));
                 }
 
-                protoMethodImpl.Body.Instructions.Clear();
-                protoMethodImpl.Parameters.Clear();
                 protoMethodImpl.Body.Variables.Clear();
-                protoMethodImpl.Parameters.Add(new ParameterDefinition(module.ImportReference(typeof(NetworkMessage))));
+                protoMethodImpl.Body.Instructions.Clear();
 
                 ILProcessor processor = protoMethodImpl.Body.GetILProcessor();
-
                 processor.Append(processor.Create(OpCodes.Nop));
-                processor.Append(processor.Create(OpCodes.Ldarg_1));
-                processor.Append(processor.Create(OpCodes.Ldfld, module.ImportReference(typeof(NetworkMessage).GetField("reader"))));
+                processor.Append(processor.Create(OpCodes.Ret));
+
+                Instruction first = protoMethodImpl.Body.Instructions[0];
+                processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_1));
+                processor.InsertBefore(first, processor.Create(OpCodes.Ldfld, module.ImportReference(typeof(NetworkMessage).GetField("reader"))));
 
                 int index = 0;
                 protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(NetworkReader))));
-                foreach (ParameterDefinition pd in method.Parameters) {
-                    if (index > 0) {
+                foreach (ParameterDefinition pd in method.Parameters)
+                {
+                    if (index > 0)
+                    {
                         protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(pd.ParameterType)));
-                        processor.Append(processor.Create(OpCodes.Stloc, index - 1));
-                        processor.Append(processor.Create(OpCodes.Ldloc_0));
-                        processor.Append(InstructionFactory.CreateReadTypeInstruction(module, processor, pd.ParameterType.FullName));
+                        processor.InsertBefore(first, processor.Create(OpCodes.Stloc, index - 1));
+                        processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
+                        processor.InsertBefore(first, InstructionFactory.CreateReadTypeInstruction(module, processor, pd.ParameterType.FullName));
                     }
                     index++;
                 }
 
-                processor.Append(processor.Create(OpCodes.Stloc, index - 1));
-                processor.Append(processor.Create(OpCodes.Ldarg_0));
-                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(protocol.Methods.Single(m => m.FullName.IndexOf("get_Connection") >= 0))));
+                processor.InsertBefore(first, processor.Create(OpCodes.Stloc, index - 1));
+                processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_0));
+                processor.InsertBefore(first, processor.Create(OpCodes.Call, module.ImportReference(protocol.Methods.Single(m => m.FullName.IndexOf("get_Connection") >= 0))));
 
                 index = 0;
-                foreach (ParameterDefinition pd in method.Parameters) {
-                    if (index > 0) {
-                        processor.Append(processor.Create(OpCodes.Ldloc, index));
+                foreach (ParameterDefinition pd in method.Parameters)
+                {
+                    if (index > 0)
+                    {
+                        processor.InsertBefore(first, processor.Create(OpCodes.Ldloc, index));
                     }
                     index++;
                 }
 
-                processor.Append(processor.Create(OpCodes.Call, method));
-                processor.Append(processor.Create(OpCodes.Nop));
-                processor.Append(processor.Create(OpCodes.Ret));
+                processor.InsertBefore(first, processor.Create(OpCodes.Call, method));
 
                 registerProcessor.InsertBefore(firstRegisterInstruction, registerProcessor.Create(OpCodes.Ldarg_0));
                 registerProcessor.InsertBefore(firstRegisterInstruction, registerProcessor.Create(OpCodes.Call, protocol.Methods.Single(m => m.FullName.IndexOf("get_Connection") >= 0)));
@@ -84,10 +100,16 @@ namespace Zyq.Weaver {
             }
 
             MethodDefinition unregisterMethod = protocol.Methods.Single(m => m.FullName.IndexOf("Unregister()") >= 0);
+            unregisterMethod.Body.Variables.Clear();
+            unregisterMethod.Body.Instructions.Clear();
+
             ILProcessor unregisterProcessor = unregisterMethod.Body.GetILProcessor();
+            unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Nop));
+            unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ret));
             Instruction firstUnregisterInstruction = unregisterMethod.Body.Instructions[0];
 
-            foreach (short key in defs.Keys) {
+            foreach (short key in defs.Keys)
+            {
                 unregisterProcessor.InsertBefore(firstUnregisterInstruction, unregisterProcessor.Create(OpCodes.Ldarg_0));
                 unregisterProcessor.InsertBefore(firstUnregisterInstruction, unregisterProcessor.Create(OpCodes.Callvirt, protocol.Methods.Single(m => m.FullName.IndexOf("get_Connection") >= 0)));
                 unregisterProcessor.InsertBefore(firstUnregisterInstruction, unregisterProcessor.Create(OpCodes.Ldc_I4, key));
