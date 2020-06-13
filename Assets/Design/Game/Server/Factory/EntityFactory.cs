@@ -10,9 +10,6 @@ namespace Zyq.Game.Server
         {
             Entity entity = new Entity(id++, Group.Player);
             entity.OnInit();
-
-            entity.AddAttribute(new BaseAttribute(10));
-
             return entity;
         }
     }

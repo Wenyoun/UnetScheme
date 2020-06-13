@@ -31,6 +31,8 @@ namespace Zyq.Weaver
         public static TypeReference RecvType;
         public static TypeReference ProtocolType;
         public static TypeReference BroadcastType;
+        public static TypeReference SyncClassType;
+        public static TypeReference SyncFieldType;
         #endregion
 
         public static bool WeaveAssemblies(string unityEngineDLL, string networkingDLL, string baseModuleRuntimeDLL, string assemblyPath, string[] depAssemblyPaths)
@@ -123,6 +125,8 @@ namespace Zyq.Weaver
             RecvType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.RecvAttribute");
             ProtocolType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ProtocolAttribute");
             BroadcastType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.BroadcastAttribute");
+            SyncClassType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.SyncClassAttribute");
+            SyncFieldType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.SyncFieldAttribute");
         }
 
         private static TypeReference ImportCorlibType(string fullName)

@@ -5,14 +5,25 @@ namespace Zyq.Weaver
 {
     public static class ParseAttribute
     {
-        public static void Parse(ModuleDefinition module, ref TypeDefinition protocol, out Dictionary<short, MethodDefinition> send, out Dictionary<short, MethodDefinition> recv, out Dictionary<short, MethodDefinition> broadcast)
+        public static void Parse(ModuleDefinition module,
+                                ref TypeDefinition protocol,
+                                out Dictionary<short, MethodDefinition> send,
+                                out Dictionary<short, MethodDefinition> recv,
+                                out Dictionary<short, MethodDefinition> broadcast,
+                                out List<TypeDefinition> syncs)
         {
             send = new Dictionary<short, MethodDefinition>();
             recv = new Dictionary<short, MethodDefinition>();
             broadcast = new Dictionary<short, MethodDefinition>();
+            syncs = new List<TypeDefinition>();
 
             foreach (TypeDefinition type in module.Types)
             {
+                if (type.CustomAttributes.Count > 0 && type.CustomAttributes[0].AttributeType.FullName == WeaverProgram.SyncClassType.FullName)
+                {
+                    syncs.Add(type);
+                }
+
                 foreach (MethodDefinition method in type.Methods)
                 {
                     if (method.CustomAttributes.Count > 0)
