@@ -9,8 +9,11 @@ namespace Zyq.Weaver
 {
     public static class SyncProcessor
     {
-        public static void Weave(ModuleDefinition module, List<TypeDefinition> syncs)
+        public static void Weave(ModuleDefinition module, List<TypeDefinition> syncs, out Dictionary<FieldDefinition, MethodDefinition> gets, out Dictionary<FieldDefinition, MethodDefinition> sets)
         {
+            sets = new Dictionary<FieldDefinition, MethodDefinition>();
+            gets = new Dictionary<FieldDefinition, MethodDefinition>();
+
             foreach (TypeDefinition type in syncs)
             {
                 List<FieldDefinition> fields = new List<FieldDefinition>();
@@ -45,6 +48,9 @@ namespace Zyq.Weaver
                         type.Methods.Add(get);
                         type.Methods.Add(set);
                         type.Properties.Add(propertyDefinition);
+
+                        gets.Add(field, get);
+                        sets.Add(field, set);
                     }
                 }
 

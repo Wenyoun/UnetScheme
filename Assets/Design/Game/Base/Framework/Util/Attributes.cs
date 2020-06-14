@@ -16,7 +16,8 @@ namespace Zyq.Game.Base
 
         public void OnInit()
         {
-            Dispose();
+            mAttrLts.Clear();
+            mAttrDys.Clear();
         }
 
         public void Dispose()

@@ -1,7 +1,9 @@
 ﻿using Zyq.Base;
 
-namespace Zyq.Game.Base {
-    public interface IEntity : ILifecycle, IUpdate, IFixedUpdate, IMessage {
+namespace Zyq.Game.Base
+{
+    public interface IEntity : ILifecycle, IUpdate, IFixedUpdate, IMessage
+    {
         void OnAdd();
 
         T AddCop<T>(T cop) where T : ICop;

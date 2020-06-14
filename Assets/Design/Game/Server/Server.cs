@@ -19,10 +19,12 @@ namespace Zyq.Game.Server
         public void Init()
         {
             m_Connections.Clear();
+            UpdateMgr.RegisterLateUpdate(OnLateUpdate);
         }
 
         public void Dispose()
         {
+            UpdateMgr.UnregisterLateUpdate(OnLateUpdate);
             foreach (Connection connection in m_Connections.Values)
             {
                 connection.Dispose();
@@ -79,6 +81,10 @@ namespace Zyq.Game.Server
         private void RegisterProtocols(Connection connection)
         {
             connection.RegisterProtocol<ServerProtocolHandler>();
+        }
+
+        private void OnLateUpdate()
+        {
         }
     }
 }

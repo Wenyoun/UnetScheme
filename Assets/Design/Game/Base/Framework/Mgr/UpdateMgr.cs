@@ -2,27 +2,26 @@
 {
     public class UpdateMgr
     {
-        private static UpdateRegister m_Register;
+        private static UpdateRegister m_Register = new UpdateRegister();
 
         public static void Init()
         {
-            m_Register = new UpdateRegister();
-        }
-
-        public static void Clear()
-        {
-            m_Register.Dispose();
+            m_Register.OnInit();
         }
 
         public static void Dispose()
         {
             m_Register.Dispose();
-            m_Register = null;
         }
 
         public static void OnUpdate(float delta)
         {
             m_Register.OnUpdate(delta);
+        }
+
+        public static void OnLateUpdate()
+        {
+            m_Register.OnLateUpdate();
         }
 
         public static void OnFixedUpdate(float delta)
@@ -38,6 +37,16 @@
         public static void UnregisterUpdate(UpdateDelegate update)
         {
             m_Register.UnregisterUpdate(update);
+        }
+
+        public static void RegisterLateUpdate(LateUpdateDelegate update)
+        {
+            m_Register.RegisterLateUpdate(update);
+        }
+
+        public static void UnregisterLateUpdate(LateUpdateDelegate update)
+        {
+            m_Register.UnregisterLateUpdate(update);
         }
 
         public static void RegisterFixedUpdate(UpdateDelegate fixedUpdate)

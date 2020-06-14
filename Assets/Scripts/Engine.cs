@@ -17,6 +17,11 @@ public class Engine : MonoBehaviour
         GameMgr.Ins.OnUpdate(Time.deltaTime);
     }
 
+    private void LateUpdate()
+    {
+        GameMgr.Ins.OnLateUpdate();
+    }
+
     private void FixedUpdate()
     {
         GameMgr.Ins.OnFixedUpdate(Time.deltaTime);

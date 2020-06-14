@@ -12,6 +12,11 @@
         void OnUpdate(float delta);
     }
 
+    public interface ILateUpdate
+    {
+        void OnLateUpdate();
+    }
+
     public interface IFixedUpdate
     {
         void OnFixedUpdate(float delta);
@@ -27,7 +32,7 @@
         bool IsFixedUpdate { get; set; }
     }
 
-    public interface ICompose : ILifecycle, IUpdate, IFixedUpdate
+    public interface ICompose : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
     {
     }
 }

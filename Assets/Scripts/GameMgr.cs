@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Base;
 using Zyq.Base;
 
-public class GameMgr : ILifecycle, IUpdate, IFixedUpdate
+public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 {
     public static GameMgr Ins = new GameMgr();
 
@@ -43,6 +43,14 @@ public class GameMgr : ILifecycle, IUpdate, IFixedUpdate
         for (int i = 0; i < mComposeLts.Count; ++i)
         {
             mComposeLts[i].OnUpdate(delta);
+        }
+    }
+
+    public void OnLateUpdate()
+    {
+        for (int i = 0; i < mComposeLts.Count; ++i)
+        {
+            mComposeLts[i].OnLateUpdate();
         }
     }
 
