@@ -130,13 +130,15 @@ namespace Zyq.Weaver
                         WriteDeserializeInstruction(module, deserialize, processor, fields[i], i, offset);
                     }
 
+                    int count = deserialize.Body.Variables.Count;
+
                     processor.Append(processor.Create(OpCodes.Ldarg_0));
                     processor.Append(processor.Create(OpCodes.Stloc_2));
                     processor.Append(processor.Create(OpCodes.Ldloc_2));
                     processor.Append(processor.Create(OpCodes.Ldnull));
                     processor.Append(processor.Create(OpCodes.Cgt_Un));
-                    processor.Append(processor.Create(OpCodes.Stloc, fields.Count - 1));
-                    processor.Append(processor.Create(OpCodes.Ldloc, fields.Count - 1));
+                    processor.Append(processor.Create(OpCodes.Stloc, count - 1));
+                    processor.Append(processor.Create(OpCodes.Ldloc, count - 1));
                     processor.Append(processor.Create(OpCodes.Brfalse_S, ret));
                     processor.Append(processor.Create(OpCodes.Nop));
                     processor.Append(processor.Create(OpCodes.Ldloc_2));

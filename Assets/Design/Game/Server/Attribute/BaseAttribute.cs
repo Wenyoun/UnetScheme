@@ -4,10 +4,10 @@ using UnityEngine.Networking;
 namespace Zyq.Game.Server
 {
     [SyncClass]
-    public class BaseAttribute : IAttribute, ISync, ISyncNotify
+    public class BaseAttribute : IAttribute, ISync
     {
         [SyncField]
-        public byte Hp1;
+        public float Hp1;
         [SyncField]
         public bool Hp2;
         [SyncField]
@@ -34,10 +34,6 @@ namespace Zyq.Game.Server
         }
 
         public void Deserialize(NetworkReader reader)
-        {
-        }
-
-        public void SyncFinished()
         {
         }
     }
