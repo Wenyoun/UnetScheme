@@ -4,7 +4,7 @@ using UnityEngine.Networking;
 namespace Zyq.Game.Server
 {
     [SyncClass]
-    public class BaseAttribute : IAttribute, ISync, ISyncStatus
+    public class BaseAttribute : IAttribute, ISync, ISyncNotify
     {
         [SyncField]
         public byte Hp1;

@@ -121,7 +121,7 @@ namespace Zyq.Weaver
 
                     deserialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(long))));
                     deserialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
-                    deserialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(ISyncStatus))));
+                    deserialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(ISyncNotify))));
 
                     int offset = deserialize.Body.Variables.Count;
 
@@ -140,7 +140,7 @@ namespace Zyq.Weaver
                     processor.Append(processor.Create(OpCodes.Brfalse_S, ret));
                     processor.Append(processor.Create(OpCodes.Nop));
                     processor.Append(processor.Create(OpCodes.Ldloc_2));
-                    processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(ISyncStatus).GetMethod("SyncFinished", Type.EmptyTypes))));
+                    processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(ISyncNotify).GetMethod("SyncFinished", Type.EmptyTypes))));
                     processor.Append(processor.Create(OpCodes.Nop));
                     processor.Append(ret);
                 }

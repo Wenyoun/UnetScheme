@@ -10,7 +10,7 @@ namespace Zyq.Game.Server
 
     }
 
-    public interface ISyncStatus
+    public interface ISyncNotify
     {
         void SyncFinished();
     }
