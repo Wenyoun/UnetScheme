@@ -2,7 +2,8 @@
 
 namespace Zyq.Game.Server
 {
-    public class ServerProtocolHandler : IProtocolHandler
+    [Protocol]
+    public class AutoProtocolHandler : IProtocolHandler
     {
         public Connection Connection { get; set; }
         public void Register() { }

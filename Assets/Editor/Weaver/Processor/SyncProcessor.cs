@@ -29,6 +29,8 @@ namespace Zyq.Weaver
                 FieldDefinition dirty = new FieldDefinition("m_Dirty", FieldAttributes.Private, module.ImportReference(typeof(long)));
                 type.Fields.Add(dirty);
 
+                ModifyIsSerializeMethod(module, type, dirty);
+
                 if (fields.Count > 0)
                 {
                     //get set method
@@ -153,6 +155,24 @@ namespace Zyq.Weaver
                     processor.Append(ret);
                 }
             }
+        }
+
+        private static void ModifyIsSerializeMethod(ModuleDefinition module, TypeDefinition type, FieldDefinition dirty)
+        {
+            MethodDefinition method = type.Methods.Single(m => m.Name == "IsSerialize");
+            method.Body.Instructions.Clear();
+
+            ILProcessor processor = method.Body.GetILProcessor();
+            Instruction lod = processor.Create(OpCodes.Ldloc_0);
+            processor.Append(processor.Create(OpCodes.Nop));
+            processor.Append(processor.Create(OpCodes.Ldarg_0));
+            processor.Append(processor.Create(OpCodes.Ldfld, dirty));
+            processor.Append(processor.Create(OpCodes.Ldc_I8, 0L));
+            processor.Append(processor.Create(OpCodes.Cgt));
+            processor.Append(processor.Create(OpCodes.Stloc_0));
+            processor.Append(processor.Create(OpCodes.Br_S, lod));
+            processor.Append(lod);
+            processor.Append(processor.Create(OpCodes.Ret));
         }
 
         private static MethodDefinition CreateGetMethod(TypeDefinition type, FieldDefinition field, string name)

@@ -44,5 +44,7 @@ namespace Zyq.Game.Base
             mAttrDys.TryGetValue(typeof(T), out attribute);
             return (T)attribute;
         }
+
+        public List<IAttribute> ALL { get { return mAttrLts; } }
     }
 }

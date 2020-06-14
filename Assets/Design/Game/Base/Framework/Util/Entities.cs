@@ -2,56 +2,70 @@
 using System.Collections.Generic;
 using Zyq.Base;
 
-namespace Zyq.Game.Base {
-    public class Entities : IDisposable, IUpdate, IFixedUpdate {
+namespace Zyq.Game.Base
+{
+    public class Entities : IDisposable, IUpdate, IFixedUpdate
+    {
         private List<Entity> mTemp;
         private List<Entity> mEntityLts;
         private Dictionary<uint, Entity> mEntityDys;
         private Dictionary<uint, List<Entity>> mEntityGps;
 
-        public Entities() {
+        public Entities()
+        {
             mTemp = new List<Entity>();
             mEntityLts = new List<Entity>();
             mEntityDys = new Dictionary<uint, Entity>();
             mEntityGps = new Dictionary<uint, List<Entity>>();
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             mTemp.Clear();
             mEntityLts.Clear();
             mEntityDys.Clear();
             mEntityGps.Clear();
         }
 
-        public void OnUpdate(float delta) {
+        public void OnUpdate(float delta)
+        {
             Refill();
-            if (mTemp.Count > 0) {
-                for (int i = 0; i < mTemp.Count; ++i) {
+            if (mTemp.Count > 0)
+            {
+                for (int i = 0; i < mTemp.Count; ++i)
+                {
                     mTemp[i].OnUpdate(delta);
                 }
             }
         }
 
-        public void OnFixedUpdate(float delta) {
+        public void OnFixedUpdate(float delta)
+        {
             Refill();
-            if (mTemp.Count > 0) {
-                for (int i = 0; i < mTemp.Count; ++i) {
+            if (mTemp.Count > 0)
+            {
+                for (int i = 0; i < mTemp.Count; ++i)
+                {
                     mTemp[i].OnFixedUpdate(delta);
                 }
             }
         }
 
-        public List<Entity> GetGpsEntitys(uint group) {
+        public List<Entity> GetGpsEntitys(uint group)
+        {
             List<Entity> entitys = null;
-            if (!mEntityGps.TryGetValue(group, out entitys)) {
+            if (!mEntityGps.TryGetValue(group, out entitys))
+            {
                 entitys = new List<Entity>();
                 mEntityGps.Add(group, entitys);
             }
             return entitys;
         }
 
-        public Entity AddEntity(Entity entity) {
-            if (!mEntityDys.ContainsKey(entity.Eid)) {
+        public Entity AddEntity(Entity entity)
+        {
+            if (!mEntityDys.ContainsKey(entity.Eid))
+            {
                 mEntityLts.Add(entity);
                 mEntityDys.Add(entity.Eid, entity);
                 GetGpsEntitys(entity.Gid).Add(entity);
@@ -61,9 +75,11 @@ namespace Zyq.Game.Base {
             return null;
         }
 
-        public Entity RemoveEntity(uint eid) {
+        public Entity RemoveEntity(uint eid)
+        {
             Entity entity = null;
-            if (mEntityDys.TryGetValue(eid, out entity)) {
+            if (mEntityDys.TryGetValue(eid, out entity))
+            {
                 mEntityLts.Remove(entity);
                 GetGpsEntitys(entity.Gid).Remove(entity);
                 mEntityDys.Remove(eid);
@@ -71,29 +87,39 @@ namespace Zyq.Game.Base {
             return entity;
         }
 
-        public Entity GetEntity(uint eid) {
+        public Entity GetEntity(uint eid)
+        {
             Entity entity = null;
             mEntityDys.TryGetValue(eid, out entity);
             return entity;
         }
 
-        public void Dispatcher(int id, uint eid, IBody body) {
-            if (eid > 0) {
+        public void Dispatcher(int id, uint eid, IBody body)
+        {
+            if (eid > 0)
+            {
                 Entity entity = null;
-                if (mEntityDys.TryGetValue(eid, out entity)) {
+                if (mEntityDys.TryGetValue(eid, out entity))
+                {
                     entity.Dispatcher(id, body);
                 }
-            } else {
+            }
+            else
+            {
                 Refill();
-                for (int i = 0; i < mTemp.Count; ++i) {
+                for (int i = 0; i < mTemp.Count; ++i)
+                {
                     mTemp[i].Dispatcher(id, body);
                 }
             }
         }
 
-        private void Refill() {
+        private void Refill()
+        {
             mTemp.Clear();
             mTemp.AddRange(mEntityLts);
         }
+
+        public List<Entity> ALL { get { return mEntityLts; } }
     }
 }

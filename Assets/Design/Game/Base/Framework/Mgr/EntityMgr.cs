@@ -104,5 +104,17 @@ namespace Zyq.Game.Base
                 m_Entities.OnFixedUpdate(delta);
             }
         }
+
+        public static List<Entity> ALL
+        {
+            get
+            {
+                if (m_Entities != null)
+                { 
+                    return m_Entities.ALL;
+                }
+                return null;
+            }
+        }
     }
 }

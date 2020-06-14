@@ -1,11 +1,14 @@
 ﻿using Zyq.Game.Base;
 
-namespace Zyq.Game.Server
+namespace Zyq.Game.Client
 {
-    public class ServerProtocolHandler : IProtocolHandler
+    [Protocol]
+    public class AutoProtocolHandler : IProtocolHandler
     {
         public Connection Connection { get; set; }
+
         public void Register() { }
+
         public void Unregister() { }
     }
 }

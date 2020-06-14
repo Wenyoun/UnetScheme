@@ -80,11 +80,38 @@ namespace Zyq.Game.Server
 
         private void RegisterProtocols(Connection connection)
         {
+            connection.RegisterProtocol<AutoProtocolHandler>();
             connection.RegisterProtocol<ServerProtocolHandler>();
         }
 
         private void OnLateUpdate()
         {
+            List<Entity> entitys = EntityMgr.ALL;
+            if (entitys != null)
+            {
+                for (int i = 0; i < entitys.Count; ++i)
+                {
+                    Entity entity = entitys[i];
+                    List<IAttribute> attributes = entity.Attributes.ALL;
+                    for (int j = 0; j < attributes.Count; ++j)
+                    {
+                        IAttribute attribute = attributes[j];
+                        if (attribute is ISync)
+                        {
+                            ISync sync = (ISync)attribute;
+                            if (sync.IsSerialize())
+                            {
+                                NetworkWriter writer = new NetworkWriter();
+                                writer.StartMessage(MsgId.Msg_Sync_Field);
+                                writer.Write(entity.Eid);
+                                sync.Serialize(writer);
+                                writer.FinishMessage();
+                                Broadcast(null, writer);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

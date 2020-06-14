@@ -29,6 +29,13 @@ namespace Zyq.Game.Server
         [SyncField]
         public string Hp11;
 
+        private long m_Mask;
+
+        public bool IsSerialize()
+        {
+            return false;
+        }
+
         public void Serialize(NetworkWriter writer)
         {
         }
