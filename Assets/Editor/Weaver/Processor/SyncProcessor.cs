@@ -277,7 +277,7 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldfld, dirty));
             processor.Append(processor.Create(OpCodes.Ldc_I8, 1L << index));
-            processor.Append(processor.Create(OpCodes.Or));
+            processor.Append(processor.Create(OpCodes.And));
             processor.Append(processor.Create(OpCodes.Ldc_I8, 1L << index));
             processor.Append(processor.Create(OpCodes.Ceq));
             processor.Append(processor.Create(OpCodes.Stloc, index + offset));
@@ -300,7 +300,7 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ldloc_0));
             processor.Append(processor.Create(OpCodes.Ldc_I8, 1L << index));
-            processor.Append(processor.Create(OpCodes.Or));
+            processor.Append(processor.Create(OpCodes.And));
             processor.Append(processor.Create(OpCodes.Ldc_I8, 1L << index));
             processor.Append(processor.Create(OpCodes.Ceq));
             processor.Append(processor.Create(OpCodes.Stloc, index + offset));

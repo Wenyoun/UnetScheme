@@ -14,7 +14,11 @@ namespace Zyq.Game.Client
             {
                 NetworkReader reader = msg.reader;
                 uint eid = reader.ReadUInt32();
-                Entity entity = EntityMgr.GetEntity(eid);
+                long dirty = reader.ReadInt64();
+                float value = reader.ReadSingle();
+                string v = reader.ReadString();
+
+                Debug.Log(eid + ":" + dirty + ":" + value + ":" + v);
             });
         }
 

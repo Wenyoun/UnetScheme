@@ -12,7 +12,8 @@ namespace Zyq.Game.Server
             entity.OnInit();
 
             BaseAttribute attribute = entity.AddAttribute(new BaseAttribute());
-            attribute.Hp1 = 10;
+            attribute.Hp1 = 999999999;
+            attribute.Hp11 = "yinhuayong";
 
             return entity;
         }
