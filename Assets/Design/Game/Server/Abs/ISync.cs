@@ -7,5 +7,11 @@ namespace Zyq.Game.Server
         void Serialize(NetworkWriter writer);
 
         void Deserialize(NetworkReader reader);
+
+    }
+
+    public interface ISyncStatus
+    {
+        void SyncFinished();
     }
 }
