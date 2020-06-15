@@ -1,8 +1,6 @@
 {
     "name": "Zyq.Game.Base",
-    "references": [
-        "Zyq.Base"
-    ],
+    "references": [],
     "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
