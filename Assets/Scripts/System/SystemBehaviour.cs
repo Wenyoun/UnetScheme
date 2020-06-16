@@ -1,5 +1,4 @@
 ﻿using Base;
-using Game;
 
 namespace System
 {
@@ -8,7 +7,6 @@ namespace System
         public override void OnInit()
         {
             Add<SystemViewModule>();
-            Add<GameBattleModule>();
         }
     }
 }
