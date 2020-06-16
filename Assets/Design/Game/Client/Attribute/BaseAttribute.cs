@@ -10,7 +10,6 @@ namespace Zyq.Game.Client
 
         [SyncField]
         public float Hp1;
-        /**
         [SyncField]
         public bool Hp2;
         [SyncField]
@@ -31,13 +30,11 @@ namespace Zyq.Game.Client
         public double Hp10;
         [SyncField]
         public string Hp11;
-        **/
 
         public bool IsSerialize()
         {
             return false;
         }
-
 
         public void Serialize(NetworkWriter writer)
         {

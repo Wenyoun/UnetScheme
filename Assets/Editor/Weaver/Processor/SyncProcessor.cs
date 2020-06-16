@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
 using System.Linq;
-using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {
     public static class SyncProcessor
     {
-        public static void Weave(ModuleDefinition module, List<TypeDefinition> syncs, out Dictionary<FieldDefinition, MethodDefinition> gets, out Dictionary<FieldDefinition, MethodDefinition> sets)
+        public static void Weave(bool isServer, ModuleDefinition module, List<TypeDefinition> syncs, out Dictionary<FieldDefinition, MethodDefinition> gets, out Dictionary<FieldDefinition, MethodDefinition> sets)
         {
             sets = new Dictionary<FieldDefinition, MethodDefinition>();
             gets = new Dictionary<FieldDefinition, MethodDefinition>();
@@ -26,13 +25,18 @@ namespace Zyq.Weaver
                     }
                 }
 
-                FieldDefinition dirty = new FieldDefinition("m_Dirty", FieldAttributes.Private, module.ImportReference(typeof(long)));
-                type.Fields.Add(dirty);
-
-                ModifyIsSerializeMethod(module, type, dirty);
-
-                if (fields.Count > 0)
+                if (fields.Count == 0)
                 {
+                    return;
+                }
+
+                if (isServer)
+                {
+                    FieldDefinition dirty = new FieldDefinition("m_Dirty", FieldAttributes.Private, module.ImportReference(typeof(long)));
+                    type.Fields.Add(dirty);
+
+                    ModifyIsSerializeMethod(module, type, dirty);
+
                     //get set method
                     for (int i = 0; i < fields.Count; ++i)
                     {
@@ -54,10 +58,7 @@ namespace Zyq.Weaver
                         gets.Add(field, get);
                         sets.Add(field, set);
                     }
-                }
 
-                if (fields.Count > 0)
-                {
                     //Serialize
                     MethodDefinition serialize = type.Methods.Single(m => m.Name == "Serialize");
 
@@ -103,8 +104,7 @@ namespace Zyq.Weaver
                     processor.Append(ins5);
                     processor.Append(ins6);
                 }
-
-                if (fields.Count > 0)
+                else
                 {
                     //Deserialize
                     MethodDefinition deserialize = type.Methods.Single(m => m.Name == "Deserialize");
@@ -118,7 +118,7 @@ namespace Zyq.Weaver
 
                     processor.Append(processor.Create(OpCodes.Nop));
                     processor.Append(processor.Create(OpCodes.Ldarg_1));
-                    processor.Append(InstructionFactory.CreateReadTypeInstruction(module, processor, dirty.FieldType.FullName));
+                    processor.Append(InstructionFactory.CreateReadTypeInstruction(module, processor, module.ImportReference(typeof(long)).ToString()));
                     processor.Append(processor.Create(OpCodes.Stloc_0));
                     processor.Append(processor.Create(OpCodes.Ldloc_0));
                     processor.Append(processor.Create(OpCodes.Ldc_I8, 0L));
@@ -129,7 +129,6 @@ namespace Zyq.Weaver
 
                     deserialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(long))));
                     deserialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
-                    deserialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(ISyncNotify))));
 
                     int offset = deserialize.Body.Variables.Count;
 
@@ -138,19 +137,6 @@ namespace Zyq.Weaver
                         WriteDeserializeInstruction(module, deserialize, processor, fields[i], i, offset);
                     }
 
-                    int count = deserialize.Body.Variables.Count;
-
-                    processor.Append(processor.Create(OpCodes.Ldarg_0));
-                    processor.Append(processor.Create(OpCodes.Stloc_2));
-                    processor.Append(processor.Create(OpCodes.Ldloc_2));
-                    processor.Append(processor.Create(OpCodes.Ldnull));
-                    processor.Append(processor.Create(OpCodes.Cgt_Un));
-                    processor.Append(processor.Create(OpCodes.Stloc, count - 1));
-                    processor.Append(processor.Create(OpCodes.Ldloc, count - 1));
-                    processor.Append(processor.Create(OpCodes.Brfalse_S, ret));
-                    processor.Append(processor.Create(OpCodes.Nop));
-                    processor.Append(processor.Create(OpCodes.Ldloc_2));
-                    processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(ISyncNotify).GetMethod("SyncFinished", Type.EmptyTypes))));
                     processor.Append(processor.Create(OpCodes.Nop));
                     processor.Append(ret);
                 }

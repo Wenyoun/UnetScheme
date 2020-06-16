@@ -34,7 +34,7 @@ namespace Zyq.Weaver
 
             if (syncAttributeTypes.Count > 0)
             {
-                SyncProcessor.Weave(module, syncAttributeTypes, out gets, out sets);
+                SyncProcessor.Weave(true, module, syncAttributeTypes, out gets, out sets);
                 ReplaceProcessor.Weave(module, gets, sets);
             }
 

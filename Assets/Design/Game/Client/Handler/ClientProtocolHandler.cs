@@ -19,6 +19,7 @@ namespace Zyq.Game.Client
                 BaseAttribute attribute = entity.GetAttribute<BaseAttribute>();
                 attribute.Deserialize(reader);
                 Debug.Log(attribute.Hp1);
+                Debug.Log(attribute.Hp11);
             });
         }
 

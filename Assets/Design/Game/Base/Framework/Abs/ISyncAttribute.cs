@@ -13,9 +13,4 @@ namespace Zyq.Game.Base
         void Deserialize(NetworkReader reader);
 
     }
-
-    public interface ISyncNotify
-    {
-        void SyncFinished();
-    }
 }

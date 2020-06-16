@@ -30,7 +30,7 @@ namespace Zyq.Weaver
 
             if (syncAttributeTypes.Count > 0)
             {
-                SyncProcessor.Weave(module, syncAttributeTypes, out gets, out sets);
+                SyncProcessor.Weave(false, module, syncAttributeTypes, out gets, out sets);
             }
 
             return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || broadcastAttributeMethods.Count > 0 || syncAttributeTypes.Count > 0;
