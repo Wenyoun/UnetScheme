@@ -78,5 +78,11 @@ namespace Zyq.Game.Host
 
             Debug.Log("OnClientDisconnect");
         }
+
+        private void Update()
+        {
+            Client.Client.Ins.OnUpdate(Time.deltaTime);
+            Server.Server.Ins.OnUpdate(Time.deltaTime);
+        }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
 using System.Linq;
-using Zyq.Game.Server;
+using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {

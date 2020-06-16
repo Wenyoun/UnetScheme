@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
-using Zyq.Game.Server;
+using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {
@@ -15,7 +15,7 @@ namespace Zyq.Weaver
                 bool find = false;
                 foreach (InterfaceImplementation iface in type.Interfaces)
                 {
-                    if (iface.InterfaceType.FullName == typeof(ISync).FullName)
+                    if (iface.InterfaceType.FullName == typeof(ISyncAttribute).FullName)
                     {
                         find = true;
                         break;

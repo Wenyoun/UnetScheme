@@ -4,14 +4,36 @@ using Zyq.Game.Base;
 
 namespace Zyq.Game.Client
 {
-    public class Client
+    public class Client : IUpdate, IFixedUpdate
     {
         public static Client Ins = new Client();
+        public EntityMgr EntityMgr { get; private set; }
+        public UpdateMgr UpdateMgr { get; private set; }
+        public MessageMgr MessageMgr { get; private set; }
+        public TimerMgr TimerMgr { get; private set; }
 
-        public void Init() { }
+        private Client()
+        {
+            EntityMgr = new EntityMgr();
+            UpdateMgr = new UpdateMgr();
+            MessageMgr = new MessageMgr();
+            TimerMgr = new TimerMgr();
+        }
+
+        public void Init()
+        {
+            UpdateMgr.Init();
+            MessageMgr.Init();
+            TimerMgr.Init();
+            EntityMgr.Init();
+        }
 
         public void Dispose()
         {
+            EntityMgr.Dispose();
+            TimerMgr.Dispose();
+            MessageMgr.Dispose();
+            UpdateMgr.Dispose();
             Connection.Dispose();
             Connection = null;
         }
@@ -30,6 +52,19 @@ namespace Zyq.Game.Client
         public void OnServerDisconnect(NetworkConnection net)
         {
             Connection.ClearRegisterProtocols();
+        }
+
+        public void OnUpdate(float delta)
+        {
+            TimerMgr.OnUpdate(delta);
+            UpdateMgr.OnUpdate(delta);
+            EntityMgr.OnUpdate(delta);
+        }
+
+        public void OnFixedUpdate(float delta)
+        {
+            UpdateMgr.OnFixedUpdate(delta);
+            EntityMgr.OnFixedUpdate(delta);
         }
 
         private Connection RegisterProtocols(Connection connection)

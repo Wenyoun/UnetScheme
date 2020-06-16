@@ -5,26 +5,42 @@ using System.Collections.Generic;
 
 namespace Zyq.Game.Server
 {
-    public class Server
+    public class Server : IUpdate, IFixedUpdate
     {
         public static Server Ins = new Server();
-
+        public EntityMgr EntityMgr { get; private set; }
+        public UpdateMgr UpdateMgr { get; private set; }
+        public MessageMgr MessageMgr { get; private set; }
+        public TimerMgr TimerMgr { get; private set; }
+        private SyncAttributeMgr m_SyncAttributeMgr;
         private Dictionary<int, Connection> m_Connections;
 
         private Server()
         {
+            EntityMgr = new EntityMgr();
+            UpdateMgr = new UpdateMgr();
+            MessageMgr = new MessageMgr();
+            TimerMgr = new TimerMgr();
             m_Connections = new Dictionary<int, Connection>();
         }
 
         public void Init()
         {
+            UpdateMgr.Init();
+            MessageMgr.Init();
+            TimerMgr.Init();
+            EntityMgr.Init();
+            m_SyncAttributeMgr = new SyncAttributeMgr();
             m_Connections.Clear();
-            UpdateMgr.RegisterLateUpdate(OnLateUpdate);
         }
 
         public void Dispose()
         {
-            UpdateMgr.UnregisterLateUpdate(OnLateUpdate);
+            EntityMgr.Dispose();
+            TimerMgr.Dispose();
+            MessageMgr.Dispose();
+            UpdateMgr.Dispose();
+            m_SyncAttributeMgr = null;
             foreach (Connection connection in m_Connections.Values)
             {
                 connection.Dispose();
@@ -51,6 +67,20 @@ namespace Zyq.Game.Server
         public void OnClientConnect(NetworkConnection net)
         {
             AddConnection(net);
+        }
+
+        public void OnUpdate(float delta)
+        {
+            TimerMgr.OnUpdate(delta);
+            UpdateMgr.OnUpdate(delta);
+            EntityMgr.OnUpdate(delta);
+            m_SyncAttributeMgr.OnUpdate(delta);
+        }
+
+        public void OnFixedUpdate(float delta)
+        {
+            UpdateMgr.OnFixedUpdate(delta);
+            EntityMgr.OnFixedUpdate(delta);
         }
 
         public void OnClientDisconnect(NetworkConnection net)
@@ -86,32 +116,7 @@ namespace Zyq.Game.Server
 
         private void OnLateUpdate()
         {
-            List<Entity> entitys = EntityMgr.ALL;
-            if (entitys != null)
-            {
-                for (int i = 0; i < entitys.Count; ++i)
-                {
-                    Entity entity = entitys[i];
-                    List<IAttribute> attributes = entity.Attributes.ALL;
-                    for (int j = 0; j < attributes.Count; ++j)
-                    {
-                        IAttribute attribute = attributes[j];
-                        if (attribute is ISync)
-                        {
-                            ISync sync = (ISync)attribute;
-                            if (sync.IsSerialize())
-                            {
-                                NetworkWriter writer = new NetworkWriter();
-                                writer.StartMessage(MsgId.Msg_Sync_Field);
-                                writer.Write(entity.Eid);
-                                sync.Serialize(writer);
-                                writer.FinishMessage();
-                                Broadcast(null, writer);
-                            }
-                        }
-                    }
-                }
-            }
+            
         }
     }
 }

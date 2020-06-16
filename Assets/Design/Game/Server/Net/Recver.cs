@@ -30,7 +30,7 @@ namespace Zyq.Game.Server
 
             Entity entity = EntityFactory.CreatePlayer();
 
-            EntityMgr.AddEntity(entity);
+            Server.Ins.EntityMgr.AddEntity(entity);
 
             Sender.CreatePlayer(connection, entity.Eid, entity.Gid, v11);
         }

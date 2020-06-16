@@ -14,11 +14,11 @@ namespace Zyq.Game.Client
             {
                 NetworkReader reader = msg.reader;
                 uint eid = reader.ReadUInt32();
-                long dirty = reader.ReadInt64();
-                float value = reader.ReadSingle();
-                string v = reader.ReadString();
-
-                Debug.Log(eid + ":" + dirty + ":" + value + ":" + v);
+                uint syncId = reader.ReadUInt32();
+                Entity entity = Client.Ins.EntityMgr.GetEntity(eid);
+                BaseAttribute attribute = entity.GetAttribute<BaseAttribute>();
+                attribute.Deserialize(reader);
+                Debug.Log(attribute.Hp1);
             });
         }
 

@@ -16,7 +16,7 @@ namespace Zyq.Game.Client
         {
             Debug.Log("客户端创建Entity:" + eid + "," + gid + "," + username);
             Entity entity = EntityFactory.CreatePlayer(eid, gid);
-            EntityMgr.AddEntity(entity);
+            Client.Ins.EntityMgr.AddEntity(entity);
         }
     }
 }

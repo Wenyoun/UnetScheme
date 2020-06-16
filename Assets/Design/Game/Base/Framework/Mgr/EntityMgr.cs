@@ -4,26 +4,20 @@ namespace Zyq.Game.Base
 {
     public class EntityMgr
     {
-        private static Entities m_Entities;
+        private Entities m_Entities;
 
-        public static void Init()
+        public void Init()
         {
             m_Entities = new Entities();
-
-            UpdateMgr.RegisterUpdate(OnUpdate);
-            UpdateMgr.RegisterFixedUpdate(OnFixedUpdate);
         }
 
-        public static void Dispose()
+        public void Dispose()
         {
             m_Entities.Dispose();
             m_Entities = null;
-
-            UpdateMgr.UnregisterUpdate(OnUpdate);
-            UpdateMgr.UnregisterFixedUpdate(OnFixedUpdate);
         }
 
-        public static void AddEntity(Entity entity)
+        public void AddEntity(Entity entity)
         {
             if (m_Entities != null)
             {
@@ -31,7 +25,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        public static void RemoveEntity(uint eid)
+        public void RemoveEntity(uint eid)
         {
             if (m_Entities != null)
             {
@@ -39,7 +33,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        public static Entity GetEntity(uint eid)
+        public Entity GetEntity(uint eid)
         {
             if (m_Entities != null)
             {
@@ -57,7 +51,7 @@ namespace Zyq.Game.Base
             return null;
         }
 
-        public static void Dispatcher(int mid)
+        public void Dispatcher(int mid)
         {
             if (m_Entities != null)
             {
@@ -65,7 +59,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        public static void Dispatcher(int mid, uint eid)
+        public void Dispatcher(int mid, uint eid)
         {
             if (m_Entities != null)
             {
@@ -73,7 +67,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        public static void Dispatcher(int mid, IBody body)
+        public void Dispatcher(int mid, IBody body)
         {
             if (m_Entities != null)
             {
@@ -81,7 +75,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        public static void Dispatcher(int mid, uint eid, IBody body)
+        public void Dispatcher(int mid, uint eid, IBody body)
         {
             if (m_Entities != null)
             {
@@ -89,7 +83,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        private static void OnUpdate(float delta)
+        public void OnUpdate(float delta)
         {
             if (m_Entities != null)
             {
@@ -97,7 +91,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        private static void OnFixedUpdate(float delta)
+        public void OnFixedUpdate(float delta)
         {
             if (m_Entities != null)
             {
@@ -105,7 +99,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        public static List<Entity> ALL
+        public List<Entity> ALL
         {
             get
             {

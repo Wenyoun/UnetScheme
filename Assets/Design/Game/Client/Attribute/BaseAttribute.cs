@@ -1,7 +1,7 @@
 ﻿using Zyq.Game.Base;
 using UnityEngine.Networking;
 
-namespace Zyq.Game.Server
+namespace Zyq.Game.Client
 {
     [SyncClass]
     public class BaseAttribute : IAttribute, ISyncAttribute
@@ -37,6 +37,7 @@ namespace Zyq.Game.Server
         {
             return false;
         }
+
 
         public void Serialize(NetworkWriter writer)
         {

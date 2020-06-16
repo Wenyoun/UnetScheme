@@ -1,9 +1,11 @@
 ﻿using UnityEngine.Networking;
 
-namespace Zyq.Game.Server
+namespace Zyq.Game.Base
 {
-    public interface ISync
+    public interface ISyncAttribute
     {
+        uint SyncId { get; }
+
         bool IsSerialize();
 
         void Serialize(NetworkWriter writer);
