@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Zyq.Base;
 
-namespace Zyq.Game.Base {
-    public class TimerRegister : IDisposable, IUpdate {
+namespace Zyq.Game.Base
+{
+    public class TimerRegister : IDisposable, IUpdate
+    {
         private static int ID = 1;
 
         private bool m_IsInitialize;
@@ -12,7 +13,8 @@ namespace Zyq.Game.Base {
         private List<TimerTick> m_List;
         private List<TimerTick> m_Adds;
 
-        public TimerRegister() {
+        public TimerRegister()
+        {
             m_Temp = new List<TimerTick>();
             m_List = new List<TimerTick>();
             m_Adds = new List<TimerTick>();
@@ -20,31 +22,38 @@ namespace Zyq.Game.Base {
             OnInit();
         }
 
-        public void OnInit() {
+        public void OnInit()
+        {
             Clear();
             m_IsInitialize = true;
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Clear();
             m_IsInitialize = false;
         }
 
-        public void Clear() {
+        public void Clear()
+        {
             m_Temp.Clear();
             m_List.Clear();
             m_Adds.Clear();
         }
 
-        public int Register(float delay, Action func) {
-            if (m_IsInitialize) {
+        public int Register(float delay, Action func)
+        {
+            if (m_IsInitialize)
+            {
                 return Register(delay, delay, 1, func, null);
             }
             return -1;
         }
 
-        public int Register(float delay, float interval, int count, Action func, Action finish = null) {
-            if (m_IsInitialize && func != null) {
+        public int Register(float delay, float interval, int count, Action func, Action finish = null)
+        {
+            if (m_IsInitialize && func != null)
+            {
                 TimerTick tick = new TimerTick();
                 tick.Id = ID++;
                 tick.Time = delay;
@@ -59,8 +68,10 @@ namespace Zyq.Game.Base {
             return -1;
         }
 
-        public int RegisterFrame(Action frame) {
-            if (m_IsInitialize && frame != null) {
+        public int RegisterFrame(Action frame)
+        {
+            if (m_IsInitialize && frame != null)
+            {
                 TimerTick tick = new TimerTick();
                 tick.Id = ID++;
                 tick.Time = 0;
@@ -76,29 +87,40 @@ namespace Zyq.Game.Base {
             return -1;
         }
 
-        public void Unregister(int id) {
-            if (m_IsInitialize) {
+        public void Unregister(int id)
+        {
+            if (m_IsInitialize)
+            {
                 TimerTick tick = Try(id);
-                if (tick != null) {
+                if (tick != null)
+                {
                     tick.Remove = true;
                 }
             }
         }
 
-        public void OnUpdate(float delta) {
-            if (m_IsInitialize) {
-                if (m_Adds.Count > 0) {
+        public void OnUpdate(float delta)
+        {
+            if (m_IsInitialize)
+            {
+                if (m_Adds.Count > 0)
+                {
                     m_List.AddRange(m_Adds);
                     m_Adds.Clear();
                 }
 
-                if (delta > 0 && m_List.Count > 0) {
-                    for (int i = 0; i < m_List.Count; ++i) {
+                if (delta > 0 && m_List.Count > 0)
+                {
+                    for (int i = 0; i < m_List.Count; ++i)
+                    {
                         TimerTick tick = m_List[i];
 
-                        if (tick.Remove) {
+                        if (tick.Remove)
+                        {
                             m_Temp.Add(tick);
-                        } else {
+                        }
+                        else
+                        {
                             if (tick.Frame != null) {
                                 tick.Frame();
                             } else {

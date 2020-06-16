@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Zyq.Base;
 
 namespace Zyq.Game.Base
 {

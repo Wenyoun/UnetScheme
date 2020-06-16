@@ -1,6 +1,8 @@
-﻿using Zyq.Base;
-namespace Base {
-    public interface IView : ILifecycle, IUpdate, ICanUpdate {
+﻿using Zyq.Game.Base;
+namespace Base
+{
+    public interface IView : ILifecycle, IUpdate, ICanUpdate
+    {
         void OnStart();
 
         void OnRegEvent();

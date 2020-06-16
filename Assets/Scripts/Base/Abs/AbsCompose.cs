@@ -1,4 +1,4 @@
-﻿using Zyq.Base;
+﻿using Zyq.Game.Base;
 
 namespace Base
 {

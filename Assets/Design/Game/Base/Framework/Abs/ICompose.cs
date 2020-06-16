@@ -1,4 +1,4 @@
-﻿namespace Zyq.Base
+﻿namespace Zyq.Game.Base
 {
     public interface ILifecycle
     {

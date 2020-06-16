@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Base;
-using Zyq.Base;
+using Zyq.Game.Base;
 
 public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 {

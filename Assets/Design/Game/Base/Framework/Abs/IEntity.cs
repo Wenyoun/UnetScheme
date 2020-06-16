@@ -1,6 +1,4 @@
-﻿using Zyq.Base;
-
-namespace Zyq.Game.Base
+﻿namespace Zyq.Game.Base
 {
     public interface IEntity : ILifecycle, IUpdate, IFixedUpdate, IMessage
     {
