@@ -1,5 +1,4 @@
-﻿using System;
-using Zyq.Game.Base;
+﻿using Zyq.Game.Base;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 

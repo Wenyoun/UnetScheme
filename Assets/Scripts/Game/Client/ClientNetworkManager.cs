@@ -11,14 +11,14 @@ namespace Zyq.Game.Client
         {
             Ins = this;
 
-            Client.Ins.Init();
+            Client.Ins.OnInit();
         }
 
         private void OnDestroy()
         {
             Ins = null;
 
-            Client.Ins.Dispose();
+            Client.Ins.OnRemove();
         }
 
         public override void OnStartClient(NetworkClient client)
@@ -55,6 +55,16 @@ namespace Zyq.Game.Client
             Client.Ins.OnServerDisconnect(net);
 
             Debug.Log("OnClientDisconnect");
+        }
+
+        private void Update()
+        {
+            Client.Ins.OnUpdate(Time.deltaTime);
+        }
+
+        private void FixedUpdate()
+        {
+            Client.Ins.OnFixedUpdate(Time.deltaTime);
         }
     }
 }

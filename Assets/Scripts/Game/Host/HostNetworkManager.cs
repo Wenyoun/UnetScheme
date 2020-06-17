@@ -11,16 +11,16 @@ namespace Zyq.Game.Host
         {
             Ins = this;
 
-            Server.Server.Ins.Init();
-            Client.Client.Ins.Init();
+            Server.Server.Ins.OnInit();
+            Client.Client.Ins.OnInit();
         }
 
         private void OnDestroy()
         {
             Ins = null;
 
-            Server.Server.Ins.Dispose();
-            Client.Client.Ins.Dispose();
+            Server.Server.Ins.OnRemove();
+            Client.Client.Ins.OnRemove();
         }
 
         public override void OnStartServer()
@@ -83,6 +83,12 @@ namespace Zyq.Game.Host
         {
             Client.Client.Ins.OnUpdate(Time.deltaTime);
             Server.Server.Ins.OnUpdate(Time.deltaTime);
+        }
+
+        private void FixedUpdate()
+        {
+            Client.Client.Ins.OnFixedUpdate(Time.deltaTime);
+            Server.Server.Ins.OnFixedUpdate(Time.deltaTime);
         }
     }
 }

@@ -4,47 +4,37 @@ using Zyq.Game.Base;
 
 namespace Zyq.Game.Client
 {
-    public class Client : IUpdate, IFixedUpdate
+    public class Client : AbsMachine
     {
         public static Client Ins = new Client();
-        public EntityMgr EntityMgr { get; private set; }
-        public UpdateMgr UpdateMgr { get; private set; }
-        public MessageMgr MessageMgr { get; private set; }
-        public TimerMgr TimerMgr { get; private set; }
+        public Connection Connection { get; private set; }
 
         private Client()
         {
-            EntityMgr = new EntityMgr();
-            UpdateMgr = new UpdateMgr();
-            MessageMgr = new MessageMgr();
-            TimerMgr = new TimerMgr();
         }
 
-        public void Init()
+        public override void OnInit()
         {
-            UpdateMgr.Init();
-            MessageMgr.Init();
-            TimerMgr.Init();
-            EntityMgr.Init();
+            base.OnInit();
         }
 
-        public void Dispose()
+        public override void OnRemove()
         {
-            EntityMgr.Dispose();
-            TimerMgr.Dispose();
-            MessageMgr.Dispose();
-            UpdateMgr.Dispose();
+            base.OnRemove();
             Connection.Dispose();
             Connection = null;
         }
 
-        public void OnStartClient() { }
+        public void OnStartClient()
+        {
+        }
 
-        public void OnStopClient() { }
+        public void OnStopClient()
+        {
+        }
 
         public void OnServerConnect(NetworkConnection net)
         {
-
             Connection = RegisterProtocols(new Connection(net));
             Sender.Login(Client.Ins.Connection, 1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity);
         }
@@ -54,26 +44,11 @@ namespace Zyq.Game.Client
             Connection.ClearRegisterProtocols();
         }
 
-        public void OnUpdate(float delta)
-        {
-            TimerMgr.OnUpdate(delta);
-            UpdateMgr.OnUpdate(delta);
-            EntityMgr.OnUpdate(delta);
-        }
-
-        public void OnFixedUpdate(float delta)
-        {
-            UpdateMgr.OnFixedUpdate(delta);
-            EntityMgr.OnFixedUpdate(delta);
-        }
-
         private Connection RegisterProtocols(Connection connection)
         {
             connection.RegisterProtocol<AutoProtocolHandler>();
             connection.RegisterProtocol<ClientProtocolHandler>();
             return connection;
         }
-
-        public Connection Connection { get; private set; }
     }
 }

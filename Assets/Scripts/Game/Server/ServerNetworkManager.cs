@@ -11,14 +11,14 @@ namespace Zyq.Game.Server
         {
             Ins = this;
 
-            Server.Ins.Init();
+            Server.Ins.OnInit();
         }
 
         private void OnDestroy()
         {
             Ins = null;
 
-            Server.Ins.Dispose();
+            Server.Ins.OnRemove();
         }
 
         public override void OnStartServer()
@@ -55,6 +55,16 @@ namespace Zyq.Game.Server
             Server.Ins.OnClientDisconnect(net);
 
             Debug.Log("OnServerDisconnect");
+        }
+
+        private void Update()
+        {
+            Server.Ins.OnUpdate(Time.deltaTime);
+        }
+
+        private void FixedUpdate()
+        {
+            Server.Ins.OnFixedUpdate(Time.deltaTime);
         }
     }
 }
