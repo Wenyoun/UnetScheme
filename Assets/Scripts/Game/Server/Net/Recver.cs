@@ -28,7 +28,7 @@ namespace Zyq.Game.Server
 
             Sender.LoginResult(connection, true);
 
-            Entity entity = EntityFactory.CreatePlayer();
+            Entity entity = EntityFactory.CreatePlayer(connection);
 
             Server.Ins.EntityMgr.AddEntity(entity);
 

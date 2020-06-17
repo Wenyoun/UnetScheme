@@ -13,7 +13,7 @@ namespace Zyq.Game.Server
                 Server.Ins.TimerMgr.Register(i, () =>
                 {
                     attribute.Hp1 = k;
-                    attribute.Hp11 = "yinhuyaong999" + k;
+                    attribute.Hp11 = "yinhuyaong->" + k;
                 });
             }
         }

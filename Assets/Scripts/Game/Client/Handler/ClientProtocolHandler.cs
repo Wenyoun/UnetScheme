@@ -18,8 +18,7 @@ namespace Zyq.Game.Client
                 Entity entity = Client.Ins.EntityMgr.GetEntity(eid);
                 BaseAttribute attribute = entity.GetSyncAttribute<BaseAttribute>(syncId);
                 attribute.Deserialize(reader);
-                Debug.Log(attribute.Hp1);
-                Debug.Log(attribute.Hp11);
+                Debug.Log(attribute.Hp1 + "," + attribute.Hp11);
             });
         }
 

@@ -6,15 +6,13 @@ namespace Zyq.Game.Server
     {
         private static uint id = 1;
 
-        public static Entity CreatePlayer()
+        public static Entity CreatePlayer(Connection connection)
         {
             Entity entity = new Entity(id++, Group.Player);
             entity.OnInit();
 
-            BaseAttribute attribute = entity.AddSyncAttribute(new BaseAttribute());
-            attribute.Hp1 = 99999;
-            attribute.Hp11 = "yinhuayong";
-
+            entity.AddSyncAttribute(new BaseAttribute());
+            entity.AddFeture(new ConnectionFeture(connection));
             entity.AddCop<ChangeAttributeCop>();
 
             return entity;

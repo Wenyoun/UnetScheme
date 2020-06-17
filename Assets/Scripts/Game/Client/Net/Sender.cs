@@ -21,6 +21,7 @@ namespace Zyq.Game.Client
             Vector2 v12,
             Vector3 v13,
             Vector4 v14,
-            Quaternion v15) { }
+            Quaternion v15)
+        { }
     }
 }
