@@ -4,7 +4,7 @@ using UnityEngine.Networking;
 namespace Zyq.Game.Client
 {
     [SyncClass]
-    public class BaseAttribute : IAttribute, ISyncAttribute
+    public class BaseAttribute : ISyncAttribute
     {
         public uint SyncId => 1;
 

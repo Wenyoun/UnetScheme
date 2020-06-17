@@ -8,6 +8,7 @@
             Fetures = new Fetures();
             Configs = new Configs();
             Attributes = new Attributes();
+            SyncAttributes = new SyncAttributes();
             MsgRegister = new MsgRegister();
             TimerRegister = new TimerRegister();
             UpdateRegister = new UpdateRegister();
@@ -56,6 +57,16 @@
         public T GetAttribute<T>() where T : IAttribute
         {
             return Attributes.GetAttribute<T>();
+        }
+
+        public T AddSyncAttribute<T>(T attribute) where T : ISyncAttribute
+        {
+            return SyncAttributes.AddAttribute<T>(attribute);
+        }
+
+        public T GetSyncAttribute<T>(uint syncId) where T : ISyncAttribute
+        {
+            return SyncAttributes.GetSyncAttribute<T>(syncId);
         }
 
         public T AddFeture<T>(T feture) where T : IFeture
@@ -121,6 +132,8 @@
         public Cops Cops { get; private set; }
 
         public Attributes Attributes { get; private set; }
+
+        public SyncAttributes SyncAttributes { get; private set; }
 
         public MsgRegister MsgRegister { get; private set; }
 

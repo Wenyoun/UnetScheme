@@ -146,7 +146,10 @@ namespace Zyq.Weaver
         private static void ModifyIsSerializeMethod(ModuleDefinition module, TypeDefinition type, FieldDefinition dirty)
         {
             MethodDefinition method = type.Methods.Single(m => m.Name == "IsSerialize");
+            method.Body.Variables.Clear();
             method.Body.Instructions.Clear();
+
+            method.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
 
             ILProcessor processor = method.Body.GetILProcessor();
             Instruction lod = processor.Create(OpCodes.Ldloc_0);

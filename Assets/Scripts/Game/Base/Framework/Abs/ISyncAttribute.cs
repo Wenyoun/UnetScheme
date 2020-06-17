@@ -11,6 +11,5 @@ namespace Zyq.Game.Base
         void Serialize(NetworkWriter writer);
 
         void Deserialize(NetworkReader reader);
-
     }
 }

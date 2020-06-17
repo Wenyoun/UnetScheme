@@ -9,7 +9,7 @@ namespace Zyq.Game.Client
             Entity entity = new Entity(eid, gid);
             entity.OnInit();
 
-            entity.AddAttribute(new BaseAttribute());
+            entity.AddSyncAttribute(new BaseAttribute());
 
             return entity;
         }
