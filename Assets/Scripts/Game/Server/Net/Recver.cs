@@ -5,7 +5,7 @@ namespace Zyq.Game.Server
 {
     public class Recver
     {
-        [Recv(MsgId.Msg_Login_Req)]
+        [Recv(NetMsgId.Msg_Login_Req)]
         public static void OnLoginHandler(Connection connection,
             byte v1,
             bool v2,

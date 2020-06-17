@@ -2,61 +2,89 @@
 {
     public class UpdateMgr
     {
-        private UpdateRegister m_Register = new UpdateRegister();
+        private UpdateRegister m_Register;
 
         public void Init()
         {
-            m_Register.OnInit();
+            m_Register = new UpdateRegister();
         }
 
         public void Dispose()
         {
             m_Register.Dispose();
+            m_Register = null;
         }
 
         public void OnUpdate(float delta)
         {
-            m_Register.OnUpdate(delta);
+            if (m_Register != null)
+            {
+                m_Register.OnUpdate(delta);
+            }
         }
 
         public void OnLateUpdate()
         {
-            m_Register.OnLateUpdate();
+            if (m_Register != null)
+            {
+                m_Register.OnLateUpdate();
+            }
         }
 
         public void OnFixedUpdate(float delta)
         {
-            m_Register.OnFixedUpdate(delta);
+            if (m_Register != null)
+            {
+                m_Register.OnFixedUpdate(delta);
+            }
         }
 
         public void RegisterUpdate(UpdateDelegate update)
         {
-            m_Register.RegisterUpdate(update);
+            if (m_Register != null)
+            {
+                m_Register.RegisterUpdate(update);
+            }
         }
 
         public void UnregisterUpdate(UpdateDelegate update)
         {
-            m_Register.UnregisterUpdate(update);
+            if (m_Register != null)
+            {
+                m_Register.UnregisterUpdate(update);
+            }
         }
 
         public void RegisterLateUpdate(LateUpdateDelegate update)
         {
-            m_Register.RegisterLateUpdate(update);
+            if (m_Register != null)
+            {
+                m_Register.RegisterLateUpdate(update);
+            }
         }
 
         public void UnregisterLateUpdate(LateUpdateDelegate update)
         {
-            m_Register.UnregisterLateUpdate(update);
+            if (m_Register != null)
+            {
+                m_Register.UnregisterLateUpdate(update);
+            }
         }
 
         public void RegisterFixedUpdate(UpdateDelegate fixedUpdate)
         {
-            m_Register.RegisterFixedUpdate(fixedUpdate);
+            if (m_Register != null)
+            {
+                m_Register.RegisterFixedUpdate(fixedUpdate);
+            }
         }
 
         public void UnregisterFixedUpdate(UpdateDelegate fixedUpdate)
         {
-            m_Register.UnregisterFixedUpdate(fixedUpdate);
+            if (m_Register != null)
+            {
+                m_Register.UnregisterFixedUpdate(fixedUpdate);
+            }
         }
     }
 }

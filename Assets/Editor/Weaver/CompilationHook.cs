@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
 using UnityEditor;
 using UnityEditor.Compilation;
 
@@ -48,8 +47,6 @@ namespace Zyq.Weaver
             {
                 return;
             }
-
-            Debug.Log(assemblyPath);
 
             string networkingRuntimeDLL = Helpers.FindNetworkingRuntime();
 

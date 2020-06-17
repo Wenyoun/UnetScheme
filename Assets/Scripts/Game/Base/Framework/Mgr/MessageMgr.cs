@@ -17,17 +17,26 @@
 
         public void Register(int id, MsgDelegate handler)
         {
-            m_Register.Register(id, handler);
+            if (m_Register != null)
+            {
+                m_Register.Register(id, handler);
+            }
         }
 
         public void Unregister(int id, MsgDelegate handler)
         {
-            m_Register.Unregister(id, handler);
+            if (m_Register != null)
+            {
+                m_Register.Unregister(id, handler);
+            }
         }
 
         public void Dispatcher(int id, IBody body = null)
         {
-            m_Register.Dispatcher(id, body);
+            if (m_Register != null)
+            {
+                m_Register.Dispatcher(id, body);
+            }
         }
     }
 }

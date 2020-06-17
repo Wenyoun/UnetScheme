@@ -19,17 +19,27 @@ namespace Zyq.Game.Base
 
         public int Register(float delay, Action func)
         {
-            return m_Register.Register(delay, delay, 1, func, null);
+            if (m_Register != null)
+            {
+                return m_Register.Register(delay, delay, 1, func, null);
+            }
+            return -1;
         }
 
         public void Unregister(int id)
         {
-            m_Register.Unregister(id);
+            if (m_Register != null)
+            {
+                m_Register.Unregister(id);
+            }
         }
 
         public void OnUpdate(float delta)
         {
-            m_Register.OnUpdate(delta);
+            if (m_Register != null)
+            {
+                m_Register.OnUpdate(delta);
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Zyq.Game.Base
 {
-    public static class MsgId
+    public static class NetMsgId
     {
         public const short Sync_Attribute = 999;
         public const short Msg_Login_Req = 200;

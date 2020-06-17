@@ -10,7 +10,7 @@ namespace Zyq.Game.Client
 
         public void Register()
         {
-            Connection.RegisterHandler(MsgId.Sync_Attribute, (NetworkMessage msg) =>
+            Connection.RegisterHandler(NetMsgId.Sync_Attribute, (NetworkMessage msg) =>
             {
                 NetworkReader reader = msg.reader;
                 uint eid = reader.ReadUInt32();
@@ -25,7 +25,7 @@ namespace Zyq.Game.Client
 
         public void Unregister()
         {
-            Connection.UnregisterHandler(MsgId.Sync_Attribute);
+            Connection.UnregisterHandler(NetMsgId.Sync_Attribute);
         }
     }
 }

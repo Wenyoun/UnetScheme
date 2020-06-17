@@ -21,7 +21,7 @@ namespace Zyq.Game.Server
                         if (attribute.IsSerialize())
                         {
                             NetworkWriter writer = new NetworkWriter();
-                            writer.StartMessage(MsgId.Sync_Attribute);
+                            writer.StartMessage(NetMsgId.Sync_Attribute);
                             writer.Write(entity.Eid);
                             writer.Write(attribute.SyncId);
                             attribute.Serialize(writer);

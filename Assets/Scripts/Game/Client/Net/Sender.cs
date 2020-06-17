@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
 
-namespace Zyq.Game.Client {
-    public static class Sender{
-        [Send(MsgId.Msg_Login_Req)]
+namespace Zyq.Game.Client
+{
+    public static class Sender
+    {
+        [Send(NetMsgId.Msg_Login_Req)]
         public static void Login(Connection connection,
             byte v1,
             bool v2,
