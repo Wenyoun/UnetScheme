@@ -15,6 +15,8 @@ namespace Zyq.Game.Server
             attribute.Hp1 = 99999;
             attribute.Hp11 = "yinhuayong";
 
+            entity.AddCop<ChangeAttributeCop>();
+
             return entity;
         }
     }

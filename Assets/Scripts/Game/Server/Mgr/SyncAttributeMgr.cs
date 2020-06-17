@@ -14,7 +14,7 @@ namespace Zyq.Game.Server
                 for (int i = 0; i < entitys.Count; ++i)
                 {
                     Entity entity = entitys[i];
-                    List<ISyncAttribute> attributes = entity.SyncAttributes.ALL;
+                    List<ISyncAttribute> attributes = entity.SyncAttributes.Attributes;
                     for (int j = 0; j < attributes.Count; ++j)
                     {
                         ISyncAttribute attribute = attributes[j];

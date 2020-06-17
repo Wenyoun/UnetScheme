@@ -10,6 +10,8 @@ namespace Zyq.Weaver
     {
         public static void Weave(ModuleDefinition module, Dictionary<FieldDefinition, MethodDefinition> gets, Dictionary<FieldDefinition, MethodDefinition> sets)
         {
+            List<TypeDefinition> defs = new List<TypeDefinition>();
+
             foreach (TypeDefinition type in module.Types)
             {
                 bool find = false;
@@ -22,30 +24,40 @@ namespace Zyq.Weaver
                     }
                 }
 
+                foreach (TypeDefinition nested in type.NestedTypes)
+                {
+                    defs.Add(nested);
+                }
+
                 if (type.IsClass && !find)
                 {
-                    foreach (MethodDefinition method in type.Methods)
+                    defs.Add(type);
+                }
+            }
+
+            foreach (TypeDefinition type in defs)
+            {
+                foreach (MethodDefinition method in type.Methods)
+                {
+                    if (method.Body != null && method.Body.Instructions != null)
                     {
-                        if (method.Body != null && method.Body.Instructions != null)
+                        for (int i = 0; i < method.Body.Instructions.Count; ++i)
                         {
-                            for (int i = 0; i < method.Body.Instructions.Count; ++i)
+                            Instruction ins = method.Body.Instructions[i];
+                            if (ins.OpCode == OpCodes.Ldfld && ins.Operand is FieldDefinition getField)
                             {
-                                Instruction ins = method.Body.Instructions[i];
-                                if (ins.OpCode == OpCodes.Ldfld && ins.Operand is FieldDefinition getField)
+                                if (gets.TryGetValue(getField, out MethodDefinition replacement))
                                 {
-                                    if (gets.TryGetValue(getField, out MethodDefinition replacement))
-                                    {
-                                        ins.OpCode = OpCodes.Call;
-                                        ins.Operand = replacement;
-                                    }
+                                    ins.OpCode = OpCodes.Call;
+                                    ins.Operand = replacement;
                                 }
-                                else if (ins.OpCode == OpCodes.Stfld && ins.Operand is FieldDefinition setField)
+                            }
+                            else if (ins.OpCode == OpCodes.Stfld && ins.Operand is FieldDefinition setField)
+                            {
+                                if (sets.TryGetValue(setField, out MethodDefinition replacement))
                                 {
-                                    if (sets.TryGetValue(setField, out MethodDefinition replacement))
-                                    {
-                                        ins.OpCode = OpCodes.Call;
-                                        ins.Operand = replacement;
-                                    }
+                                    ins.OpCode = OpCodes.Call;
+                                    ins.Operand = replacement;
                                 }
                             }
                         }

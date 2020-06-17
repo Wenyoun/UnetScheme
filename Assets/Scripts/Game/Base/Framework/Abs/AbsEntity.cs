@@ -64,6 +64,11 @@
             return SyncAttributes.AddAttribute<T>(attribute);
         }
 
+        public T GetSyncAttribute<T>() where T : ISyncAttribute
+        {
+            return SyncAttributes.GetSyncAttribute<T>();
+        }
+
         public T GetSyncAttribute<T>(uint syncId) where T : ISyncAttribute
         {
             return SyncAttributes.GetSyncAttribute<T>(syncId);
