@@ -7,7 +7,7 @@ namespace Zyq.Game.Server
     public class Server : AbsMachine
     {
         public static Server Ins = new Server();
-        private SyncAttributeMgr SyncAttributeMgr;
+        private SyncAttributeMgr m_SyncAttributeMgr;
         private Dictionary<int, Connection> Connections;
 
         private Server()
@@ -18,14 +18,14 @@ namespace Zyq.Game.Server
         public override void OnInit()
         {
             base.OnInit();
-            SyncAttributeMgr = new SyncAttributeMgr();
+            m_SyncAttributeMgr = new SyncAttributeMgr();
             Connections.Clear();
         }
 
         public override void OnRemove()
         {
             base.OnRemove();
-            SyncAttributeMgr = null;
+            m_SyncAttributeMgr = null;
             foreach (Connection connection in Connections.Values)
             {
                 connection.Dispose();
@@ -62,7 +62,7 @@ namespace Zyq.Game.Server
         public override void OnUpdate(float delta)
         {
             base.OnUpdate(delta);
-            SyncAttributeMgr.OnUpdate(delta);
+            m_SyncAttributeMgr.OnUpdate(delta);
         }
 
         private void AddConnection(NetworkConnection net)
