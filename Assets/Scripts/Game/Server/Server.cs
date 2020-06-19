@@ -65,6 +65,12 @@ namespace Zyq.Game.Server
             m_SyncAttributeMgr.OnUpdate(delta);
         }
 
+        public override void RegisterProtocols(Connection connection)
+        {
+            connection.RegisterProtocol<AutoProtocolHandler>();
+            connection.RegisterProtocol<ServerProtocolHandler>();
+        }
+
         private void AddConnection(NetworkConnection net)
         {
             if (!Connections.ContainsKey(net.connectionId))
@@ -83,12 +89,6 @@ namespace Zyq.Game.Server
                 Connections.Remove(net.connectionId);
                 connection.Dispose();
             }
-        }
-
-        private void RegisterProtocols(Connection connection)
-        {
-            connection.RegisterProtocol<AutoProtocolHandler>();
-            connection.RegisterProtocol<ServerProtocolHandler>();
         }
     }
 }

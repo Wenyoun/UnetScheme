@@ -1,6 +1,7 @@
 ﻿using System;
 
-namespace Zyq.Game.Base {
-    [AttributeUsage(AttributeTargets.Class)]
+namespace Zyq.Game.Base
+{
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class ProtocolAttribute : Attribute { }
 }

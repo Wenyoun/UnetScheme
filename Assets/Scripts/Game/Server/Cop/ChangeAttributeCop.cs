@@ -7,7 +7,7 @@ namespace Zyq.Game.Server
         public override void OnInit()
         {
             BaseAttribute attribute = Entity.GetSyncAttribute<BaseAttribute>();
-            for (int i = 5; i < 10; ++i)
+            for (int i = 1; i < 10; ++i)
             {
                 int k = i;
                 Server.Ins.TimerMgr.Register(i, () =>

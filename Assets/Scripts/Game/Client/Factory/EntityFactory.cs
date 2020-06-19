@@ -10,6 +10,7 @@ namespace Zyq.Game.Client
             entity.OnInit();
 
             entity.AddSyncAttribute(new BaseAttribute());
+            entity.AddCop<ChangeAttributeCop>();
 
             return entity;
         }

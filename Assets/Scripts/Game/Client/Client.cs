@@ -35,7 +35,8 @@ namespace Zyq.Game.Client
 
         public void OnServerConnect(NetworkConnection net)
         {
-            Connection = RegisterProtocols(new Connection(net));
+            Connection = new Connection(net);
+            RegisterProtocols(Connection);
             Sender.Login(Connection, 1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity);
         }
 
@@ -44,11 +45,10 @@ namespace Zyq.Game.Client
             Connection.ClearRegisterProtocols();
         }
 
-        private Connection RegisterProtocols(Connection connection)
+        public override void RegisterProtocols(Connection connection)
         {
             connection.RegisterProtocol<AutoProtocolHandler>();
             connection.RegisterProtocol<ClientProtocolHandler>();
-            return connection;
         }
     }
 }

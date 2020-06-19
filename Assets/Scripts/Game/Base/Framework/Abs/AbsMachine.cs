@@ -1,6 +1,6 @@
 ﻿namespace Zyq.Game.Base
 {
-    public class AbsMachine : ILifecycle, IUpdate, IFixedUpdate
+    public abstract class AbsMachine : ILifecycle, IUpdate, IFixedUpdate
     {
         public TimerMgr TimerMgr { get; private set; }
         public EntityMgr EntityMgr { get; private set; }
@@ -43,5 +43,7 @@
             UpdateMgr.OnFixedUpdate(delta);
             EntityMgr.OnFixedUpdate(delta);
         }
+
+        public abstract void RegisterProtocols(Connection connection);
     }
 }
