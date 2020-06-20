@@ -15,8 +15,14 @@ namespace Zyq.Game.Client
         public static void OnCreatePlayer(Connection connection, uint eid, uint gid, string username)
         {
             Debug.Log("客户端创建Entity:" + eid + "," + gid + "," + username);
-            Entity entity = EntityFactory.CreatePlayer(eid, gid);
+            Entity entity = EntityFactory.CreatePlayer(connection, eid, gid);
             Client.Ins.EntityMgr.AddEntity(entity);
+        }
+
+        [Recv(NetMsgId.Msg_Create_Player1)]
+        public static void OnCreatePlayer1(Connection connection, uint eid, string username)
+        {
+            Debug.Log("11111:::");
         }
     }
 }

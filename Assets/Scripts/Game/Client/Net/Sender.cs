@@ -6,7 +6,7 @@ namespace Zyq.Game.Client
     public static class Sender
     {
         [Send(NetMsgId.Msg_Login_Req)]
-        public static void Login(Connection connection,
+        public static void RpcLogin(Connection connection,
             byte v1,
             bool v2,
             short v3,

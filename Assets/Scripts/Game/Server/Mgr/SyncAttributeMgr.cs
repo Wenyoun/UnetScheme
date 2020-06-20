@@ -15,18 +15,21 @@ namespace Zyq.Game.Server
                 {
                     Entity entity = entitys[i];
                     List<ISyncAttribute> attributes = entity.SyncAttributes.Attributes;
-                    for (int j = 0; j < attributes.Count; ++j)
+                    if (attributes.Count > 0)
                     {
-                        ISyncAttribute attribute = attributes[j];
-                        if (attribute.IsSerialize())
+                        for (int j = 0; j < attributes.Count; ++j)
                         {
-                            NetworkWriter writer = new NetworkWriter();
-                            writer.StartMessage(NetMsgId.Sync_Attribute);
-                            writer.Write(entity.Eid);
-                            writer.Write(attribute.SyncId);
-                            attribute.Serialize(writer);
-                            writer.FinishMessage();
-                            Server.Ins.Broadcast(null, writer);
+                            ISyncAttribute attribute = attributes[j];
+                            if (attribute.IsSerialize())
+                            {
+                                NetworkWriter writer = new NetworkWriter();
+                                writer.StartMessage(NetMsgId.Sync_Attribute);
+                                writer.Write(entity.Eid);
+                                writer.Write(attribute.SyncId);
+                                attribute.Serialize(writer);
+                                writer.FinishMessage();
+                                Server.Ins.Broadcast(null, writer);
+                            }
                         }
                     }
                 }

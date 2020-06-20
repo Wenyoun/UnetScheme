@@ -1,4 +1,5 @@
-﻿using Zyq.Game.Base;
+﻿using UnityEngine;
+using Zyq.Game.Base;
 using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
@@ -15,9 +16,9 @@ namespace Zyq.Game.Client
                 uint eid = reader.ReadUInt32();
                 uint syncId = reader.ReadUInt32();
                 Entity entity = Client.Ins.EntityMgr.GetEntity(eid);
-                ISyncAttribute attribute = entity.GetSyncAttribute<ISyncAttribute>(syncId);
+                BaseAttribute attribute = entity.GetSyncAttribute<BaseAttribute>(syncId);
                 attribute.Deserialize(reader);
-                entity.Dispatcher(MessageConstants.Sync_Attribute);
+                Debug.Log(attribute.Hp1 + "," + attribute.Hp11);
             });
         }
 

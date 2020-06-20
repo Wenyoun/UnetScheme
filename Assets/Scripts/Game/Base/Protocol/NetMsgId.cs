@@ -6,5 +6,6 @@
         public const short Msg_Login_Req = 200;
         public const short Msg_Login_Res = 201;
         public const short Msg_Create_Player = 202;
+        public const short Msg_Create_Player1 = 203;
     }
 }

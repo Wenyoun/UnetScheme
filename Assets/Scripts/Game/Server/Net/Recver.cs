@@ -26,13 +26,13 @@ namespace Zyq.Game.Server
 
             Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" + v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15);
 
-            Sender.LoginResult(connection, true);
+            Sender.RpcTargetLoginResult(connection, true);
 
             Entity entity = EntityFactory.CreatePlayer(connection);
 
             Server.Ins.EntityMgr.AddEntity(entity);
 
-            Sender.CreatePlayer(connection, entity.Eid, entity.Gid, v11);
+            Sender.BroadcastCreatePlayer(connection, entity.Eid, entity.Gid, v11);
         }
     }
 }

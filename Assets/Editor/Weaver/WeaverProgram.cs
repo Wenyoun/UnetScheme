@@ -6,7 +6,6 @@ using Mono.CecilX;
 using Mono.CecilX.Cil;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Linq;
 
 namespace Zyq.Weaver
 {
