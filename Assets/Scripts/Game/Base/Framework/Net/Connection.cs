@@ -6,13 +6,25 @@ namespace Zyq.Game.Base
 {
     public class Connection : IDisposable
     {
-        private NetworkConnection m_Net;
+        private bool m_IsConnected;
+        private NetworkConnection m_Network;
         private List<IProtocolHandler> m_Handlers;
 
-        public Connection(NetworkConnection net)
+        public Connection()
         {
-            m_Net = net;
             m_Handlers = new List<IProtocolHandler>();
+        }
+
+        public void OnConnect(NetworkConnection network)
+        {
+            m_IsConnected = true;
+            m_Network = network;
+        }
+
+        public void OnDisconnect(NetworkConnection network)
+        {
+            m_IsConnected = false;
+            ClearRegisterProtocols();
         }
 
         public void RegisterProtocol<T>() where T : IProtocolHandler, new()
@@ -25,36 +37,42 @@ namespace Zyq.Game.Base
 
         public void Dispose()
         {
+            m_IsConnected = false;
             ClearRegisterProtocols();
-
-            m_Net.Dispose();
-            m_Net = null;
+            m_Network.Dispose();
+            m_Network = null;
         }
 
         public void RegisterHandler(short id, NetworkMessageDelegate handler)
         {
-            m_Net.RegisterHandler(id, handler);
+            m_Network.RegisterHandler(id, handler);
         }
 
         public void UnregisterHandler(short id)
         {
-            m_Net.UnregisterHandler(id);
+            m_Network.UnregisterHandler(id);
         }
 
         public void Send(NetworkWriter writer)
         {
-            m_Net.SendWriter(writer, 0);
+            if (m_IsConnected)
+            {
+                m_Network.SendWriter(writer, 0);
+            }
         }
 
         private void ClearRegisterProtocols()
         {
-            for (int i = 0; i < m_Handlers.Count; ++i)
+            if (m_Handlers != null)
             {
-                m_Handlers[i].Unregister();
-            }
+                for (int i = 0; i < m_Handlers.Count; ++i)
+                {
+                    m_Handlers[i].Unregister();
+                }
 
-            m_Handlers.Clear();
-            m_Handlers = null;
+                m_Handlers.Clear();
+                m_Handlers = null;
+            }
         }
     }
 }

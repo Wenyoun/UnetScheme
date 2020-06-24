@@ -12,32 +12,30 @@ namespace Zyq.Game.Server
 
         private Server()
         {
-            m_Connections = new Dictionary<int, Connection>();
         }
 
         public override void OnInit()
         {
             base.OnInit();
             m_SyncAttributeMgr = new SyncAttributeMgr();
-            m_Connections.Clear();
+            m_Connections = new Dictionary<int, Connection>();
         }
 
         public override void OnRemove()
         {
             base.OnRemove();
+            ClearConnections();
             m_SyncAttributeMgr = null;
-            foreach (Connection connection in m_Connections.Values)
-            {
-                connection.Dispose();
-            }
-            m_Connections.Clear();
         }
 
         public void Broadcast(Connection target, NetworkWriter writer)
         {
-            foreach (Connection connection in m_Connections.Values)
+            if (m_Connections != null)
             {
-                connection.Send(writer);
+                foreach (Connection connection in m_Connections.Values)
+                {
+                    connection.Send(writer);
+                }
             }
         }
 
@@ -49,14 +47,27 @@ namespace Zyq.Game.Server
         {
         }
 
-        public override void OnNetConnect(NetworkConnection net)
+        public override void OnNetConnect(NetworkConnection network)
         {
-            AddConnection(net);
+            int netId = network.connectionId;
+            if (!m_Connections.ContainsKey(netId))
+            {
+                Connection connection = new Connection();
+                connection.OnConnect(network);
+                m_Connections.Add(netId, connection);
+                RegisterProtocols(connection);
+            }
         }
 
-        public override void OnNetDisconnect(NetworkConnection net)
+        public override void OnNetDisconnect(NetworkConnection network)
         {
-            RemoveConnection(net);
+            int netId = network.connectionId;
+            Connection connection = null;
+            if (m_Connections.TryGetValue(netId, out connection))
+            {
+                m_Connections.Remove(netId);
+                connection.Dispose();
+            }
         }
 
         public override void OnUpdate(float delta)
@@ -71,24 +82,14 @@ namespace Zyq.Game.Server
             connection.RegisterProtocol<ServerProtocolHandler>();
         }
 
-        private void AddConnection(NetworkConnection net)
+        private void ClearConnections()
         {
-            if (!m_Connections.ContainsKey(net.connectionId))
-            {
-                Connection connection = new Connection(net);
-                m_Connections.Add(net.connectionId, connection);
-                RegisterProtocols(connection);
-            }
-        }
-
-        private void RemoveConnection(NetworkConnection net)
-        {
-            Connection connection = null;
-            if (m_Connections.TryGetValue(net.connectionId, out connection))
+            foreach (Connection connection in m_Connections.Values)
             {
                 connection.Dispose();
-                m_Connections.Remove(net.connectionId);
             }
+            m_Connections.Clear();
+            m_Connections = null;
         }
     }
 }

@@ -33,17 +33,28 @@ namespace Zyq.Game.Client
         {
         }
 
-        public override void OnNetConnect(NetworkConnection net)
+        public void Send(NetworkWriter writer)
         {
-            Connection = new Connection(net);
+            if (Connection != null)
+            {
+                Connection.Send(writer);
+            }
+        }
+
+        public override void OnNetConnect(NetworkConnection network)
+        {
+            if (Connection == null)
+            {
+                Connection = new Connection();
+            }
+            Connection.OnConnect(network);
             RegisterProtocols(Connection);
             Sender.RpcLogin(Connection, 1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity);
         }
 
-        public override void OnNetDisconnect(NetworkConnection net)
+        public override void OnNetDisconnect(NetworkConnection network)
         {
-            Connection.Dispose();
-            Connection = null;
+            Connection.OnDisconnect(network);
         }
 
         private void RegisterProtocols(Connection connection)
