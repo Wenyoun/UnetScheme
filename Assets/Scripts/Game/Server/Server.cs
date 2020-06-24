@@ -28,11 +28,11 @@ namespace Zyq.Game.Server
             m_SyncAttributeMgr = null;
         }
 
-        public void Send(Connection target, NetworkWriter writer)
+        public void Send(Connection connection, NetworkWriter writer)
         {
-            if (target != null)
+            if (connection != null)
             {
-                target.Send(writer);
+                connection.Send(writer);
             }
         }
 
