@@ -5,19 +5,13 @@ namespace Zyq.Game.Server
 {
     public class ServerNetworkManager : NetworkManager
     {
-        public static ServerNetworkManager Ins;
-
         private void Awake()
         {
-            Ins = this;
-
             Server.Ins.OnInit();
         }
 
         private void OnDestroy()
         {
-            Ins = null;
-
             Server.Ins.OnRemove();
         }
 
@@ -43,7 +37,7 @@ namespace Zyq.Game.Server
         {
             base.OnServerConnect(net);
 
-            Server.Ins.OnClientConnect(net);
+            Server.Ins.OnNetConnect(net);
 
             Debug.Log("OnServerConnect");
         }
@@ -52,7 +46,7 @@ namespace Zyq.Game.Server
         {
             base.OnServerDisconnect(net);
 
-            Server.Ins.OnClientDisconnect(net);
+            Server.Ins.OnNetDisconnect(net);
 
             Debug.Log("OnServerDisconnect");
         }

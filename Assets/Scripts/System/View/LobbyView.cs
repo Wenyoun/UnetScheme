@@ -1,9 +1,7 @@
 ﻿using Base;
 using UnityEngine;
 using UnityEngine.UI;
-using Zyq.Game.Host;
-using Zyq.Game.Client;
-using Zyq.Game.Server;
+using UnityEngine.Networking;
 
 namespace System
 {
@@ -29,32 +27,34 @@ namespace System
             m_Port = Cop.Get<InputField>("4");
         }
 
+        private NetworkManager m_Network;
+
         public override void OnRegEvent()
         {
             m_CreateServer.onClick.AddListener(() =>
             {
-                if (ServerNetworkManager.Ins == null)
+                if (m_Network == null)
                 {
-                    SimpleResMgr.CreateRoot("Prefabs/Game/ServerNetworkManager");
-                    ServerNetworkManager.Ins.StartServer();
+                    m_Network = SimpleResMgr.CreateRoot("Prefabs/Game/ServerNetworkManager").GetComponent<NetworkManager>();
+                    m_Network.StartServer();
                 }
             });
 
             m_CreateHost.onClick.AddListener(() =>
             {
-                if (HostNetworkManager.Ins == null)
+                if (m_Network == null)
                 {
-                    SimpleResMgr.CreateRoot("Prefabs/Game/HostNetworkManager");
-                    HostNetworkManager.Ins.StartHost();
+                    m_Network = SimpleResMgr.CreateRoot("Prefabs/Game/HostNetworkManager").GetComponent<NetworkManager>();
+                    m_Network.StartHost();
                 }
             });
 
             m_JoinServer.onClick.AddListener(() =>
             {
-                if (ClientNetworkManager.Ins == null)
+                if (m_Network == null)
                 {
-                    SimpleResMgr.CreateRoot("Prefabs/Game/ClientNetworkManager");
-                    ClientNetworkManager.Ins.StartClient();
+                    m_Network = SimpleResMgr.CreateRoot("Prefabs/Game/ClientNetworkManager").GetComponent<NetworkManager>();
+                    m_Network.StartClient();
                 }
             });
         }

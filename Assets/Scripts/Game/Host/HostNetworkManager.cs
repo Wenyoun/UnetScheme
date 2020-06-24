@@ -5,20 +5,14 @@ namespace Zyq.Game.Host
 {
     public class HostNetworkManager : NetworkManager
     {
-        public static HostNetworkManager Ins;
-
         private void Awake()
         {
-            Ins = this;
-
             Server.Server.Ins.OnInit();
             Client.Client.Ins.OnInit();
         }
 
         private void OnDestroy()
         {
-            Ins = null;
-
             Server.Server.Ins.OnRemove();
             Client.Client.Ins.OnRemove();
         }
@@ -47,16 +41,16 @@ namespace Zyq.Game.Host
         {
             base.OnServerConnect(net);
 
-            Debug.Log("OnServerConnect");
+            Server.Server.Ins.OnNetConnect(net);
 
-            Server.Server.Ins.OnClientConnect(net);
+            Debug.Log("OnServerConnect");
         }
 
         public override void OnServerDisconnect(NetworkConnection net)
         {
             base.OnServerDisconnect(net);
 
-            Server.Server.Ins.OnClientDisconnect(net);
+            Server.Server.Ins.OnNetDisconnect(net);
 
             Debug.Log("OnServerDisconnect");
         }
@@ -65,16 +59,16 @@ namespace Zyq.Game.Host
         {
             base.OnClientConnect(net);
 
-            Debug.Log("OnClientConnect");
+            Client.Client.Ins.OnNetConnect(net);
 
-            Client.Client.Ins.OnServerConnect(net);
+            Debug.Log("OnClientConnect");
         }
 
         public override void OnClientDisconnect(NetworkConnection net)
         {
             base.OnClientDisconnect(net);
 
-            Client.Client.Ins.OnServerDisconnect(net);
+            Client.Client.Ins.OnNetDisconnect(net);
 
             Debug.Log("OnClientDisconnect");
         }

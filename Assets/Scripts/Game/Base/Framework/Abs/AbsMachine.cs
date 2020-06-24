@@ -1,4 +1,6 @@
-﻿namespace Zyq.Game.Base
+﻿using UnityEngine.Networking;
+
+namespace Zyq.Game.Base
 {
     public abstract class AbsMachine : ILifecycle, IUpdate, IFixedUpdate
     {
@@ -44,6 +46,8 @@
             EntityMgr.OnFixedUpdate(delta);
         }
 
-        public abstract void RegisterProtocols(Connection connection);
+        public abstract void OnNetConnect(NetworkConnection net);
+
+        public abstract void OnNetDisconnect(NetworkConnection net);
     }
 }
