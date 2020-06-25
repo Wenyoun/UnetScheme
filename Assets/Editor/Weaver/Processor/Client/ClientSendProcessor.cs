@@ -33,13 +33,10 @@ namespace Zyq.Weaver
                 Collection<ParameterDefinition> parms = method.Parameters;
                 for (int i = 0; i < parms.Count; ++i)
                 {
-                    if (i > 0)
-                    {
-                        processor.InsertBefore(first, processor.Create(OpCodes.Nop));
-                        processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
-                        processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_S, (byte)(method.IsStatic ? i : i + 1)));
-                        processor.InsertBefore(first, InstructionFactory.CreateWriteTypeInstruction(module, processor, parms[i].ParameterType.ToString()));
-                    }
+                    processor.InsertBefore(first, processor.Create(OpCodes.Nop));
+                    processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
+                    processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_S, (byte)(method.IsStatic ? i : i + 1)));
+                    processor.InsertBefore(first, InstructionFactory.CreateWriteTypeInstruction(module, processor, parms[i].ParameterType.ToString()));
                 }
 
                 processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));

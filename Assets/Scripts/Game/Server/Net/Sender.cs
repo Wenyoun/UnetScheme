@@ -10,7 +10,7 @@ namespace Zyq.Game.Server
         }
 
         [Broadcast(NetMsgId.Msg_Create_Player)]
-        public static void BroadcastCreatePlayer(Connection connection, uint eid, uint gid, string username)
+        public static void BroadcastCreatePlayer(uint eid, uint gid, string username)
         {
         }
     }

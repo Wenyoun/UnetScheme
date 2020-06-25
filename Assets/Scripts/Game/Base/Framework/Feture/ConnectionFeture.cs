@@ -4,7 +4,7 @@ namespace Zyq.Game.Base
 {
     public class ConnectionFeture : AbsFeture
     {
-        public Connection m_Connection;
+        private Connection m_Connection;
 
         public ConnectionFeture(Connection connection)
         {

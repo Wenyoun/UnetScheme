@@ -3,7 +3,7 @@ using Zyq.Game.Base;
 
 namespace Zyq.Game.Client
 {
-    public static class Sender
+    public class Sender
     {
         [Send(NetMsgId.Msg_Login_Req)]
         public static void RpcLogin(byte v1,

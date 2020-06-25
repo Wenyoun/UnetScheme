@@ -45,9 +45,10 @@ namespace Zyq.Weaver
                 processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
                 processor.InsertBefore(first, processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.NetworkWriterFinishMessageMethod)));
                 processor.InsertBefore(first, processor.Create(OpCodes.Nop));
+                processor.InsertBefore(first, processor.Create(OpCodes.Ldsfld, module.ImportReference(WeaverProgram.ServerInsField)));
                 processor.InsertBefore(first, processor.Create(method.IsStatic ? OpCodes.Ldarg_0 : OpCodes.Ldarg_1));
                 processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
-                processor.InsertBefore(first, processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionSendMethod)));
+                processor.InsertBefore(first, processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ServerSendMethod)));
             }
         }
     }

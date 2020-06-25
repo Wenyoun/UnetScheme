@@ -28,7 +28,7 @@ namespace Zyq.Game.Server
                                 writer.Write(attribute.SyncId);
                                 attribute.Serialize(writer);
                                 writer.FinishMessage();
-                                Server.Ins.Broadcast(null, writer);
+                                Server.Ins.Broadcast(writer);
                             }
                         }
                     }

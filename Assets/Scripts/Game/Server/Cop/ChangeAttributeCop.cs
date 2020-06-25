@@ -1,5 +1,4 @@
 ﻿using Zyq.Game.Base;
-using UnityEngine.Networking;
 
 namespace Zyq.Game.Server
 {
@@ -16,28 +15,8 @@ namespace Zyq.Game.Server
                 {
                     attribute.Hp1 = k;
                     attribute.Hp11 = "yinhuyaong->" + k;
-                    RpcNotify("yinhuayong");
                 });
             }
-        }
-
-        private void RpcNotify(string username)
-        {
-            NetworkWriter writer = new NetworkWriter();
-            writer.StartMessage(1);
-            writer.Write(1);
-            writer.Write(Entity.Eid);
-            writer.Write(username);
-            ConnectionFeture target = Entity.GetFeture<ConnectionFeture>();
-            if (target != null)
-            {
-                target.Send(writer);
-            }
-        }
-
-        [Send(NetMsgId.Msg_Create_Player2)]
-        private void Test(Connection target, string usename)
-        {
         }
     }
 }

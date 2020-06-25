@@ -50,6 +50,8 @@ namespace Zyq.Weaver
         #region Zyq.Game.Base.Connection
         public static TypeReference ConnectionType;
         public static MethodReference ConnectionSendMethod;
+        public static MethodReference ConnectionRegisterHandlerMethod;
+        public static MethodReference ConnectionUnregisterHandlerMethod;
         #endregion
 
         #region Zyq.Game.Base.ConnectionFeture
@@ -67,6 +69,8 @@ namespace Zyq.Weaver
         #region Zyq.Game.Server.Server
         public static TypeReference ServerType;
         public static FieldReference ServerInsField;
+        public static MethodReference ServerSendMethod;
+        public static MethodReference ServerBroadcastMethod;
         #endregion
 
         public static bool WeaveAssemblies(string unityEngineDLL, string networkingDLL, string baseModuleRuntimeDLL, string assemblyPath, string[] depAssemblyPaths)
@@ -165,6 +169,8 @@ namespace Zyq.Weaver
 
             ConnectionType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.Connection");
             ConnectionSendMethod = ResolveHelper.ResolveMethod(ConnectionType, "Send");
+            ConnectionRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "RegisterHandler");
+            ConnectionUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "UnregisterHandler");
 
             ConnectionFetureType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ConnectionFeture");
             ConnectionFetureRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "RegisterHandler");
@@ -182,6 +188,8 @@ namespace Zyq.Weaver
         {
             ServerType = CurrentAssembly.MainModule.GetType("Zyq.Game.Server.Server");
             ServerInsField = ResolveHelper.ResolveField(ServerType, "Ins");
+            ServerSendMethod = ResolveHelper.ResolveMethod(ServerType, "Send");
+            ServerBroadcastMethod = ResolveHelper.ResolveMethod(ServerType, "Broadcast");
         }
     }
 }

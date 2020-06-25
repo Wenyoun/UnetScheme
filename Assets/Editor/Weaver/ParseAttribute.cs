@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Mono.CecilX;
-using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {

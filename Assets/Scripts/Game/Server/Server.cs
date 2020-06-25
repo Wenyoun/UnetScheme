@@ -36,7 +36,7 @@ namespace Zyq.Game.Server
             }
         }
 
-        public void Broadcast(Connection target, NetworkWriter writer)
+        public void Broadcast(NetworkWriter writer)
         {
             if (m_Connections != null)
             {

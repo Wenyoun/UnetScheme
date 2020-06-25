@@ -23,7 +23,6 @@ namespace Zyq.Game.Server
             Vector4 v14,
             Quaternion v15)
         {
-
             Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" + v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15);
 
             Sender.RpcTargetLoginResult(connection, true);
@@ -32,7 +31,7 @@ namespace Zyq.Game.Server
 
             Server.Ins.EntityMgr.AddEntity(entity);
 
-            Sender.BroadcastCreatePlayer(connection, entity.Eid, entity.Gid, v11);
+            Sender.BroadcastCreatePlayer(entity.Eid, entity.Gid, v11);
         }
     }
 }

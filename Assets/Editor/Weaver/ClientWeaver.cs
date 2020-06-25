@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using Mono.CecilX;
-using UnityEngine.Networking;
+﻿using Mono.CecilX;
+using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
@@ -32,7 +31,7 @@ namespace Zyq.Weaver
 
             if (recvAttributeMethods.Count > 0)
             {
-                RecvProcessor.Weave(module, recvAttributeMethods, protocol);
+                ClientRecvProcessor.Weave(module, recvAttributeMethods, protocol);
             }
 
             if (copTypes.Count > 0)
@@ -45,7 +44,7 @@ namespace Zyq.Weaver
                 SyncProcessor.Weave(false, module, syncTypes, out gets, out sets);
             }
 
-            return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || broadcastAttributeMethods.Count > 0 || syncTypes.Count > 0;
+            return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || copTypes.Count > 0 || syncTypes.Count > 0;
         }
     }
 }

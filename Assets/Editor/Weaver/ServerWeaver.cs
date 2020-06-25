@@ -31,12 +31,17 @@ namespace Zyq.Weaver
 
             if (recvAttributeMethods.Count > 0)
             {
-                RecvProcessor.Weave(module, recvAttributeMethods, protocol);
+                ServerRecvProcessor.Weave(module, recvAttributeMethods, protocol);
             }
 
             if (broadcastAttributeMethods.Count > 0)
             {
-                BroadcastProcessor.Weave(module, broadcastAttributeMethods);
+                ServerBroadcastProcessor.Weave(module, broadcastAttributeMethods);
+            }
+
+            if (copTypes.Count > 0)
+            {
+                ServerRecvCopProcessor.Weave(module, copTypes);
             }
 
             if (syncAttributeTypes.Count > 0)
@@ -45,7 +50,7 @@ namespace Zyq.Weaver
                 ReplaceProcessor.Weave(module, gets, sets);
             }
 
-            return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || broadcastAttributeMethods.Count > 0 || syncAttributeTypes.Count > 0;
+            return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || broadcastAttributeMethods.Count > 0 || copTypes.Count > 0 || syncAttributeTypes.Count > 0;
         }
     }
 }
