@@ -1,5 +1,5 @@
-﻿using Zyq.Game.Base;
-using UnityEngine.Networking;
+﻿using UnityEngine;
+using Zyq.Game.Base;
 
 namespace Zyq.Game.Client
 {
@@ -12,40 +12,26 @@ namespace Zyq.Game.Client
             {
                 UnityEngine.Debug.Log(attribute.Hp1 + ":" + attribute.Hp11);
             });
-            //OnRegisterChangeAttributeCopHandler();
         }
-        public override void OnRemove()
-        {
-            base.OnRemove();
-            //OnUnregisterChangeAttributeCopHandler();
-        }
-        /**
-                private void OnRegisterChangeAttributeCopHandler()
-                {
-                    ConnectionFeture connection = Entity.GetFeture<ConnectionFeture>();
-                    if (connection != null)
-                    {
-                        connection.RegisterHandler(NetMsgId.Msg_Create_Player2, Protocol_100);
-                        connection.RegisterHandler(NetMsgId.Msg_Create_Player2, Protocol_100);
-                    }
-                }
-                private void OnUnregisterChangeAttributeCopHandler()
-                {
-                    ConnectionFeture connection = Entity.GetFeture<ConnectionFeture>();
-                    if (connection != null)
-                    {
-                        connection.UnregisterHandler(NetMsgId.Msg_Create_Player2);
-                        connection.UnregisterHandler(NetMsgId.Msg_Create_Player2);
-                    }
-                }
-        **/
+
 
         [Recv(NetMsgId.Msg_Create_Player2)]
-        private void RecvTest(string name)
+        public void RpcLogin(byte v1,
+                                   bool v2,
+                                   short v3,
+                                   int v4,
+                                   long v5,
+                                   ushort v6,
+                                   uint v7,
+                                   ulong v8,
+                                   float v9,
+                                   double v10,
+                                   string v11,
+                                   Vector2 v12,
+                                   Vector3 v13,
+                                   Vector4 v14,
+                                   Quaternion v15)
         {
         }
-
-
-
     }
 }

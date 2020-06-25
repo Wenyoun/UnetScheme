@@ -8,11 +8,15 @@ namespace Zyq.Weaver
         public static TypeReference MakeGenericType(this TypeReference self, params TypeReference[] arguments)
         {
             if (self.GenericParameters.Count != arguments.Length)
+            {
                 throw new ArgumentException();
+            }
 
-            var instance = new GenericInstanceType(self);
-            foreach (var argument in arguments)
+            GenericInstanceType instance = new GenericInstanceType(self);
+            foreach (TypeReference argument in arguments)
+            {
                 instance.GenericArguments.Add(argument);
+            }
 
             return instance;
         }
@@ -20,18 +24,22 @@ namespace Zyq.Weaver
         public static MethodReference MakeGenericMethod(this MethodReference self, params TypeReference[] arguments)
         {
             if (self.GenericParameters.Count != arguments.Length)
+            {
                 throw new ArgumentException();
+            }
 
-            var instance = new GenericInstanceMethod(self);
-            foreach (var argument in arguments)
+            GenericInstanceMethod instance = new GenericInstanceMethod(self);
+            foreach (TypeReference argument in arguments)
+            {
                 instance.GenericArguments.Add(argument);
+            }
 
             return instance;
         }
 
         public static MethodReference MakeGeneric(this MethodReference self, params TypeReference[] arguments)
         {
-            var reference = new MethodReference(self.Name, self.ReturnType)
+            MethodReference reference = new MethodReference(self.Name, self.ReturnType)
             {
                 DeclaringType = self.DeclaringType.MakeGenericType(arguments),
                 HasThis = self.HasThis,
@@ -39,11 +47,15 @@ namespace Zyq.Weaver
                 CallingConvention = self.CallingConvention,
             };
 
-            foreach (var parameter in self.Parameters)
+            foreach (ParameterDefinition parameter in self.Parameters)
+            {
                 reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
+            }
 
-            foreach (var generic_parameter in self.GenericParameters)
-                reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
+            foreach (GenericParameter parameter in self.GenericParameters)
+            {
+                reference.GenericParameters.Add(new GenericParameter(parameter.Name, reference));
+            }
 
             return reference;
         }

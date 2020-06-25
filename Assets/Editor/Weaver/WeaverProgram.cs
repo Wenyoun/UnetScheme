@@ -18,6 +18,8 @@ namespace Zyq.Weaver
 
         #region  networking
         public static TypeReference NetowrkMessageType;
+        public static FieldReference NetworkMessageReaderField;
+        public static MethodReference NetowrkMessageCtorMethod;
         public static TypeReference NetworkWriterType;
         public static MethodReference NetworkWriterCtorMethod;
         public static MethodReference NetworkWriterStartMessageMethod;
@@ -34,24 +36,35 @@ namespace Zyq.Weaver
         public static TypeReference SyncFieldType;
         #endregion
 
-        #region Zyq.Game.Base
+        #region Zyq.Game.Base.IEntity
         public static TypeReference IEntityType;
         public static MethodReference IEntityGetFetureMethod;
+        #endregion
+
+        #region Zyq.Game.Base.AbsCop
         public static TypeReference AbsCopType;
         public static MethodReference AbsCopOnRemoveMethod;
         public static MethodReference AbsCopGetEntityMethod;
-        public static TypeReference ConnectionType;
-        public static MethodReference ConnectionSendMethod;
-        public static TypeReference ConnectionFetureType;
         #endregion
 
-        #region Zyq.Game.Client
+        #region Zyq.Game.Base.Connection
+        public static TypeReference ConnectionType;
+        public static MethodReference ConnectionSendMethod;
+        #endregion
+
+        #region Zyq.Game.Base.ConnectionFeture
+        public static TypeReference ConnectionFetureType;
+        public static MethodReference ConnectionFetureRegisterHandlerMethod;
+        public static MethodReference ConnectionFetureUnregisterHandlerMethod;
+        #endregion
+
+        #region Zyq.Game.Client.Client
         public static TypeReference ClientType;
         public static FieldReference ClientInsField;
         public static MethodReference ClientSendMethod;
         #endregion
 
-        #region Zyq.Game.Server
+        #region Zyq.Game.Server.Server
         public static TypeReference ServerType;
         public static FieldReference ServerInsField;
         #endregion
@@ -123,6 +136,7 @@ namespace Zyq.Weaver
         private static void SetupUnityTypes()
         {
             NetowrkMessageType = NetworkingAssembly.MainModule.GetType("UnityEngine.Networking.NetworkMessage");
+            NetworkMessageReaderField = ResolveHelper.ResolveField(NetowrkMessageType, "reader");
 
             NetworkWriterType = NetworkingAssembly.MainModule.GetType("UnityEngine.Networking.NetworkWriter");
 
@@ -153,6 +167,8 @@ namespace Zyq.Weaver
             ConnectionSendMethod = ResolveHelper.ResolveMethod(ConnectionType, "Send");
 
             ConnectionFetureType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ConnectionFeture");
+            ConnectionFetureRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "RegisterHandler");
+            ConnectionFetureUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "UnregisterHandler");
         }
 
         private static void SetupClientModuleTypes()

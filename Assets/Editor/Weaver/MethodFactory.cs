@@ -5,12 +5,13 @@ namespace Zyq.Weaver
 {
     public static class MethodFactory
     {
-        public static MethodDefinition CreateMethod(ModuleDefinition module, TypeDefinition type, string methodName, MethodAttributes attributes)
+        public static MethodDefinition CreateMethod(ModuleDefinition module, TypeDefinition type, string methodName, MethodAttributes attributes, bool isEmpty = false)
         {
             MethodDefinition method = ResolveHelper.ResolveMethod(type, methodName);
             if (method == null)
             {
                 method = new MethodDefinition(methodName, attributes, module.ImportReference(typeof(void)));
+                method.Body.InitLocals = true;
                 type.Methods.Add(method);
             }
 
@@ -18,9 +19,12 @@ namespace Zyq.Weaver
             method.Body.Variables.Clear();
             method.Body.Instructions.Clear();
 
-            ILProcessor processor = method.Body.GetILProcessor();
-            processor.Append(processor.Create(OpCodes.Nop));
-            processor.Append(processor.Create(OpCodes.Ret));
+            if (isEmpty == false)
+            {
+                ILProcessor processor = method.Body.GetILProcessor();
+                processor.Append(processor.Create(OpCodes.Nop));
+                processor.Append(processor.Create(OpCodes.Ret));
+            }
 
             return method;
         }
