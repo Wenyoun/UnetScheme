@@ -12,15 +12,22 @@ namespace Zyq.Weaver
             Dictionary<short, MethodDefinition> sendAttributeMethods;
             Dictionary<short, MethodDefinition> recvAttributeMethods;
             Dictionary<short, MethodDefinition> broadcastAttributeMethods;
-            List<TypeDefinition> syncAttributeTypes;
+            List<TypeDefinition> copTypes;
+            List<TypeDefinition> syncTypes;
             Dictionary<FieldDefinition, MethodDefinition> gets;
             Dictionary<FieldDefinition, MethodDefinition> sets;
 
-            ParseAttribute.Parse(module, ref protocol, out sendAttributeMethods, out recvAttributeMethods, out broadcastAttributeMethods, out syncAttributeTypes);
+            ParseAttribute.Parse(module,
+                                 ref protocol,
+                                 out sendAttributeMethods,
+                                 out recvAttributeMethods,
+                                 out broadcastAttributeMethods,
+                                 out copTypes,
+                                 out syncTypes);
 
             if (sendAttributeMethods.Count > 0)
             {
-                SendProcessor.Weave(module, sendAttributeMethods);
+                ClientSendProcessor.Weave(module, sendAttributeMethods);
             }
 
             if (recvAttributeMethods.Count > 0)
@@ -28,12 +35,17 @@ namespace Zyq.Weaver
                 RecvProcessor.Weave(module, recvAttributeMethods, protocol);
             }
 
-            if (syncAttributeTypes.Count > 0)
+            if (copTypes.Count > 0)
             {
-                SyncProcessor.Weave(false, module, syncAttributeTypes, out gets, out sets);
+                ClientRecvCopProcessor.Weave(module, copTypes);
             }
 
-            return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || broadcastAttributeMethods.Count > 0 || syncAttributeTypes.Count > 0;
+            if (syncTypes.Count > 0)
+            {
+                SyncProcessor.Weave(false, module, syncTypes, out gets, out sets);
+            }
+
+            return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || broadcastAttributeMethods.Count > 0 || syncTypes.Count > 0;
         }
     }
 }

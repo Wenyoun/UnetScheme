@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Mono.CecilX;
+using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {
@@ -10,15 +11,22 @@ namespace Zyq.Weaver
                                 out Dictionary<short, MethodDefinition> send,
                                 out Dictionary<short, MethodDefinition> recv,
                                 out Dictionary<short, MethodDefinition> broadcast,
+                                out List<TypeDefinition> cops,
                                 out List<TypeDefinition> syncs)
         {
             send = new Dictionary<short, MethodDefinition>();
             recv = new Dictionary<short, MethodDefinition>();
             broadcast = new Dictionary<short, MethodDefinition>();
+            cops = new List<TypeDefinition>();
             syncs = new List<TypeDefinition>();
 
             foreach (TypeDefinition type in module.Types)
             {
+                if (type.BaseType != null && type.BaseType.FullName == WeaverProgram.AbsCopType.FullName)
+                {
+                    cops.Add(type);
+                }
+
                 if (type.CustomAttributes.Count > 0 && type.CustomAttributes[0].AttributeType.FullName == WeaverProgram.SyncClassType.FullName)
                 {
                     syncs.Add(type);
@@ -38,7 +46,10 @@ namespace Zyq.Weaver
                             }
                             else if (methodAttr.AttributeType.FullName == WeaverProgram.RecvType.FullName)
                             {
-                                recv.Add(msgId, method);
+                                if (method.IsStatic)
+                                {
+                                    recv.Add(msgId, method);
+                                }
                             }
                             else if (methodAttr.AttributeType.FullName == WeaverProgram.BroadcastType.FullName)
                             {

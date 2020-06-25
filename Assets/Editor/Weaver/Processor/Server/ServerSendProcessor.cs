@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
 using Mono.Collections.Generic;
-using UnityEngine.Networking;
-using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {
-    public static class SendProcessor
+    public static class ServerSendProcessor
     {
-        public static void Weave(ModuleDefinition module, Dictionary<short, MethodDefinition> defs)
+        public static void Weave(ModuleDefinition module, Dictionary<short, MethodDefinition> methods)
         {
-            foreach (short key in defs.Keys)
+            foreach (short key in methods.Keys)
             {
-                MethodDefinition method = defs[key];
+                MethodDefinition method = methods[key];
                 ILProcessor processor = method.Body.GetILProcessor();
 
                 method.Body.Variables.Clear();
@@ -33,15 +30,15 @@ namespace Zyq.Weaver
                 processor.InsertBefore(first, processor.Create(OpCodes.Ldc_I4, key));
                 processor.InsertBefore(first, processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.NetworkWriterStartMessageMethod)));
 
-                Collection<ParameterDefinition> pds = method.Parameters;
-                for (int i = 0; i < pds.Count; ++i)
+                Collection<ParameterDefinition> parms = method.Parameters;
+                for (int i = 0; i < parms.Count; ++i)
                 {
                     if (i > 0)
                     {
                         processor.InsertBefore(first, processor.Create(OpCodes.Nop));
                         processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
                         processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_S, (byte)(method.IsStatic ? i : i + 1)));
-                        processor.InsertBefore(first, InstructionFactory.CreateWriteTypeInstruction(module, processor, pds[i].ParameterType.ToString()));
+                        processor.InsertBefore(first, InstructionFactory.CreateWriteTypeInstruction(module, processor, parms[i].ParameterType.ToString()));
                     }
                 }
 
@@ -50,7 +47,7 @@ namespace Zyq.Weaver
                 processor.InsertBefore(first, processor.Create(OpCodes.Nop));
                 processor.InsertBefore(first, processor.Create(method.IsStatic ? OpCodes.Ldarg_0 : OpCodes.Ldarg_1));
                 processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
-                processor.InsertBefore(first, processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(Connection).GetMethod("Send", new Type[] { typeof(NetworkWriter) }))));
+                processor.InsertBefore(first, processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionSendMethod)));
             }
         }
     }

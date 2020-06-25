@@ -4,16 +4,26 @@ namespace Zyq.Game.Base
 {
     public class ConnectionFeture : AbsFeture
     {
-        public Connection Connection { get; set; }
+        public Connection m_Connection;
 
         public ConnectionFeture(Connection connection)
         {
-            Connection = connection;
+            m_Connection = connection;
         }
 
         public void Send(NetworkWriter writer)
         {
-            Connection.Send(writer);
+            m_Connection.Send(writer);
+        }
+
+        public void RegisterHandler(short id, NetworkMessageDelegate handler)
+        {
+            m_Connection.RegisterHandler(id, handler);
+        }
+
+        public void UnregisterHandler(short id)
+        {
+            m_Connection.UnregisterHandler(id);
         }
     }
 }

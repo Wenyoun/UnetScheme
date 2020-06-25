@@ -28,11 +28,16 @@ namespace Zyq.Game.Server
             writer.Write(1);
             writer.Write(Entity.Eid);
             writer.Write(username);
-            ConnectionFeture con = Entity.GetFeture<ConnectionFeture>();
-            if (con != null)
+            ConnectionFeture target = Entity.GetFeture<ConnectionFeture>();
+            if (target != null)
             {
-                con.Send(writer);
+                target.Send(writer);
             }
+        }
+
+        [Send(NetMsgId.Msg_Create_Player2)]
+        private void Test(Connection target, string usename)
+        {
         }
     }
 }

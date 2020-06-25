@@ -11,15 +11,22 @@ namespace Zyq.Weaver
             Dictionary<short, MethodDefinition> sendAttributeMethods;
             Dictionary<short, MethodDefinition> recvAttributeMethods;
             Dictionary<short, MethodDefinition> broadcastAttributeMethods;
+            List<TypeDefinition> copTypes;
             List<TypeDefinition> syncAttributeTypes;
             Dictionary<FieldDefinition, MethodDefinition> gets;
             Dictionary<FieldDefinition, MethodDefinition> sets;
 
-            ParseAttribute.Parse(module, ref protocol, out sendAttributeMethods, out recvAttributeMethods, out broadcastAttributeMethods, out syncAttributeTypes);
+            ParseAttribute.Parse(module,
+                                 ref protocol,
+                                 out sendAttributeMethods,
+                                 out recvAttributeMethods,
+                                 out broadcastAttributeMethods,
+                                 out copTypes,
+                                 out syncAttributeTypes);
 
             if (sendAttributeMethods.Count > 0)
             {
-                SendProcessor.Weave(module, sendAttributeMethods);
+                ServerSendProcessor.Weave(module, sendAttributeMethods);
             }
 
             if (recvAttributeMethods.Count > 0)

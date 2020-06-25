@@ -5,14 +5,18 @@ using Mono.CecilX.Cil;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Zyq.Weaver {
-    public static class InstructionFactory {
-        private class TypeWrapper {
+namespace Zyq.Weaver
+{
+    public static class InstructionFactory
+    {
+        private class TypeWrapper
+        {
             public Type type;
             public string readMethod;
             public string writeMethod;
 
-            public TypeWrapper(Type _type, string _readMethod, string _writeMethod) {
+            public TypeWrapper(Type _type, string _readMethod, string _writeMethod)
+            {
                 type = _type;
                 readMethod = _readMethod;
                 writeMethod = _writeMethod;
@@ -21,7 +25,8 @@ namespace Zyq.Weaver {
 
         private static Dictionary<string, TypeWrapper> ReadMappers = new Dictionary<string, TypeWrapper>();
 
-        static InstructionFactory() {
+        static InstructionFactory()
+        {
             ReadMappers.Add("System.Byte", new TypeWrapper(typeof(byte), "ReadByte", "Write"));
             ReadMappers.Add("System.Boolean", new TypeWrapper(typeof(bool), "ReadBoolean", "Write"));
             ReadMappers.Add("System.Int16", new TypeWrapper(typeof(short), "ReadInt16", "Write"));
@@ -39,20 +44,24 @@ namespace Zyq.Weaver {
             ReadMappers.Add("UnityEngine.Quaternion", new TypeWrapper(typeof(Quaternion), "ReadQuaternion", "Write"));
         }
 
-        public static Instruction CreateReadTypeInstruction(ModuleDefinition module, ILProcessor processor, string type) {
+        public static Instruction CreateReadTypeInstruction(ModuleDefinition module, ILProcessor processor, string type)
+        {
             TypeWrapper wrapper = null;
 
-            if (ReadMappers.TryGetValue(type, out wrapper)) {
+            if (ReadMappers.TryGetValue(type, out wrapper))
+            {
                 return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod(wrapper.readMethod, Type.EmptyTypes)));
             }
 
             throw new Exception("CreateReadTypeInstruction中无法确定的类型:" + type);
         }
 
-        public static Instruction CreateWriteTypeInstruction(ModuleDefinition module, ILProcessor processor, string type) {
+        public static Instruction CreateWriteTypeInstruction(ModuleDefinition module, ILProcessor processor, string type)
+        {
             TypeWrapper wrapper = null;
 
-            if (ReadMappers.TryGetValue(type, out wrapper)) {
+            if (ReadMappers.TryGetValue(type, out wrapper))
+            {
                 return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkWriter).GetMethod(wrapper.writeMethod, new Type[] { wrapper.type })));
             }
 

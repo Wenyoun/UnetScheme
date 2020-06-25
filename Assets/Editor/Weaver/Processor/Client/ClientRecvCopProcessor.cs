@@ -8,16 +8,112 @@ using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {
-    public static class RecvProcessor
+    public static class ClientRecvCopProcessor
     {
-        public static void Weave(ModuleDefinition module, Dictionary<short, MethodDefinition> defs, TypeDefinition protocol)
+        private struct Wrapper
         {
-            if (module == null || defs.Count == 0 || protocol == null)
+            public short MsgId;
+            MethodDefinition Method;
+
+            public Wrapper(short msgId, MethodDefinition method)
+            {
+                MsgId = msgId;
+                Method = method;
+            }
+        }
+
+        public static void Weave(ModuleDefinition module, List<TypeDefinition> types)
+        {
+            if (module == null || types.Count == 0)
             {
                 return;
             }
 
-            MethodDefinition registerMethod = ResolveHelper.ResolveMethod(protocol, "Register");
+            List<Wrapper> methods = new List<Wrapper>();
+            foreach (TypeDefinition type in types)
+            {
+                methods.Clear();
+
+                foreach (MethodDefinition method in type.Methods)
+                {
+                    if (method.CustomAttributes.Count > 0 && method.CustomAttributes[0].AttributeType.FullName == WeaverProgram.RecvType.FullName)
+                    {
+                        short msgId = (short)method.CustomAttributes[0].ConstructorArguments[0].Value;
+                        methods.Add(new Wrapper(msgId, method));
+                    }
+                }
+
+                if (methods.Count > 0)
+                {
+                    MethodDefinition onInitMethod = ResolveHelper.ResolveMethod(type, "OnInit");
+                    MethodDefinition onRemoveMethod = ResolveHelper.ResolveMethod(type, "OnRemove");
+
+                    if (onRemoveMethod == null)
+                    {
+                        onRemoveMethod = MethodFactory.CreateMethod(module, type, "OnRemove", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual);
+                        ILProcessor pro = onRemoveMethod.Body.GetILProcessor();
+                        Instruction ins = onRemoveMethod.Body.Instructions[0];
+                        pro.InsertAfter(ins, pro.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopOnRemoveMethod)));
+                        pro.InsertAfter(ins, pro.Create(OpCodes.Ldarg_0));
+                    }
+
+                    string onRegisterHandlerName = "OnRegister" + type.Name + "Handler";
+                    MethodDefinition registerMethod = MethodFactory.CreateMethod(module, type, onRegisterHandlerName, MethodAttributes.Private | MethodAttributes.HideBySig);
+                    {
+                        registerMethod.Body.Instructions.Clear();
+                        registerMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ConnectionFetureType)));
+                        registerMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
+
+                        foreach (Wrapper wrapper in methods)
+                        {
+                            MethodDefinition handler = MethodFactory.CreateMethod(module, type, "OnProtocol_" + wrapper.MsgId, MethodAttributes.Private | MethodAttributes.HideBySig);
+                            handler.Parameters.Add(new ParameterDefinition(module.ImportReference(WeaverProgram.NetowrkMessageType)));
+
+                            ILProcessor processor = registerMethod.Body.GetILProcessor();
+                            Instruction ret = processor.Create(OpCodes.Ret);
+                            processor.Append(processor.Create(OpCodes.Nop));
+                            processor.Append(processor.Create(OpCodes.Ldarg_0));
+                            processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopGetEntityMethod)));
+                            processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IEntityGetFetureMethod.MakeGenericMethod(WeaverProgram.ConnectionFetureType))));
+                            processor.Append(processor.Create(OpCodes.Stloc_0));
+                            processor.Append(processor.Create(OpCodes.Ldloc_0));
+                            processor.Append(processor.Create(OpCodes.Ldnull));
+                            processor.Append(processor.Create(OpCodes.Cgt_Un));
+                            processor.Append(processor.Create(OpCodes.Stloc_1));
+                            processor.Append(processor.Create(OpCodes.Ldloc_1));
+                            processor.Append(processor.Create(OpCodes.Brfalse, ret));
+                            /**
+                            processor.Append(processor.Create(OpCodes.Nop));
+                            processor.Append(processor.Create(OpCodes.Ldloc_0));
+                            processor.Append(processor.Create(OpCodes.Ldc_I4, wrapper.MsgId));
+                            processor.Append(processor.Create(OpCodes.Ldarg_0));
+                            **/
+                            processor.Append(ret);
+                        }
+
+                        {
+                            ILProcessor init = onInitMethod.Body.GetILProcessor();
+                            Instruction ins1 = onInitMethod.Body.Instructions[onInitMethod.Body.Instructions.Count - 1];
+                            init.InsertBefore(ins1, init.Create(OpCodes.Ldarg_0));
+                            init.InsertBefore(ins1, init.Create(OpCodes.Call, registerMethod));
+                            init.InsertBefore(ins1, init.Create(OpCodes.Nop));
+                        }
+                    }
+
+                    string onUnregisterHandlerName = "OnUnregister" + type.Name + "Handler";
+                    MethodDefinition unregisterMethod = MethodFactory.CreateMethod(module, type, onUnregisterHandlerName, MethodAttributes.Private | MethodAttributes.HideBySig);
+                    {
+                        ILProcessor remo = onRemoveMethod.Body.GetILProcessor();
+                        Instruction ins2 = onRemoveMethod.Body.Instructions[onRemoveMethod.Body.Instructions.Count - 1];
+                        remo.InsertBefore(ins2, remo.Create(OpCodes.Ldarg_0));
+                        remo.InsertBefore(ins2, remo.Create(OpCodes.Call, unregisterMethod));
+                        remo.InsertBefore(ins2, remo.Create(OpCodes.Nop));
+                    }
+                }
+            }
+
+            /**
+            MethodDefinition registerMethod = protocol.Methods.Single(m => m.FullName.IndexOf("Register()") >= 0);
             registerMethod.Body.Variables.Clear();
             registerMethod.Body.Instructions.Clear();
 
@@ -115,6 +211,7 @@ namespace Zyq.Weaver
                 unregisterProcessor.InsertBefore(firstUnregisterInstruction, unregisterProcessor.Create(OpCodes.Ldc_I4, key));
                 unregisterProcessor.InsertBefore(firstUnregisterInstruction, unregisterProcessor.Create(OpCodes.Callvirt, module.ImportReference(typeof(Connection).GetMethod("UnregisterHandler", new Type[] { typeof(short) }))));
             }
+        **/
         }
     }
 }

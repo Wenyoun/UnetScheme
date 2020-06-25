@@ -22,7 +22,6 @@ namespace Zyq.Game.Client
         [Recv(NetMsgId.Msg_Create_Player1)]
         public static void OnCreatePlayer1(Connection connection, uint eid, string username)
         {
-            Debug.Log("11111:::");
         }
     }
 }
