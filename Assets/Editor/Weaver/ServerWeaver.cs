@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Mono.CecilX;
+﻿using Mono.CecilX;
+using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
@@ -47,7 +47,7 @@ namespace Zyq.Weaver
             if (syncAttributeTypes.Count > 0)
             {
                 SyncProcessor.Weave(true, module, syncAttributeTypes, out gets, out sets);
-                ReplaceProcessor.Weave(module, gets, sets);
+                ServerReplaceProcessor.Weave(module, gets, sets);
             }
 
             return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || broadcastAttributeMethods.Count > 0 || copTypes.Count > 0 || syncAttributeTypes.Count > 0;

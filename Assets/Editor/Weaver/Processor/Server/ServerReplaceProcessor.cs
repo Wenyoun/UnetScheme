@@ -6,7 +6,7 @@ using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {
-    public static class ReplaceProcessor
+    public static class ServerReplaceProcessor
     {
         public static void Weave(ModuleDefinition module, Dictionary<FieldDefinition, MethodDefinition> gets, Dictionary<FieldDefinition, MethodDefinition> sets)
         {
