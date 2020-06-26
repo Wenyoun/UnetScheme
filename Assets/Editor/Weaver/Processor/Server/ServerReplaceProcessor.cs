@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
 using Zyq.Game.Base;
@@ -10,7 +9,7 @@ namespace Zyq.Weaver
     {
         public static void Weave(ModuleDefinition module, Dictionary<FieldDefinition, MethodDefinition> gets, Dictionary<FieldDefinition, MethodDefinition> sets)
         {
-            List<TypeDefinition> defs = new List<TypeDefinition>();
+            List<TypeDefinition> types = new List<TypeDefinition>();
 
             foreach (TypeDefinition type in module.Types)
             {
@@ -26,16 +25,16 @@ namespace Zyq.Weaver
 
                 foreach (TypeDefinition nested in type.NestedTypes)
                 {
-                    defs.Add(nested);
+                    types.Add(nested);
                 }
 
                 if (type.IsClass && !find)
                 {
-                    defs.Add(type);
+                    types.Add(type);
                 }
             }
 
-            foreach (TypeDefinition type in defs)
+            foreach (TypeDefinition type in types)
             {
                 foreach (MethodDefinition method in type.Methods)
                 {

@@ -8,7 +8,7 @@ namespace Zyq.Game.Client
         [Recv(NetMsgId.Msg_Login_Res)]
         public static void OnLoginRsp(bool result)
         {
-            Debug.Log("客户端收到服务器的登陆结果:" + (result ? "登录成功" : "登录失败1"));
+            Debug.Log("客户端收到服务器的登陆结果:" + (result ? "登录成功" : "登录失败"));
         }
 
         [Recv(NetMsgId.Msg_Create_Player)]

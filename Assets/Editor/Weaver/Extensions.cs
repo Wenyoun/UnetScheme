@@ -1,10 +1,21 @@
 ﻿using System;
 using Mono.CecilX;
+using System.Linq;
 
 namespace Zyq.Weaver
 {
     public static class Extensions
     {
+        public static MethodDefinition GetMethod(this TypeDefinition self, string name)
+        {
+            return self.Methods.Where(m => m.Name == name).First();
+        }
+
+        public static FieldDefinition GetField(this TypeDefinition self, string name)
+        {
+            return self.Fields.Where(f => f.Name == name).First();
+        }
+
         public static TypeReference MakeGenericType(this TypeReference self, params TypeReference[] arguments)
         {
             if (self.GenericParameters.Count != arguments.Length)
