@@ -4,8 +4,13 @@ namespace Zyq.Game.Base
 {
     public class ConnectionFeture : AbsFeture
     {
+        #region Fields
         private Connection m_Connection;
+        #endregion
+
+        #region Properties
         public Connection Connection => m_Connection;
+        #endregion
 
         public ConnectionFeture(Connection connection)
         {
@@ -14,17 +19,26 @@ namespace Zyq.Game.Base
 
         public void Send(NetworkWriter writer)
         {
-            m_Connection.Send(writer);
+            if (m_Connection != null)
+            {
+                m_Connection.Send(writer);
+            }
         }
 
         public void RegisterHandler(short id, NetworkMessageDelegate handler)
         {
-            m_Connection.RegisterHandler(id, handler);
+            if (m_Connection != null)
+            {
+                m_Connection.RegisterHandler(id, handler);
+            }
         }
 
         public void UnregisterHandler(short id)
         {
-            m_Connection.UnregisterHandler(id);
+            if (m_Connection != null)
+            {
+                m_Connection.UnregisterHandler(id);
+            }
         }
     }
 }

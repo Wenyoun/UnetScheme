@@ -7,9 +7,16 @@ namespace Zyq.Game.Server
     public class Server : AbsMachine
     {
         public static Server Ins = new Server();
+
+        #region Fields
+        public ServerEntityMgr m_EntityMgr;
         private SyncAttributeMgr m_SyncAttributeMgr;
         private Dictionary<int, Connection> m_Connections;
-        public ServerEntityMgr EntityMgr { get; private set; }
+        #endregion
+
+        #region Properties
+        public ServerEntityMgr EntityMgr => m_EntityMgr;
+        #endregion
 
         private Server()
         {
@@ -18,7 +25,7 @@ namespace Zyq.Game.Server
         public override void OnInit()
         {
             base.OnInit();
-            EntityMgr = new ServerEntityMgr();
+            m_EntityMgr = new ServerEntityMgr();
             m_SyncAttributeMgr = new SyncAttributeMgr();
             m_Connections = new Dictionary<int, Connection>();
         }
@@ -27,8 +34,8 @@ namespace Zyq.Game.Server
         {
             base.OnRemove();
             ClearConnections();
-            EntityMgr.Dispose();
-            EntityMgr = null;
+            m_EntityMgr.Dispose();
+            m_EntityMgr = null;
             m_SyncAttributeMgr = null;
         }
 
@@ -85,9 +92,9 @@ namespace Zyq.Game.Server
         public override void OnUpdate(float delta)
         {
             base.OnUpdate(delta);
-            if (EntityMgr != null)
+            if (m_EntityMgr != null)
             {
-                EntityMgr.OnUpdate(delta);
+                m_EntityMgr.OnUpdate(delta);
             }
             if (m_SyncAttributeMgr != null)
             {
@@ -98,9 +105,9 @@ namespace Zyq.Game.Server
         public override void OnFixedUpdate(float delta)
         {
             base.OnFixedUpdate(delta);
-            if(EntityMgr != null)
+            if (m_EntityMgr != null)
             {
-                EntityMgr.OnFixedUpdate(delta);
+                m_EntityMgr.OnFixedUpdate(delta);
             }
         }
 
