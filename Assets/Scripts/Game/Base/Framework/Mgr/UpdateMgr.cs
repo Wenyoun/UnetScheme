@@ -1,10 +1,12 @@
-﻿namespace Zyq.Game.Base
+﻿using System;
+
+namespace Zyq.Game.Base
 {
-    public class UpdateMgr
+    public class UpdateMgr : IDisposable
     {
         private UpdateRegister m_Register;
 
-        public void Init()
+        public UpdateMgr()
         {
             m_Register = new UpdateRegister();
         }

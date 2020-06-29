@@ -1,10 +1,12 @@
-﻿namespace Zyq.Game.Base
+﻿using System;
+
+namespace Zyq.Game.Base
 {
-    public class MessageMgr
+    public class MessageMgr : IDisposable
     {
         private MsgRegister m_Register;
 
-        public void Init()
+        public MessageMgr()
         {
             m_Register = new MsgRegister();
         }

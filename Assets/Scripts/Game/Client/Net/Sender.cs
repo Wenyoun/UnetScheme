@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using Zyq.Game.Base;
 
 namespace Zyq.Game.Client

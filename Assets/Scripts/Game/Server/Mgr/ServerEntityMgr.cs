@@ -1,20 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using Zyq.Game.Base;
+using System.Collections.Generic;
 
-namespace Zyq.Game.Base
+namespace Zyq.Game.Server
 {
-    public class EntityMgr
+    public class ServerEntityMgr : IDisposable
     {
         private Entities m_Entities;
+        private Dictionary<Connection, Entity> m_Connections;
 
-        public void Init()
+        public ServerEntityMgr()
         {
             m_Entities = new Entities();
+            m_Connections = new Dictionary<Connection, Entity>();
         }
 
         public void Dispose()
         {
             m_Entities.Dispose();
             m_Entities = null;
+            m_Connections.Clear();
+            m_Connections = null;
         }
 
         public void AddEntity(Entity entity)
@@ -22,6 +28,11 @@ namespace Zyq.Game.Base
             if (m_Entities != null)
             {
                 m_Entities.AddEntity(entity);
+                ConnectionFeture connection = entity.GetFeture<ConnectionFeture>();
+                if (connection != null)
+                {
+                    m_Connections.Add(connection.Connection, entity);
+                }
             }
         }
 
@@ -29,8 +40,30 @@ namespace Zyq.Game.Base
         {
             if (m_Entities != null)
             {
-                m_Entities.RemoveEntity(eid);
+                Entity entity = m_Entities.GetEntity(eid);
+                if (entity != null)
+                {
+                    ConnectionFeture connection = entity.GetFeture<ConnectionFeture>();
+                    if (connection != null && m_Connections.ContainsKey(connection.Connection))
+                    {
+                        m_Connections.Remove(connection.Connection);
+                    }
+                    m_Entities.RemoveEntity(eid);
+                }
             }
+        }
+
+        public Entity GetEntity(Connection conneciton)
+        {
+            if (m_Entities != null && m_Connections != null)
+            {
+                Entity entity = null;
+                if (m_Connections.TryGetValue(conneciton, out entity))
+                {
+                    return entity;
+                }
+            }
+            return null;
         }
 
         public Entity GetEntity(uint eid)
@@ -99,13 +132,13 @@ namespace Zyq.Game.Base
             }
         }
 
-        public List<Entity> ALL
+        public List<Entity> Entitys
         {
             get
             {
                 if (m_Entities != null)
-                { 
-                    return m_Entities.ALL;
+                {
+                    return m_Entities.Entitys;
                 }
                 return null;
             }

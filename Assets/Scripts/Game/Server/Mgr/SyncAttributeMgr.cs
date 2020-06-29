@@ -8,7 +8,7 @@ namespace Zyq.Game.Server
     {
         public void OnUpdate(float delta)
         {
-            List<Entity> entitys = Server.Ins.EntityMgr.ALL;
+            List<Entity> entitys = Server.Ins.EntityMgr.Entitys;
             if (entitys != null)
             {
                 for (int i = 0; i < entitys.Count; ++i)

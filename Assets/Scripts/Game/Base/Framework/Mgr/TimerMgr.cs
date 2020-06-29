@@ -2,11 +2,11 @@
 
 namespace Zyq.Game.Base
 {
-    public class TimerMgr
+    public class TimerMgr : IDisposable
     {
         private TimerRegister m_Register;
 
-        public void Init()
+        public TimerMgr()
         {
             m_Register = new TimerRegister();
         }

@@ -1,5 +1,5 @@
-﻿using UnityEngine.Networking;
-using Zyq.Game.Base;
+﻿using Zyq.Game.Base;
+using UnityEngine.Networking;
 using System.Collections.Generic;
 
 namespace Zyq.Game.Server
@@ -9,6 +9,7 @@ namespace Zyq.Game.Server
         public static Server Ins = new Server();
         private SyncAttributeMgr m_SyncAttributeMgr;
         private Dictionary<int, Connection> m_Connections;
+        public ServerEntityMgr EntityMgr { get; private set; }
 
         private Server()
         {
@@ -17,6 +18,7 @@ namespace Zyq.Game.Server
         public override void OnInit()
         {
             base.OnInit();
+            EntityMgr = new ServerEntityMgr();
             m_SyncAttributeMgr = new SyncAttributeMgr();
             m_Connections = new Dictionary<int, Connection>();
         }
@@ -25,6 +27,8 @@ namespace Zyq.Game.Server
         {
             base.OnRemove();
             ClearConnections();
+            EntityMgr.Dispose();
+            EntityMgr = null;
             m_SyncAttributeMgr = null;
         }
 
@@ -81,7 +85,23 @@ namespace Zyq.Game.Server
         public override void OnUpdate(float delta)
         {
             base.OnUpdate(delta);
-            m_SyncAttributeMgr.OnUpdate(delta);
+            if (EntityMgr != null)
+            {
+                EntityMgr.OnUpdate(delta);
+            }
+            if (m_SyncAttributeMgr != null)
+            {
+                m_SyncAttributeMgr.OnUpdate(delta);
+            }
+        }
+
+        public override void OnFixedUpdate(float delta)
+        {
+            base.OnFixedUpdate(delta);
+            if(EntityMgr != null)
+            {
+                EntityMgr.OnFixedUpdate(delta);
+            }
         }
 
         private void RegisterProtocols(Connection connection)

@@ -8,6 +8,7 @@ namespace Zyq.Game.Client
     {
         public static Client Ins = new Client();
         public Connection Connection { get; private set; }
+        public ClientEntityMgr EntityMgr { get; private set; }
 
         private Client()
         {
@@ -16,11 +17,14 @@ namespace Zyq.Game.Client
         public override void OnInit()
         {
             base.OnInit();
+            EntityMgr = new ClientEntityMgr();
         }
 
         public override void OnRemove()
         {
             base.OnRemove();
+            EntityMgr.Dispose();
+            EntityMgr = null;
             Connection.Dispose();
             Connection = null;
         }
@@ -39,6 +43,18 @@ namespace Zyq.Game.Client
             {
                 Connection.Send(writer);
             }
+        }
+
+        public override void OnUpdate(float delta)
+        {
+            base.OnUpdate(delta);
+            EntityMgr.OnUpdate(delta);
+        }
+
+        public override void OnFixedUpdate(float delta)
+        {
+            base.OnFixedUpdate(delta);
+            EntityMgr.OnFixedUpdate(delta);
         }
 
         public override void OnNetConnect(NetworkConnection network)

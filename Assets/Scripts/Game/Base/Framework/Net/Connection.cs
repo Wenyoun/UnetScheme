@@ -69,7 +69,6 @@ namespace Zyq.Game.Base
                 {
                     m_Handlers[i].Unregister();
                 }
-
                 m_Handlers.Clear();
                 m_Handlers = null;
             }

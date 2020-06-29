@@ -119,6 +119,6 @@ namespace Zyq.Game.Base
             mTemp.AddRange(mEntityLts);
         }
 
-        public List<Entity> ALL { get { return mEntityLts; } }
+        public List<Entity> Entitys { get { return mEntityLts; } }
     }
 }
