@@ -6,7 +6,7 @@ namespace Zyq.Game.Base
 {
     public class Connection : IDisposable
     {
-        private bool m_IsConnected;
+        private bool m_Connected;
         private NetworkConnection m_Network;
         private List<IProtocolHandler> m_Handlers;
 
@@ -17,13 +17,13 @@ namespace Zyq.Game.Base
 
         public void OnConnect(NetworkConnection network)
         {
-            m_IsConnected = true;
+            m_Connected = true;
             m_Network = network;
         }
 
         public void OnDisconnect(NetworkConnection network)
         {
-            m_IsConnected = false;
+            m_Connected = false;
             ClearRegisterProtocols();
         }
 
@@ -37,7 +37,7 @@ namespace Zyq.Game.Base
 
         public void Dispose()
         {
-            m_IsConnected = false;
+            m_Connected = false;
             ClearRegisterProtocols();
             m_Network.Dispose();
             m_Network = null;
@@ -55,7 +55,7 @@ namespace Zyq.Game.Base
 
         public void Send(NetworkWriter writer)
         {
-            if (m_IsConnected)
+            if (m_Connected)
             {
                 m_Network.SendWriter(writer, 0);
             }
