@@ -45,8 +45,8 @@ namespace Zyq.Game.Base
             }
         }
 
-        public abstract void OnNetConnect(NetworkConnection net);
+        public abstract void OnNetConnect(NetworkConnection network);
 
-        public abstract void OnNetDisconnect(NetworkConnection net);
+        public abstract void OnNetDisconnect(NetworkConnection network);
     }
 }
