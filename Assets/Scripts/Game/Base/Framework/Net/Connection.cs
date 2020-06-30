@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine.Networking;
+using System.Collections.Generic;
 
 namespace Zyq.Game.Base
 {
