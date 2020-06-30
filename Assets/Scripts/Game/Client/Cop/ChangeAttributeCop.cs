@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using Zyq.Game.Base;
+﻿using Zyq.Game.Base;
 
 namespace Zyq.Game.Client
 {
@@ -12,12 +11,6 @@ namespace Zyq.Game.Client
             {
                 UnityEngine.Debug.Log(attribute.Hp1 + "." + attribute.Hp11);
             });
-        }
-
-        [Recv(NetMsgId.Msg_Test)]
-        public void TestRecv(string username)
-        {
-            Debug.Log(username);
         }
     }
 }
