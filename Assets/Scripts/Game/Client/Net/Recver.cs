@@ -12,10 +12,10 @@ namespace Zyq.Game.Client
         }
 
         [Recv(NetMsgId.Msg_Create_Player)]
-        public static void OnCreatePlayer(uint eid, uint gid, string username)
+        public static void OnCreatePlayer(uint eid, uint gid, Vector3 position)
         {
-            Debug.Log("客户端创建Entity:" + eid + "," + gid + "," + username);
-            Entity entity = EntityFactory.CreatePlayer(eid, gid);
+            Debug.Log("客户端创建Entity:" + eid + "," + gid + "," + position);
+            Entity entity = EntityFactory.CreatePlayer(eid, gid, position);
             Client.Ins.EntityMgr.AddEntity(entity);
         }
     }

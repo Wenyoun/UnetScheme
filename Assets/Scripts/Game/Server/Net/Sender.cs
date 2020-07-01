@@ -1,4 +1,5 @@
-﻿using Zyq.Game.Base;
+﻿using UnityEngine;
+using Zyq.Game.Base;
 
 namespace Zyq.Game.Server
 {
@@ -10,7 +11,7 @@ namespace Zyq.Game.Server
         }
 
         [Broadcast(NetMsgId.Msg_Create_Player)]
-        public static void BroadcastCreatePlayer(uint eid, uint gid, string username)
+        public static void BroadcastCreatePlayer(uint eid, uint gid, Vector3 position)
         {
         }
     }

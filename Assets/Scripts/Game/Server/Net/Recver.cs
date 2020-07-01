@@ -27,11 +27,13 @@ namespace Zyq.Game.Server
 
             Sender.RpcTargetLoginResult(connection, true);
 
-            Entity entity = EntityFactory.CreatePlayer(connection);
+            Vector3 position = new Vector3(1, 0, 1);
+
+            Entity entity = EntityFactory.CreatePlayer(connection, position);
 
             Server.Ins.EntityMgr.AddEntity(entity);
 
-            Sender.BroadcastCreatePlayer(entity.Eid, entity.Gid, v11);
+            Sender.BroadcastCreatePlayer(entity.Eid, entity.Gid, position);
         }
     }
 }

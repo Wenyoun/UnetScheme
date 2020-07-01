@@ -2,7 +2,7 @@
 
 namespace Zyq.Game.Base
 {
-    public class ConnectionFeture : AbsFeture
+    public class ConnectionFeture : IFeture
     {
         #region Fields
         private Connection m_Connection;

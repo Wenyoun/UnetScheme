@@ -1,4 +1,5 @@
-﻿using Zyq.Game.Base;
+﻿using UnityEngine;
+using Zyq.Game.Base;
 
 namespace Zyq.Game.Server
 {
@@ -6,13 +7,14 @@ namespace Zyq.Game.Server
     {
         private static uint id = 1;
 
-        public static Entity CreatePlayer(Connection connection)
+        public static Entity CreatePlayer(Connection connection, Vector3 position)
         {
             Entity entity = new Entity(id++, Group.Player);
             entity.OnInit();
 
             entity.AddSyncAttribute(new BaseAttribute());
             entity.AddFeture(new ConnectionFeture(connection));
+            entity.AddFeture(new ServerObjectFeture(position));
             entity.AddCop<ChangeAttributeCop>();
 
             return entity;

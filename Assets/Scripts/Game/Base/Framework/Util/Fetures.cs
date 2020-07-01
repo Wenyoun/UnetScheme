@@ -8,25 +8,18 @@ namespace Zyq.Game.Base
         private List<IFeture> mFetLts;
         private Dictionary<Type, IFeture> mFetDys;
 
-        public Fetures()
+        public void OnInit()
         {
             mFetLts = new List<IFeture>();
             mFetDys = new Dictionary<Type, IFeture>();
         }
 
-        public void OnInit()
-        {
-            Dispose();
-        }
-
         public void Dispose()
         {
-            for (int i = 0; i < mFetLts.Count; ++i)
-            {
-                mFetLts[i].OnRemove();
-            }
             mFetLts.Clear();
             mFetDys.Clear();
+            mFetLts = null;
+            mFetDys = null;
         }
 
         public T AddFeture<T>(T feture, IEntity entity) where T : IFeture
@@ -36,7 +29,6 @@ namespace Zyq.Game.Base
             {
                 mFetLts.Add(feture);
                 mFetDys.Add(type, feture);
-                feture.OnInit(entity);
                 return (T)feture;
             }
             return default(T);
