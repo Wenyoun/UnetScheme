@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
@@ -32,8 +31,7 @@ namespace Zyq.Weaver
 
                 if (isServer)
                 {
-                    FieldDefinition dirty = new FieldDefinition("m_Dirty", FieldAttributes.Private, module.ImportReference(typeof(long)));
-                    type.Fields.Add(dirty);
+                    FieldDefinition dirty = FieldFactory.CreateField(module, type, "m_Dirty", FieldAttributes.Private, module.ImportReference(typeof(long)));
 
                     ModifyIsSerializeMethod(module, type, dirty);
 
@@ -42,7 +40,7 @@ namespace Zyq.Weaver
                     {
                         FieldDefinition field = fields[i];
                         string name = field.Name;
-                        MethodDefinition get = CreateGetMethod(type, field, name);
+                        MethodDefinition get = CreateGetMethod(module, type, field, name);
                         MethodDefinition set = CreateSetMethod(module, type, field, name, dirty, i);
 
                         PropertyDefinition propertyDefinition = new PropertyDefinition("Sync" + name, PropertyAttributes.None, field.FieldType)
@@ -60,7 +58,7 @@ namespace Zyq.Weaver
                     }
 
                     //Serialize
-                    MethodDefinition serialize = type.Methods.Single(m => m.Name == "Serialize");
+                    MethodDefinition serialize = ResolveHelper.ResolveMethod(type, "Serialize");
 
                     serialize.Body.InitLocals = true;
                     ILProcessor processor = serialize.Body.GetILProcessor();
@@ -107,7 +105,7 @@ namespace Zyq.Weaver
                 else
                 {
                     //Deserialize
-                    MethodDefinition deserialize = type.Methods.Single(m => m.Name == "Deserialize");
+                    MethodDefinition deserialize = ResolveHelper.ResolveMethod(type, "Deserialize");
 
                     deserialize.Body.InitLocals = true;
                     ILProcessor processor = deserialize.Body.GetILProcessor();
@@ -145,7 +143,7 @@ namespace Zyq.Weaver
 
         private static void ModifyIsSerializeMethod(ModuleDefinition module, TypeDefinition type, FieldDefinition dirty)
         {
-            MethodDefinition method = type.Methods.Single(m => m.Name == "IsSerialize");
+            MethodDefinition method = ResolveHelper.ResolveMethod(type, "IsSerialize");
             method.Body.Variables.Clear();
             method.Body.Instructions.Clear();
 
@@ -164,11 +162,15 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Ret));
         }
 
-        private static MethodDefinition CreateGetMethod(TypeDefinition type, FieldDefinition field, string name)
+        private static MethodDefinition CreateGetMethod(ModuleDefinition module, TypeDefinition type, FieldDefinition field, string name)
         {
-            MethodDefinition get = new MethodDefinition("get_Sync" + name, MethodAttributes.Public |
-                                                                           MethodAttributes.SpecialName |
-                                                                           MethodAttributes.HideBySig, field.FieldType);
+            MethodDefinition get = MethodFactory.CreateMethod(module,
+                                                              type,
+                                                              "get_Sync" + name,
+                                                              MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, 
+                                                              field.FieldType,
+                                                              true);
+
             ILProcessor processor = get.Body.GetILProcessor();
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldfld, field));
@@ -176,14 +178,18 @@ namespace Zyq.Weaver
             get.Body.Variables.Add(new VariableDefinition(field.FieldType));
             get.Body.InitLocals = true;
             get.SemanticsAttributes = MethodSemanticsAttributes.Getter;
+
             return get;
         }
 
         public static MethodDefinition CreateSetMethod(ModuleDefinition module, TypeDefinition type, FieldDefinition field, string name, FieldDefinition dirty, int offset)
         {
-            MethodDefinition set = new MethodDefinition("set_Sync" + name, MethodAttributes.Public |
-                                                                           MethodAttributes.SpecialName |
-                                                                           MethodAttributes.HideBySig, module.ImportReference(typeof(void)));
+            MethodDefinition set = MethodFactory.CreateMethod(module,
+                                                              type, 
+                                                              "set_Sync" + name,
+                                                              MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+                                                              module.ImportReference(typeof(void)),
+                                                              true);
 
             set.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
             set.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.None, field.FieldType));

@@ -28,9 +28,9 @@ namespace Zyq.Weaver
             return null;
         }
 
-        public static FieldReference ResolveField(TypeReference type, string fieldName)
+        public static FieldDefinition ResolveField(TypeReference type, string fieldName)
         {
-            foreach (FieldReference field in type.Resolve().Fields)
+            foreach (FieldDefinition field in type.Resolve().Fields)
             {
                 if (field.Name == fieldName)
                 {
