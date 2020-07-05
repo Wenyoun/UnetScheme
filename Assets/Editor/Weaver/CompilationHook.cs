@@ -84,8 +84,6 @@ namespace Zyq.Weaver
                 return;
             }
 
-            UnityEngine.Debug.Log(assemblyPath);
-
             string networkingRuntimeDLL = Helpers.FindNetworkingRuntime();
 
             string unityEngineCoreModuleRuntimeDLL = UnityEditorInternal.InternalEditorUtility.GetEngineCoreModuleAssemblyPath();
