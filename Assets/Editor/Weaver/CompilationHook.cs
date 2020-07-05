@@ -1,37 +1,73 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Compilation;
+using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
-    public class CompilationHook
+    public static class CompilationHook
     {
+        private const string Server = "Zyq.Game.Server";
+        private const string Client = "Zyq.Game.Client";
+
         [InitializeOnLoadMethod]
         private static void OnInitializeOnLoad()
         {
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             CompilationPipeline.assemblyCompilationFinished += OnAssemblyCompilationFinished;
-            if (!SessionState.GetBool("MIRROR_WEAVED", false))
+            OnPlayModeStateChanged(PlayModeStateChange.ExitingEditMode);
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.ExitingEditMode)
             {
-                SessionState.SetBool("MIRROR_WEAVED", true);
-                SessionState.SetBool("MIRROR_WEAVE_SUCCESS", true);
-                WeaveExistingAssemblies();
+                CompilationHook.CheckWeaveClientAssemblies();
+                CompilationHook.CheckWeaveServerAssemblies();
             }
         }
 
-        [MenuItem("Test/Execute")]
-        public static void WeaveExistingAssemblies()
+        private static void CheckWeaveClientAssemblies()
         {
-            foreach (Assembly assembly in CompilationPipeline.GetAssemblies())
+            if (!SessionState.GetBool(Client, false))
             {
-                if (File.Exists(assembly.outputPath))
+                foreach (Assembly assembly in CompilationPipeline.GetAssemblies())
                 {
-                    OnAssemblyCompilationFinished(assembly.outputPath, new CompilerMessage[0]);
+                    if (File.Exists(assembly.outputPath) && assembly.outputPath.IndexOf(Client) >= 0)
+                    {
+                        OnAssemblyCompilationFinished(assembly.outputPath, new CompilerMessage[0]);
+                        break;
+                    }
+                }
+
+                if (SessionState.GetBool(Client, false))
+                {
+                    UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
                 }
             }
-            UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
         }
+
+        private static void CheckWeaveServerAssemblies()
+        {
+            if (!SessionState.GetBool(Server, false))
+            {
+                foreach (Assembly assembly in CompilationPipeline.GetAssemblies())
+                {
+                    if (File.Exists(assembly.outputPath) && assembly.outputPath.IndexOf(Server) >= 0)
+                    {
+                        OnAssemblyCompilationFinished(assembly.outputPath, new CompilerMessage[0]);
+                        break;
+                    }
+                }
+
+                if (SessionState.GetBool(Server, false))
+                {
+                    UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
+                }
+            }
+        }
+
 
         private static void OnAssemblyCompilationFinished(string assemblyPath, CompilerMessage[] messages)
         {
@@ -48,6 +84,8 @@ namespace Zyq.Weaver
                 return;
             }
 
+            UnityEngine.Debug.Log(assemblyPath);
+
             string networkingRuntimeDLL = Helpers.FindNetworkingRuntime();
 
             string unityEngineCoreModuleRuntimeDLL = UnityEditorInternal.InternalEditorUtility.GetEngineCoreModuleAssemblyPath();
@@ -56,10 +94,9 @@ namespace Zyq.Weaver
 
             HashSet<string> dependencyPaths = Helpers.GetDependecyPaths(assemblyPath);
 
-            if (!Program.Process(unityEngineCoreModuleRuntimeDLL, networkingRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray()))
-            {
-                SessionState.SetBool("MIRROR_WEAVE_SUCCESS", false);
-            }
+            bool result = WeaverProgram.WeaveAssemblies(unityEngineCoreModuleRuntimeDLL, networkingRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray());
+            string name = Path.GetFileName(assemblyPath).Replace(".dll", "");
+            SessionState.SetBool(name, result);
         }
     }
 }

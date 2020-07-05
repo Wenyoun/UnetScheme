@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Mono.CecilX;
-using Mono.CecilX.Cil;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace Zyq.Weaver
 {
@@ -82,9 +79,9 @@ namespace Zyq.Weaver
                 SetupUnityTypes();
                 try
                 {
-                    if (!Weave(unityEngineDLL, networkingDLL, assemblyPath, depAssemblyPaths))
+                    if (Weave(unityEngineDLL, networkingDLL, assemblyPath, depAssemblyPaths))
                     {
-                        return false;
+                        return true;
                     }
                 }
                 catch (Exception e)
@@ -92,7 +89,7 @@ namespace Zyq.Weaver
                     Debug.LogError("Exception:" + e);
                 }
             }
-            return true;
+            return false;
         }
 
         private static bool Weave(string unityEngineDLL, string networkingDLL, string assemblyPath, string[] depAssemblyPaths)
@@ -112,14 +109,15 @@ namespace Zyq.Weaver
 
                 SetupBaseModuleTypes();
 
-                bool result = WeaveModule(CurrentAssembly.MainModule);
-                if (result)
+                if (WeaveModule(CurrentAssembly.MainModule))
                 {
                     WriterParameters writeParams = new WriterParameters { WriteSymbols = true };
                     CurrentAssembly.Write(writeParams);
+                    return true;
                 }
             }
-            return true;
+
+            return false;
         }
 
         private static bool WeaveModule(ModuleDefinition module)

@@ -13,8 +13,6 @@ namespace Zyq.Weaver
             Dictionary<short, MethodDefinition> broadcastAttributeMethods;
             List<TypeDefinition> copTypes;
             List<TypeDefinition> syncTypes;
-            Dictionary<FieldDefinition, MethodDefinition> gets;
-            Dictionary<FieldDefinition, MethodDefinition> sets;
 
             ParseAttribute.Parse(module,
                                  ref protocol,
@@ -41,7 +39,7 @@ namespace Zyq.Weaver
 
             if (syncTypes.Count > 0)
             {
-                SyncProcessor.Weave(false, module, syncTypes, out gets, out sets);
+                ClientSyncProcessor.Weave(module, syncTypes);
             }
 
             return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || copTypes.Count > 0 || syncTypes.Count > 0;
