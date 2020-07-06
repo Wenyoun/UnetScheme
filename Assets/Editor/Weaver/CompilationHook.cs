@@ -23,18 +23,18 @@ namespace Zyq.Weaver
         {
             if (state == PlayModeStateChange.ExitingEditMode)
             {
-                CompilationHook.CheckWeaveClientAssemblies();
-                CompilationHook.CheckWeaveServerAssemblies();
+                CompilationHook.CheckWeaveAssemblies(Client);
+                CompilationHook.CheckWeaveAssemblies(Server);
             }
         }
 
-        private static void CheckWeaveClientAssemblies()
+        private static void CheckWeaveAssemblies(string module)
         {
-            if (!SessionState.GetBool(Client, false))
+            if (!SessionState.GetBool(module, false))
             {
                 foreach (Assembly assembly in CompilationPipeline.GetAssemblies())
                 {
-                    if (File.Exists(assembly.outputPath) && assembly.outputPath.IndexOf(Client) >= 0)
+                    if (File.Exists(assembly.outputPath) && assembly.outputPath.IndexOf(module) >= 0)
                     {
                         OnAssemblyCompilationFinished(assembly.outputPath, new CompilerMessage[0]);
                         break;
@@ -47,27 +47,6 @@ namespace Zyq.Weaver
                 }
             }
         }
-
-        private static void CheckWeaveServerAssemblies()
-        {
-            if (!SessionState.GetBool(Server, false))
-            {
-                foreach (Assembly assembly in CompilationPipeline.GetAssemblies())
-                {
-                    if (File.Exists(assembly.outputPath) && assembly.outputPath.IndexOf(Server) >= 0)
-                    {
-                        OnAssemblyCompilationFinished(assembly.outputPath, new CompilerMessage[0]);
-                        break;
-                    }
-                }
-
-                if (SessionState.GetBool(Server, false))
-                {
-                    UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
-                }
-            }
-        }
-
 
         private static void OnAssemblyCompilationFinished(string assemblyPath, CompilerMessage[] messages)
         {
@@ -98,8 +77,8 @@ namespace Zyq.Weaver
             HashSet<string> dependencyPaths = Helpers.GetDependecyPaths(assemblyPath);
 
             bool result = WeaverProgram.WeaveAssemblies(unityEngineCoreModuleRuntimeDLL, networkingRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray());
-            string name = Path.GetFileName(assemblyPath).Replace(".dll", "");
-            SessionState.SetBool(name, result);
+            string module = Path.GetFileName(assemblyPath).Replace(".dll", "");
+            SessionState.SetBool(module, result);
         }
     }
 }
