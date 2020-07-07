@@ -33,5 +33,17 @@ namespace Zyq.Game.Client
                 }
             }
         }
+
+        private void OnTest(NetworkMessage msg)
+        {
+            NetworkReader reader = msg.reader;
+            byte v1 = reader.ReadByte();
+            double v2 = reader.ReadDouble();
+            string v3 = reader.ReadString();
+            Test1 v4 = new Test1();
+            v4.mDeserialize(reader);
+            int v5 = reader.ReadInt32();
+            Recver.RecvRsp(v1, v2, v3, v4, v5);
+        }
     }
 }

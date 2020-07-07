@@ -40,18 +40,34 @@ namespace Zyq.Weaver
                     processor.Append(processor.Create(OpCodes.Nop));
                     processor.Append(processor.Create(OpCodes.Ldarg_1));
                     processor.Append(processor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.NetworkMessageReaderField)));
+                    processor.Append(processor.Create(OpCodes.Stloc, 0));
 
                     Collection<ParameterDefinition> parms = method.Parameters;
                     for (int i = 0; i < parms.Count; ++i)
                     {
-                        ParameterDefinition pd = parms[i];
-                        protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(pd.ParameterType)));
-                        processor.Append(processor.Create(OpCodes.Stloc, i));
-                        processor.Append(processor.Create(OpCodes.Ldloc_0));
-                        processor.Append(InstructionFactory.CreateReadTypeInstruction(module, processor, pd.ParameterType.FullName));
+                        ParameterDefinition parm = parms[i];
+                        protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
+                        if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
+                        {
+                            processor.Append(processor.Create(OpCodes.Ldloc_0));
+                            processor.Append(BaseTypeFactory.CreateReadTypeInstruction(module, processor, parm.ParameterType.FullName));
+                            processor.Append(processor.Create(OpCodes.Stloc, i + 1));
+                        }
+                        else
+                        {
+                            TypeDefinition parmType = parm.ParameterType as TypeDefinition;
+                            if (parmType != null && parmType.IsValueType)
+                            {
+                                MethodDefinition deserialize = StructFactory.CreateDeserialize(module, parmType);
+                                processor.Append(processor.Create(OpCodes.Ldloca, i + 1));
+                                processor.Append(processor.Create(OpCodes.Initobj, parmType));
+                                processor.Append(processor.Create(OpCodes.Ldloca, i + 1));
+                                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                processor.Append(processor.Create(OpCodes.Call, deserialize));
+                            }
+                        }
                     }
 
-                    processor.Append(processor.Create(OpCodes.Stloc, parms.Count));
                     for (int i = 0; i < parms.Count; ++i)
                     {
                         processor.Append(processor.Create(OpCodes.Ldloc, i + 1));

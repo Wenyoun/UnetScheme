@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 
 namespace Zyq.Weaver
 {
-    public static class InstructionFactory
+    public static class BaseTypeFactory
     {
         private class TypeWrapper
         {
@@ -25,7 +25,7 @@ namespace Zyq.Weaver
 
         private static Dictionary<string, TypeWrapper> ReadMappers = new Dictionary<string, TypeWrapper>();
 
-        static InstructionFactory()
+        static BaseTypeFactory()
         {
             ReadMappers.Add("System.Byte", new TypeWrapper(typeof(byte), "ReadByte", "Write"));
             ReadMappers.Add("System.Boolean", new TypeWrapper(typeof(bool), "ReadBoolean", "Write"));
@@ -44,6 +44,11 @@ namespace Zyq.Weaver
             ReadMappers.Add("UnityEngine.Quaternion", new TypeWrapper(typeof(Quaternion), "ReadQuaternion", "Write"));
         }
 
+        public static bool IsBaseType(string type)
+        {
+            return ReadMappers.ContainsKey(type);
+        }
+
         public static Instruction CreateReadTypeInstruction(ModuleDefinition module, ILProcessor processor, string type)
         {
             TypeWrapper wrapper = null;
@@ -53,7 +58,7 @@ namespace Zyq.Weaver
                 return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod(wrapper.readMethod, Type.EmptyTypes)));
             }
 
-            throw new Exception("CreateReadTypeInstruction中无法确定的类型:" + type);
+            return null;
         }
 
         public static Instruction CreateWriteTypeInstruction(ModuleDefinition module, ILProcessor processor, string type)
@@ -65,7 +70,7 @@ namespace Zyq.Weaver
                 return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkWriter).GetMethod(wrapper.writeMethod, new Type[] { wrapper.type })));
             }
 
-            throw new Exception("CreateWriteTypeInstruction中无法确定的类型:" + type);
+            return null;
         }
     }
 }

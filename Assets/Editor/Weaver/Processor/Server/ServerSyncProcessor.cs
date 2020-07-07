@@ -82,7 +82,7 @@ namespace Zyq.Weaver
                 processor.Append(processor.Create(OpCodes.Ldarg_1));
                 processor.Append(processor.Create(OpCodes.Ldarg_0));
                 processor.Append(processor.Create(OpCodes.Ldfld, dirty));
-                processor.Append(InstructionFactory.CreateWriteTypeInstruction(module, processor, dirty.FieldType.FullName));
+                processor.Append(BaseTypeFactory.CreateWriteTypeInstruction(module, processor, dirty.FieldType.FullName));
 
                 serialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
 
@@ -243,7 +243,7 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Ldarg_1));
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldfld, field));
-            processor.Append(InstructionFactory.CreateWriteTypeInstruction(module, processor, field.FieldType.FullName));
+            processor.Append(BaseTypeFactory.CreateWriteTypeInstruction(module, processor, field.FieldType.FullName));
             processor.Append(end);
         }
     }

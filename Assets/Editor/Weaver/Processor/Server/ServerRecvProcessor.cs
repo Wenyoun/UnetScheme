@@ -50,7 +50,7 @@ namespace Zyq.Weaver
                             protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(pd.ParameterType)));
                             processor.Append(processor.Create(OpCodes.Stloc, i - 1));
                             processor.Append(processor.Create(OpCodes.Ldloc_0));
-                            processor.Append(InstructionFactory.CreateReadTypeInstruction(module, processor, pd.ParameterType.FullName));
+                            processor.Append(BaseTypeFactory.CreateReadTypeInstruction(module, processor, pd.ParameterType.FullName));
                         }
                     }
 

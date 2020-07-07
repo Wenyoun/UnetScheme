@@ -37,7 +37,7 @@ namespace Zyq.Weaver
 
                 processor.Append(processor.Create(OpCodes.Nop));
                 processor.Append(processor.Create(OpCodes.Ldarg_1));
-                processor.Append(InstructionFactory.CreateReadTypeInstruction(module, processor, module.ImportReference(typeof(long)).ToString()));
+                processor.Append(BaseTypeFactory.CreateReadTypeInstruction(module, processor, module.ImportReference(typeof(long)).ToString()));
                 processor.Append(processor.Create(OpCodes.Stloc_0));
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                 processor.Append(processor.Create(OpCodes.Ldc_I8, 0L));
@@ -79,7 +79,7 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldarg_1));
-            processor.Append(InstructionFactory.CreateReadTypeInstruction(module, processor, field.FieldType.FullName));
+            processor.Append(BaseTypeFactory.CreateReadTypeInstruction(module, processor, field.FieldType.FullName));
             processor.Append(processor.Create(OpCodes.Stfld, field));
             processor.Append(end);
         }

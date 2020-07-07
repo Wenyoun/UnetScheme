@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
+using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
 {
@@ -17,6 +18,15 @@ namespace Zyq.Game.Client
             Debug.Log("客户端创建Entity:" + eid + "," + gid + "," + position);
             Entity entity = EntityFactory.CreatePlayer(eid, gid, position);
             Client.Ins.EntityMgr.AddEntity(entity);
+        }
+
+        [Recv(NetMsgId.Msg_Create_Player1)]
+        public static void RecvRsp(byte v1,
+                                   double v2,
+                                   string v3,
+                                   Test1 v4,
+                                   int v5)
+        {
         }
     }
 }

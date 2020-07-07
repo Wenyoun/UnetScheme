@@ -94,7 +94,7 @@ namespace Zyq.Weaver
                                         handler.Body.Variables.Add(new VariableDefinition(module.ImportReference(pd.ParameterType)));
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, i));
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
-                                        handlerProcessor.Append(InstructionFactory.CreateReadTypeInstruction(module, processor, pd.ParameterType.FullName));
+                                        handlerProcessor.Append(BaseTypeFactory.CreateReadTypeInstruction(module, processor, pd.ParameterType.FullName));
                                     }
                                     handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, parms.Count));
                                     handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldarg_0));
