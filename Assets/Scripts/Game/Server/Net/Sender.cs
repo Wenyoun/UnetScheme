@@ -15,4 +15,19 @@ namespace Zyq.Game.Server
         {
         }
     }
+
+    public struct Test1
+    {
+        public int v1;
+        public double v2;
+        public Test2 v3;
+        public string v4;
+    }
+
+    public struct Test2
+    {
+        public int v1;
+        public double v2;
+        public string v3;
+    }
 }

@@ -19,11 +19,13 @@ namespace Zyq.Game.Server
             double v10,
             string v11,
             Vector2 v12,
+            Test1 test1,
             Vector3 v13,
             Vector4 v14,
             Quaternion v15)
         {
             Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" + v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15);
+            Debug.Log(test1.v1 + "," + test1.v2 + "," + test1.v4 + ",(" + test1.v3.v1 + "," + test1.v3.v2 + "," + test1.v3.v3 + ")");
 
             Sender.RpcTargetLoginResult(connection, true);
 
