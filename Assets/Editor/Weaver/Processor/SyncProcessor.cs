@@ -84,7 +84,7 @@ namespace Zyq.Weaver
                     processor.Append(processor.Create(OpCodes.Ldarg_1));
                     processor.Append(processor.Create(OpCodes.Ldarg_0));
                     processor.Append(processor.Create(OpCodes.Ldfld, dirty));
-                    processor.Append(BaseTypeFactory.CreateWriteTypeInstruction(module, processor, dirty.FieldType.FullName));
+                    processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, dirty.FieldType.FullName));
 
                     serialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
 
@@ -116,7 +116,7 @@ namespace Zyq.Weaver
 
                     processor.Append(processor.Create(OpCodes.Nop));
                     processor.Append(processor.Create(OpCodes.Ldarg_1));
-                    processor.Append(BaseTypeFactory.CreateReadTypeInstruction(module, processor, module.ImportReference(typeof(long)).ToString()));
+                    processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, module.ImportReference(typeof(long)).ToString()));
                     processor.Append(processor.Create(OpCodes.Stloc_0));
                     processor.Append(processor.Create(OpCodes.Ldloc_0));
                     processor.Append(processor.Create(OpCodes.Ldc_I8, 0L));
@@ -282,7 +282,7 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Ldarg_1));
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldfld, field));
-            processor.Append(BaseTypeFactory.CreateWriteTypeInstruction(module, processor, field.FieldType.FullName));
+            processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, field.FieldType.FullName));
             processor.Append(end);
         }
 
@@ -304,7 +304,7 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldarg_1));
-            processor.Append(BaseTypeFactory.CreateReadTypeInstruction(module, processor, field.FieldType.FullName));
+            processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, field.FieldType.FullName));
             processor.Append(processor.Create(OpCodes.Stfld, field));
             processor.Append(end);
         }

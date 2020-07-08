@@ -37,14 +37,14 @@ namespace Zyq.Weaver
                         processor.Append(processor.Create(OpCodes.Nop));
                         processor.Append(processor.Create(OpCodes.Ldloc_0));
                         processor.Append(processor.Create(OpCodes.Ldarg_S, index));
-                        processor.Append(BaseTypeFactory.CreateWriteTypeInstruction(module, processor, parm.ParameterType.ToString()));
+                        processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parm.ParameterType.ToString()));
                     }
                     else
                     {
                         TypeDefinition parmType = parm.ParameterType as TypeDefinition;
                         if (parmType != null && parmType.IsValueType)
                         {
-                            MethodDefinition serialize = StructFactory.CreateSerialize(module, parmType);
+                            MethodDefinition serialize = StructMethodFactory.CreateSerialize(module, parmType);
                             processor.Append(processor.Create(OpCodes.Ldarga_S, index));
                             processor.Append(processor.Create(OpCodes.Ldloc_0));
                             processor.Append(processor.Create(OpCodes.Call, serialize));

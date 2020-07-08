@@ -5,14 +5,24 @@ namespace Zyq.Weaver
 {
     public static class MethodFactory
     {
-        public static MethodDefinition CreateMethod(ModuleDefinition module, TypeDefinition type, string methodName, MethodAttributes attributes, bool isEmpty = false)
+        public static MethodDefinition CreateMethod(ModuleDefinition module,
+                                                    TypeDefinition type,
+                                                    string methodName,
+                                                    MethodAttributes attributes,
+                                                    bool isEmpty = false)
         {
             return CreateMethod(module, type, methodName, attributes, module.ImportReference(typeof(void)), isEmpty);
         }
 
-        public static MethodDefinition CreateMethod(ModuleDefinition module, TypeDefinition type, string methodName, MethodAttributes attributes, TypeReference returnType, bool isEmpty = false)
+        public static MethodDefinition CreateMethod(ModuleDefinition module,
+                                                    TypeDefinition type,
+                                                    string methodName,
+                                                    MethodAttributes attributes,
+                                                    TypeReference returnType,
+                                                    bool isEmpty = false)
         {
             MethodDefinition method = ResolveHelper.ResolveMethod(type, methodName);
+
             if (method == null)
             {
                 method = new MethodDefinition(methodName, attributes, returnType);

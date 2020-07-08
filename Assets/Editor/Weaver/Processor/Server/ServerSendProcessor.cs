@@ -38,7 +38,7 @@ namespace Zyq.Weaver
                         processor.InsertBefore(first, processor.Create(OpCodes.Nop));
                         processor.InsertBefore(first, processor.Create(OpCodes.Ldloc_0));
                         processor.InsertBefore(first, processor.Create(OpCodes.Ldarg_S, (byte)(method.IsStatic ? i : i + 1)));
-                        processor.InsertBefore(first, BaseTypeFactory.CreateWriteTypeInstruction(module, processor, parms[i].ParameterType.ToString()));
+                        processor.InsertBefore(first, BaseTypeFactory.CreateWriteInstruction(module, processor, parms[i].ParameterType.ToString()));
                     }
                 }
 

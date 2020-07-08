@@ -33,7 +33,7 @@ namespace Zyq.Weaver
                     processor.Append(processor.Create(OpCodes.Nop));
                     processor.Append(processor.Create(OpCodes.Ldloc_0));
                     processor.Append(processor.Create(OpCodes.Ldarg_S, (byte)(method.IsStatic ? i : i + 1)));
-                    processor.Append(BaseTypeFactory.CreateWriteTypeInstruction(module, processor, pd.ParameterType.ToString()));
+                    processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, pd.ParameterType.ToString()));
                 }
 
                 processor.Append(processor.Create(OpCodes.Ldloc_0));

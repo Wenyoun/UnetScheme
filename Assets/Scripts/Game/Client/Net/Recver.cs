@@ -23,7 +23,6 @@ namespace Zyq.Game.Client
         [Recv(NetMsgId.Msg_Create_Player1)]
         public static void RecvRsp(byte v1,
                                    double v2,
-                                   string v3,
                                    Test1 v4,
                                    int v5)
         {

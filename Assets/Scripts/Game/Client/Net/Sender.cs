@@ -25,55 +25,23 @@ namespace Zyq.Game.Client
         {
         }
 
-        //[Send(NetMsgId.Msg_Create_Player1)]
+        [Send(NetMsgId.Msg_Create_Player1)]
         public static void RpcLogin(byte v1,
                                     int v2,
                                     Test1 v3)
         {
-            /**
-            NetworkWriter writer = new NetworkWriter();
-            writer.StartMessage(1);
-            writer.Write(v1);
-            writer.Write(v2);
-            v3.Serialize(writer);
-            writer.FinishMessage();
-            Client.Ins.Send(writer);
-            **/
         }
     }
+
     public struct Test1
     {
         public int v1;
         public int v2;
-        public string v3;
-        //public Test2 v4;
-
-        public void mDeserialize(NetworkReader reader)
-        {
-            v1 = reader.ReadInt32();
-            v2 = reader.ReadInt32();
-            v3 = reader.ReadString();
-        }
+        public Test2 v3;
+        public string v4;
     }
 
     public struct Test2
-    {
-        public int v1;
-        public int v2;
-        public Test3 test3;
-        public string v3;
-
-        /**
-                public void Serialize(NetworkWriter writer)
-                {
-                    writer.Write(v1);
-                    writer.Write(v2);
-                    writer.Write(v3);
-                }
-                **/
-    }
-
-    public struct Test3
     {
         public int v1;
         public int v2;
