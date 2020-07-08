@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
-using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
 {
@@ -36,9 +35,14 @@ namespace Zyq.Game.Client
     public struct Test1
     {
         public int v1;
-        public int v2;
-        public Test2 v3;
-        public string v4;
+        public Test2 v2;
+        public int v3;
+        public Test2 v4;
+        public string v5;
+
+        public void tesD(UnityEngine.Networking.NetworkReader reader)
+        {
+        }
     }
 
     public struct Test2
@@ -46,5 +50,8 @@ namespace Zyq.Game.Client
         public int v1;
         public int v2;
         public string v3;
+        public string v4;
+        public string v5;
+        public string v6;
     }
 }

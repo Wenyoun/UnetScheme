@@ -4,6 +4,11 @@ namespace Zyq.Weaver
 {
     public static class ResolveHelper
     {
+        public static bool HasMethod(TypeDefinition type, string methodName)
+        {
+            return ResolveMethod(type, methodName) != null;
+        }
+
         public static MethodDefinition ResolveMethod(TypeDefinition type, string methodName)
         {
             foreach (MethodDefinition method in type.Methods)

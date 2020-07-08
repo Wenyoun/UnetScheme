@@ -26,7 +26,6 @@ namespace Zyq.Weaver
                     processor.Append(processor.Create(OpCodes.Ldarg_0));
                     processor.Append(processor.Create(OpCodes.Ldfld, field));
                     processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, field.FieldType.ToString()));
-                    processor.Append(processor.Create(OpCodes.Nop));
                 }
                 else
                 {
@@ -38,11 +37,11 @@ namespace Zyq.Weaver
                         processor.Append(processor.Create(OpCodes.Ldflda, field));
                         processor.Append(processor.Create(OpCodes.Ldarg_1));
                         processor.Append(processor.Create(OpCodes.Call, ser));
-                        processor.Append(processor.Create(OpCodes.Nop));
                     }
                 }
             }
 
+            processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ret));
 
             return serialize;
@@ -69,7 +68,6 @@ namespace Zyq.Weaver
                     processor.Append(processor.Create(OpCodes.Ldarg_1));
                     processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, field.FieldType.ToString()));
                     processor.Append(processor.Create(OpCodes.Stfld, field));
-                    processor.Append(processor.Create(OpCodes.Nop));
                 }
                 else
                 {
@@ -81,11 +79,11 @@ namespace Zyq.Weaver
                         processor.Append(processor.Create(OpCodes.Ldflda, field));
                         processor.Append(processor.Create(OpCodes.Ldarg_1));
                         processor.Append(processor.Create(OpCodes.Call, dser));
-                        processor.Append(processor.Create(OpCodes.Nop));
                     }
                 }
             }
 
+            processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ret));
 
             return deserialize;

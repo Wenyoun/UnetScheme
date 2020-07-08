@@ -40,7 +40,7 @@ namespace Zyq.Weaver
                         processor.Append(processor.Create(OpCodes.Nop));
                         processor.Append(processor.Create(OpCodes.Ldarg_1));
                         processor.Append(processor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.NetworkMessageReaderField)));
-                        processor.Append(processor.Create(OpCodes.Stloc, 0));
+                        processor.Append(processor.Create(OpCodes.Stloc_0));
 
                         Collection<ParameterDefinition> parms = method.Parameters;
                         for (int i = 0; i < parms.Count; ++i)

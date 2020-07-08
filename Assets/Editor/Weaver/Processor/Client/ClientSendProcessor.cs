@@ -12,8 +12,8 @@ namespace Zyq.Weaver
             foreach (short key in methods.Keys)
             {
                 MethodDefinition method = methods[key];
-                ILProcessor processor = method.Body.GetILProcessor();
 
+                ILProcessor processor = method.Body.GetILProcessor();
                 method.Body.Variables.Clear();
                 method.Body.Instructions.Clear();
 
@@ -34,7 +34,6 @@ namespace Zyq.Weaver
 
                     if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
                     {
-                        processor.Append(processor.Create(OpCodes.Nop));
                         processor.Append(processor.Create(OpCodes.Ldloc_0));
                         processor.Append(processor.Create(OpCodes.Ldarg_S, index));
                         processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parm.ParameterType.ToString()));
@@ -54,10 +53,10 @@ namespace Zyq.Weaver
 
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                 processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.NetworkWriterFinishMessageMethod)));
-                processor.Append(processor.Create(OpCodes.Nop));
                 processor.Append(processor.Create(OpCodes.Ldsfld, module.ImportReference(WeaverProgram.ClientInsField)));
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                 processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ClientSendMethod)));
+                processor.Append(processor.Create(OpCodes.Nop));
                 processor.Append(processor.Create(OpCodes.Ret));
             }
         }

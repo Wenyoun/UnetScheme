@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
-using Mono.Collections.Generic;
 using UnityEngine.Networking;
+using Mono.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
@@ -49,123 +49,167 @@ namespace Zyq.Weaver
 
                     if (onRemoveMethod == null)
                     {
-                        onRemoveMethod = MethodFactory.CreateMethod(module, type, "OnRemove", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual);
+                        onRemoveMethod = MethodFactory.CreateMethod(module,
+                                                                    type,
+                                                                    "OnRemove",
+                                                                    MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual);
+
                         ILProcessor pro = onRemoveMethod.Body.GetILProcessor();
-                        Instruction ins = onRemoveMethod.Body.Instructions[0];
-                        pro.InsertAfter(ins, pro.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopOnRemoveMethod)));
-                        pro.InsertAfter(ins, pro.Create(OpCodes.Ldarg_0));
+                        Instruction ins = onRemoveMethod.Body.Instructions[onRemoveMethod.Body.Instructions.Count - 1];
+                        pro.InsertBefore(ins, pro.Create(OpCodes.Ldarg_0));
+                        pro.InsertBefore(ins, pro.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopOnRemoveMethod)));
                     }
 
-                    string onRegisterHandlerName = "OnRegister" + type.Name + "Handler";
-                    MethodDefinition registerMethod = MethodFactory.CreateMethod(module, type, onRegisterHandlerName, MethodAttributes.Private | MethodAttributes.HideBySig);
                     {
-                        registerMethod.Body.Instructions.Clear();
-                        registerMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ConnectionFetureType)));
-                        registerMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
+                        string registerHandlerName = "OnRegister" + type.Name + "Handler";
+                        bool isExistsRegisterMethod = ResolveHelper.HasMethod(type, registerHandlerName);
+                        MethodDefinition registerMethod = MethodFactory.CreateMethod(module,
+                                                                                     type,
+                                                                                     registerHandlerName,
+                                                                                     MethodAttributes.Private | MethodAttributes.HideBySig,
+                                                                                     true);
                         {
-                            ILProcessor processor = registerMethod.Body.GetILProcessor();
-                            Instruction ret = processor.Create(OpCodes.Ret);
-                            processor.Append(processor.Create(OpCodes.Nop));
-                            processor.Append(processor.Create(OpCodes.Ldarg_0));
-                            processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopGetEntityMethod)));
-                            processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IEntityGetFetureMethod.MakeGenericMethod(WeaverProgram.ConnectionFetureType))));
-                            processor.Append(processor.Create(OpCodes.Stloc_0));
-                            processor.Append(processor.Create(OpCodes.Ldloc_0));
-                            processor.Append(processor.Create(OpCodes.Ldnull));
-                            processor.Append(processor.Create(OpCodes.Cgt_Un));
-                            processor.Append(processor.Create(OpCodes.Stloc_1));
-                            processor.Append(processor.Create(OpCodes.Ldloc_1));
-                            processor.Append(processor.Create(OpCodes.Brfalse, ret));
-                            foreach (MethodDetail wrapper in methods)
+                            registerMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ConnectionFetureType)));
+                            registerMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
                             {
-                                MethodDefinition handler = MethodFactory.CreateMethod(module, type, "OnHandlerProtocol_" + wrapper.MsgId, MethodAttributes.Private | MethodAttributes.HideBySig, true);
+                                ILProcessor processor = registerMethod.Body.GetILProcessor();
+                                Instruction ret = processor.Create(OpCodes.Ret);
+                                processor.Append(processor.Create(OpCodes.Nop));
+                                processor.Append(processor.Create(OpCodes.Ldarg_0));
+                                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopGetEntityMethod)));
+                                processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IEntityGetFetureMethod.MakeGenericMethod(WeaverProgram.ConnectionFetureType))));
+                                processor.Append(processor.Create(OpCodes.Stloc_0));
+                                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                processor.Append(processor.Create(OpCodes.Ldnull));
+                                processor.Append(processor.Create(OpCodes.Cgt_Un));
+                                processor.Append(processor.Create(OpCodes.Stloc_1));
+                                processor.Append(processor.Create(OpCodes.Ldloc_1));
+                                processor.Append(processor.Create(OpCodes.Brfalse, ret));
+
+                                foreach (MethodDetail wrapper in methods)
                                 {
-                                    handler.Parameters.Add(new ParameterDefinition(module.ImportReference(WeaverProgram.NetowrkMessageType)));
-                                    handler.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
+                                    MethodDefinition handler = MethodFactory.CreateMethod(module,
+                                                                                          type,
+                                                                                          "OnHandlerProtocol_" + wrapper.MsgId,
+                                                                                          MethodAttributes.Private | MethodAttributes.HideBySig,
+                                                                                          true);
+                                    {
+                                        handler.Parameters.Add(new ParameterDefinition(module.ImportReference(WeaverProgram.NetowrkMessageType)));
+                                        handler.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
 
-                                    ILProcessor handlerProcessor = handler.Body.GetILProcessor();
-                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Nop));
-                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldarg_1));
-                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.NetworkMessageReaderField)));
-                                    Collection<ParameterDefinition> parms = wrapper.Method.Parameters;
-                                    for (int i = 0; i < parms.Count; ++i)
-                                    {
-                                        ParameterDefinition pd = parms[i];
-                                        handler.Body.Variables.Add(new VariableDefinition(module.ImportReference(pd.ParameterType)));
-                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, i));
-                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
-                                        handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, pd.ParameterType.FullName));
+                                        ILProcessor handlerProcessor = handler.Body.GetILProcessor();
+                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Nop));
+                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldarg_1));
+                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.NetworkMessageReaderField)));
+                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc_0));
+
+                                        Collection<ParameterDefinition> parms = wrapper.Method.Parameters;
+                                        for (int i = 0; i < parms.Count; ++i)
+                                        {
+                                            ParameterDefinition parm = parms[i];
+                                            handler.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
+                                            if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
+                                            {
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
+                                                handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parm.ParameterType.FullName));
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, i + 1));
+                                            }
+                                            else
+                                            {
+                                                TypeDefinition parmType = parm.ParameterType as TypeDefinition;
+                                                if (parmType != null && parmType.IsValueType)
+                                                {
+                                                    MethodDefinition deserialize = StructMethodFactory.CreateDeserialize(module, parmType);
+                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, i + 1));
+                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Initobj, parmType));
+                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, i + 1));
+                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
+                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Call, deserialize));
+                                                }
+                                            }
+                                        }
+
+                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldarg_0));
+
+                                        for (int i = 0; i < parms.Count; ++i)
+                                        {
+                                            handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc, i + 1));
+                                        }
+
+                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Call, wrapper.Method));
+                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Nop));
+                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ret));
                                     }
-                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, parms.Count));
-                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldarg_0));
-                                    for (int i = 0; i < parms.Count; ++i)
+
                                     {
-                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc, i + 1));
+                                        processor.Append(processor.Create(OpCodes.Nop));
+                                        processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                        processor.Append(processor.Create(OpCodes.Ldc_I4, wrapper.MsgId));
+                                        processor.Append(processor.Create(OpCodes.Ldarg_0));
+                                        processor.Append(processor.Create(OpCodes.Ldftn, handler));
+                                        processor.Append(processor.Create(OpCodes.Newobj, module.ImportReference(typeof(NetworkMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));
+                                        processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionFetureRegisterHandlerMethod)));
+                                        processor.Append(processor.Create(OpCodes.Nop));
                                     }
-                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Call, wrapper.Method));
-                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Nop));
-                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ret));
                                 }
+                                processor.Append(ret);
+                            }
 
+                            if (!isExistsRegisterMethod)
+                            {
+                                ILProcessor pro = onInitMethod.Body.GetILProcessor();
+                                Instruction ins = onInitMethod.Body.Instructions[onInitMethod.Body.Instructions.Count - 1];
+                                pro.InsertBefore(ins, pro.Create(OpCodes.Ldarg_0));
+                                pro.InsertBefore(ins, pro.Create(OpCodes.Call, registerMethod));
+                                pro.InsertBefore(ins, pro.Create(OpCodes.Nop));
+                            }
+                        }
+                    }
+
+
+                    {
+                        string unregisterHandlerName = "OnUnregister" + type.Name + "Handler";
+                        bool isExistsUnregisterMethod = ResolveHelper.HasMethod(type, unregisterHandlerName);
+                        MethodDefinition unregisterMethod = MethodFactory.CreateMethod(module,
+                                                                                       type,
+                                                                                       unregisterHandlerName,
+                                                                                       MethodAttributes.Private | MethodAttributes.HideBySig,
+                                                                                       true);
+                        {
+                            unregisterMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ConnectionFetureType)));
+                            unregisterMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
+                            {
+                                ILProcessor processor = unregisterMethod.Body.GetILProcessor();
+                                Instruction ret = processor.Create(OpCodes.Ret);
+                                processor.Append(processor.Create(OpCodes.Nop));
+                                processor.Append(processor.Create(OpCodes.Ldarg_0));
+                                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopGetEntityMethod)));
+                                processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IEntityGetFetureMethod.MakeGenericMethod(WeaverProgram.ConnectionFetureType))));
+                                processor.Append(processor.Create(OpCodes.Stloc_0));
+                                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                processor.Append(processor.Create(OpCodes.Ldnull));
+                                processor.Append(processor.Create(OpCodes.Cgt_Un));
+                                processor.Append(processor.Create(OpCodes.Stloc_1));
+                                processor.Append(processor.Create(OpCodes.Ldloc_1));
+                                processor.Append(processor.Create(OpCodes.Brfalse, ret));
+                                foreach (MethodDetail wrapper in methods)
                                 {
                                     processor.Append(processor.Create(OpCodes.Nop));
                                     processor.Append(processor.Create(OpCodes.Ldloc_0));
                                     processor.Append(processor.Create(OpCodes.Ldc_I4, wrapper.MsgId));
-                                    processor.Append(processor.Create(OpCodes.Ldarg_0));
-                                    processor.Append(processor.Create(OpCodes.Ldftn, handler));
-                                    processor.Append(processor.Create(OpCodes.Newobj, module.ImportReference(typeof(NetworkMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));
-                                    processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionFetureRegisterHandlerMethod)));
-                                    processor.Append(processor.Create(OpCodes.Nop));
+                                    processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ConnectionFetureUnregisterHandlerMethod)));
                                 }
+                                processor.Append(ret);
                             }
-                            processor.Append(ret);
-                        }
 
-                        {
-                            ILProcessor init = onInitMethod.Body.GetILProcessor();
-                            Instruction ins1 = onInitMethod.Body.Instructions[onInitMethod.Body.Instructions.Count - 1];
-                            init.InsertBefore(ins1, init.Create(OpCodes.Ldarg_0));
-                            init.InsertBefore(ins1, init.Create(OpCodes.Call, registerMethod));
-                            init.InsertBefore(ins1, init.Create(OpCodes.Nop));
-                        }
-                    }
-
-                    string onUnregisterHandlerName = "OnUnregister" + type.Name + "Handler";
-                    MethodDefinition unregisterMethod = MethodFactory.CreateMethod(module, type, onUnregisterHandlerName, MethodAttributes.Private | MethodAttributes.HideBySig);
-                    {
-                        unregisterMethod.Body.Instructions.Clear();
-                        unregisterMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ConnectionFetureType)));
-                        unregisterMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
-                        {
-                            ILProcessor processor = unregisterMethod.Body.GetILProcessor();
-                            Instruction ret = processor.Create(OpCodes.Ret);
-                            processor.Append(processor.Create(OpCodes.Nop));
-                            processor.Append(processor.Create(OpCodes.Ldarg_0));
-                            processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopGetEntityMethod)));
-                            processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IEntityGetFetureMethod.MakeGenericMethod(WeaverProgram.ConnectionFetureType))));
-                            processor.Append(processor.Create(OpCodes.Stloc_0));
-                            processor.Append(processor.Create(OpCodes.Ldloc_0));
-                            processor.Append(processor.Create(OpCodes.Ldnull));
-                            processor.Append(processor.Create(OpCodes.Cgt_Un));
-                            processor.Append(processor.Create(OpCodes.Stloc_1));
-                            processor.Append(processor.Create(OpCodes.Ldloc_1));
-                            processor.Append(processor.Create(OpCodes.Brfalse, ret));
-                            foreach (MethodDetail wrapper in methods)
+                            if (!isExistsUnregisterMethod)
                             {
-                                processor.Append(processor.Create(OpCodes.Nop));
-                                processor.Append(processor.Create(OpCodes.Ldloc_0));
-                                processor.Append(processor.Create(OpCodes.Ldc_I4, wrapper.MsgId));
-                                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ConnectionFetureUnregisterHandlerMethod)));
+                                ILProcessor pro = onRemoveMethod.Body.GetILProcessor();
+                                Instruction ins = onRemoveMethod.Body.Instructions[onRemoveMethod.Body.Instructions.Count - 1];
+                                pro.InsertBefore(ins, pro.Create(OpCodes.Ldarg_0));
+                                pro.InsertBefore(ins, pro.Create(OpCodes.Call, unregisterMethod));
+                                pro.InsertBefore(ins, pro.Create(OpCodes.Nop));
                             }
-                            processor.Append(ret);
-                        }
-
-                        {
-                            ILProcessor remo = onRemoveMethod.Body.GetILProcessor();
-                            Instruction ins2 = onRemoveMethod.Body.Instructions[onRemoveMethod.Body.Instructions.Count - 1];
-                            remo.InsertBefore(ins2, remo.Create(OpCodes.Ldarg_0));
-                            remo.InsertBefore(ins2, remo.Create(OpCodes.Call, unregisterMethod));
-                            remo.InsertBefore(ins2, remo.Create(OpCodes.Nop));
                         }
                     }
                 }

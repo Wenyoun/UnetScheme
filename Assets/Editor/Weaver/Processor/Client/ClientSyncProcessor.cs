@@ -28,13 +28,10 @@ namespace Zyq.Weaver
                 //Deserialize
                 MethodDefinition deserialize = ResolveHelper.ResolveMethod(type, "Deserialize");
 
-                deserialize.Body.InitLocals = true;
                 ILProcessor processor = deserialize.Body.GetILProcessor();
-
                 processor.Body.Instructions.Clear();
 
                 Instruction ret = processor.Create(OpCodes.Ret);
-
                 processor.Append(processor.Create(OpCodes.Nop));
                 processor.Append(processor.Create(OpCodes.Ldarg_1));
                 processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, module.ImportReference(typeof(long)).ToString()));
@@ -66,7 +63,6 @@ namespace Zyq.Weaver
             method.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
 
             Instruction end = processor.Create(OpCodes.Nop);
-
             processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ldloc_0));
             processor.Append(processor.Create(OpCodes.Ldc_I8, 1L << index));
