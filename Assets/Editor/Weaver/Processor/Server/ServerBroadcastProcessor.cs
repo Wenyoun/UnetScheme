@@ -12,8 +12,8 @@ namespace Zyq.Weaver
             foreach (short key in methods.Keys)
             {
                 MethodDefinition method = methods[key];
-                ILProcessor processor = method.Body.GetILProcessor();
 
+                ILProcessor processor = method.Body.GetILProcessor();
                 method.Body.Variables.Clear();
                 method.Body.Instructions.Clear();
 
@@ -29,11 +29,26 @@ namespace Zyq.Weaver
                 Collection<ParameterDefinition> parms = method.Parameters;
                 for (int i = 0; i < parms.Count; ++i)
                 {
-                    ParameterDefinition pd = parms[i];
-                    processor.Append(processor.Create(OpCodes.Nop));
-                    processor.Append(processor.Create(OpCodes.Ldloc_0));
-                    processor.Append(processor.Create(OpCodes.Ldarg_S, (byte)(method.IsStatic ? i : i + 1)));
-                    processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, pd.ParameterType.ToString()));
+                    ParameterDefinition parm = parms[i];
+                    byte index = (byte)(method.IsStatic ? i : i + 1);
+
+                    if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
+                    {
+                        processor.Append(processor.Create(OpCodes.Ldloc_0));
+                        processor.Append(processor.Create(OpCodes.Ldarg_S, index));
+                        processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parm.ParameterType.ToString()));
+                    }
+                    else
+                    {
+                        TypeDefinition parmType = parm.ParameterType as TypeDefinition;
+                        if (parmType != null && parmType.IsValueType)
+                        {
+                            MethodDefinition serialize = StructMethodFactory.CreateSerialize(module, parmType);
+                            processor.Append(processor.Create(OpCodes.Ldarga_S, index));
+                            processor.Append(processor.Create(OpCodes.Ldloc_0));
+                            processor.Append(processor.Create(OpCodes.Call, serialize));
+                        }
+                    }
                 }
 
                 processor.Append(processor.Create(OpCodes.Ldloc_0));

@@ -35,7 +35,7 @@ namespace Zyq.Game.Server
 
             Server.Ins.EntityMgr.AddEntity(entity);
 
-            Sender.BroadcastCreatePlayer(entity.Eid, entity.Gid, position);
+            Sender.BroadcastCreatePlayer(entity.Eid, entity.Gid, position, new Test1());
         }
     }
 }

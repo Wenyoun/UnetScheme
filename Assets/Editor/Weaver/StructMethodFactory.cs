@@ -50,10 +50,10 @@ namespace Zyq.Weaver
         public static MethodDefinition CreateDeserialize(ModuleDefinition module, TypeDefinition type)
         {
             MethodDefinition deserialize = MethodFactory.CreateMethod(module,
-                                                                    type,
-                                                                    "Deserialize",
-                                                                    MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
-                                                                    true);
+                                                                      type,
+                                                                      "Deserialize",
+                                                                      MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+                                                                      true);
 
             deserialize.Parameters.Add(new ParameterDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
 
