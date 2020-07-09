@@ -35,7 +35,9 @@ namespace Zyq.Weaver
 
                 foreach (MethodDefinition method in type.Methods)
                 {
-                    if (!method.IsStatic && method.CustomAttributes.Count > 0 && method.CustomAttributes[0].AttributeType.FullName == WeaverProgram.RecvType.FullName)
+                    if (!method.IsStatic &&
+                        method.CustomAttributes.Count > 0 &&
+                        method.CustomAttributes[0].AttributeType.FullName == WeaverProgram.RecvType.FullName)
                     {
                         short msgId = (short)method.CustomAttributes[0].ConstructorArguments[0].Value;
                         methods.Add(new MethodDetail(msgId, method));
