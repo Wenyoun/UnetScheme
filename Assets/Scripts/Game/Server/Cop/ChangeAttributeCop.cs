@@ -1,4 +1,5 @@
-﻿using Zyq.Game.Base;
+﻿using UnityEngine;
+using Zyq.Game.Base;
 
 namespace Zyq.Game.Server
 {
@@ -15,6 +16,7 @@ namespace Zyq.Game.Server
                 {
                     attribute.Hp1 = k;
                     attribute.Hp11 = "yinhuyaong->" + k;
+                    attribute.Hp12 = new Vector3(k, k, k);
                 });
             }
         }

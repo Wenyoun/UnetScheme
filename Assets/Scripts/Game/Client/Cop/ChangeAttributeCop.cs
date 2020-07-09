@@ -10,7 +10,7 @@ namespace Zyq.Game.Client
             BaseAttribute attribute = Entity.GetSyncAttribute<BaseAttribute>();
             RegisterMessage(MessageConstants.Sync_Attribute, (IBody body) =>
             {
-                UnityEngine.Debug.Log(attribute.Hp1 + "." + attribute.Hp11);
+                UnityEngine.Debug.Log(attribute.Hp1 + "." + attribute.Hp11 + "," + attribute.Hp12);
             });
         }
 

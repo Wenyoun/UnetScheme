@@ -31,6 +31,7 @@ namespace Zyq.Weaver
 
                 FieldDefinition dirty = FieldFactory.CreateField(module, type, "m_Dirty", FieldAttributes.Private, module.ImportReference(typeof(long)));
 
+                //public bool IsSeialize();
                 ModifyIsSerializeMethod(module, type, dirty);
 
                 //get set method
@@ -58,9 +59,7 @@ namespace Zyq.Weaver
                 //Serialize
                 MethodDefinition serialize = ResolveHelper.ResolveMethod(type, "Serialize");
 
-                serialize.Body.InitLocals = true;
                 ILProcessor processor = serialize.Body.GetILProcessor();
-
                 processor.Body.Instructions.Clear();
 
                 Instruction ins1 = processor.Create(OpCodes.Nop);
@@ -111,15 +110,15 @@ namespace Zyq.Weaver
             method.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
 
             ILProcessor processor = method.Body.GetILProcessor();
-            Instruction lod = processor.Create(OpCodes.Ldloc_0);
+            Instruction ins = processor.Create(OpCodes.Ldloc_0);
             processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldfld, dirty));
             processor.Append(processor.Create(OpCodes.Ldc_I8, 0L));
             processor.Append(processor.Create(OpCodes.Cgt));
             processor.Append(processor.Create(OpCodes.Stloc_0));
-            processor.Append(processor.Create(OpCodes.Br_S, lod));
-            processor.Append(lod);
+            processor.Append(processor.Create(OpCodes.Br_S, ins));
+            processor.Append(ins);
             processor.Append(processor.Create(OpCodes.Ret));
         }
 
@@ -137,7 +136,6 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Ldfld, field));
             processor.Append(processor.Create(OpCodes.Ret));
             get.Body.Variables.Add(new VariableDefinition(field.FieldType));
-            get.Body.InitLocals = true;
             get.SemanticsAttributes = MethodSemanticsAttributes.Getter;
 
             return get;
@@ -157,13 +155,20 @@ namespace Zyq.Weaver
 
             ILProcessor processor = set.Body.GetILProcessor();
 
-            if (field.FieldType.FullName == "System.String")
+            if (BaseTypeFactory.IsSystemBaseType(field.FieldType.ToString()))
             {
-                AppedStringTypeInstruction(module, processor, field, dirty, offset);
+                if (field.FieldType.IsValueType)
+                {
+                    AppendBaseTypeInstruction(processor, field, dirty, offset);
+                }
+                else if (field.FieldType.ToString() == "System.String")
+                {
+                    AppendOpInequalityInstruction(module, processor, field, dirty, offset);
+                }
             }
-            else
+            else if(field.FieldType.IsValueType)
             {
-                AppedBaseTypeInstruction(processor, field, dirty, offset);
+                AppendOpInequalityInstruction(module, processor, field, dirty, offset);
             }
 
             set.SemanticsAttributes = MethodSemanticsAttributes.Setter;
@@ -171,7 +176,7 @@ namespace Zyq.Weaver
             return set;
         }
 
-        private static void AppedBaseTypeInstruction(ILProcessor processor, FieldDefinition field, FieldDefinition dirty, int offset)
+        private static void AppendBaseTypeInstruction(ILProcessor processor, FieldDefinition field, FieldDefinition dirty, int offset)
         {
             Instruction end = processor.Create(OpCodes.Ret);
             processor.Append(processor.Create(OpCodes.Nop));
@@ -198,14 +203,14 @@ namespace Zyq.Weaver
             processor.Append(end);
         }
 
-        private static void AppedStringTypeInstruction(ModuleDefinition module, ILProcessor processor, FieldDefinition field, FieldDefinition dirty, int offset)
+        private static void AppendOpInequalityInstruction(ModuleDefinition module, ILProcessor processor, FieldDefinition field, FieldDefinition dirty, int offset)
         {
             Instruction end = processor.Create(OpCodes.Ret);
             processor.Append(processor.Create(OpCodes.Nop));
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldfld, field));
             processor.Append(processor.Create(OpCodes.Ldarg_1));
-            processor.Append(processor.Create(OpCodes.Call, module.ImportReference(typeof(string).GetMethod("op_Inequality", new Type[] { typeof(string), typeof(string) }))));
+            processor.Append(processor.Create(OpCodes.Call, module.ImportReference(ResolveHelper.ResolveMethod(field.FieldType, "op_Inequality"))));
             processor.Append(processor.Create(OpCodes.Stloc_0));
             processor.Append(processor.Create(OpCodes.Ldloc_0));
             processor.Append(processor.Create(OpCodes.Brfalse_S, end));

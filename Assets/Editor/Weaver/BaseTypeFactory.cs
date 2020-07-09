@@ -49,6 +49,11 @@ namespace Zyq.Weaver
             return Mappers.ContainsKey(type);
         }
 
+        public static bool IsSystemBaseType(string type)
+        {
+            return Mappers.ContainsKey(type) && type.IndexOf("System.") >= 0;
+        }
+
         public static Instruction CreateReadInstruction(ModuleDefinition module, ILProcessor processor, string type)
         {
             TypeWrapper wrapper = null;

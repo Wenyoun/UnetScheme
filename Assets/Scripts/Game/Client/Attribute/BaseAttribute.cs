@@ -1,4 +1,5 @@
-﻿using Zyq.Game.Base;
+﻿using UnityEngine;
+using Zyq.Game.Base;
 using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
@@ -30,6 +31,8 @@ namespace Zyq.Game.Client
         public double Hp10;
         [SyncField]
         public string Hp11;
+        [SyncField]
+        public Vector3 Hp12;
 
         public bool IsSerialize()
         {
