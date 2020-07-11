@@ -46,17 +46,27 @@ namespace Zyq.Weaver
                         for (int i = 0; i < parms.Count; ++i)
                         {
                             ParameterDefinition parm = parms[i];
+                            TypeDefinition parmType = parm.ParameterType as TypeDefinition;
                             protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
+
                             if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
                             {
                                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                                 processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parm.ParameterType.FullName));
                                 processor.Append(processor.Create(OpCodes.Stloc, i + 1));
                             }
-                            else
+                            else if (parmType != null && parmType.IsEnum)
                             {
-                                TypeDefinition parmType = parm.ParameterType as TypeDefinition;
-                                if (parmType != null && parmType.IsValueType)
+                                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, typeof(int).ToString()));
+                                processor.Append(processor.Create(OpCodes.Stloc, i + 1));
+                            }
+                            else if (parmType != null)
+                            {
+                                if(parmType.IsArray)
+                                {
+                                }
+                                else if (parmType.IsValueType)
                                 {
                                     MethodDefinition deserialize = StructMethodFactory.CreateDeserialize(module, parmType);
                                     processor.Append(processor.Create(OpCodes.Ldloca, i + 1));

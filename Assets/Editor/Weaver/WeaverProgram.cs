@@ -95,7 +95,8 @@ namespace Zyq.Weaver
         private static bool Weave(string unityEngineDLL, string networkingDLL, string assemblyPath, string[] depAssemblyPaths)
         {
             using (DefaultAssemblyResolver asmResolver = new DefaultAssemblyResolver())
-            using (CurrentAssembly = AssemblyDefinition.ReadAssembly(assemblyPath, new ReaderParameters { ReadWrite = true, ReadSymbols = true, AssemblyResolver = asmResolver }))
+            using (CurrentAssembly = AssemblyDefinition.ReadAssembly(assemblyPath,
+                                                                     new ReaderParameters { ReadWrite = true, ReadSymbols = true, AssemblyResolver = asmResolver }))
             {
                 asmResolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
                 asmResolver.AddSearchDirectory(Helpers.FindUnityEngineDLLDirectoryName());
@@ -111,8 +112,7 @@ namespace Zyq.Weaver
 
                 if (WeaveModule(CurrentAssembly.MainModule))
                 {
-                    WriterParameters writeParams = new WriterParameters { WriteSymbols = true };
-                    CurrentAssembly.Write(writeParams);
+                    CurrentAssembly.Write(new WriterParameters { WriteSymbols = true });
                     return true;
                 }
             }
@@ -122,7 +122,11 @@ namespace Zyq.Weaver
 
         private static bool WeaveModule(ModuleDefinition module)
         {
-            if (module.Name.EndsWith("Zyq.Game.Client.dll"))
+            if(module.Name.EndsWith("Zyq.Game.Base.dll"))
+            {
+                return BaseWeaver.Weave(module);
+            }
+            else if (module.Name.EndsWith("Zyq.Game.Client.dll"))
             {
                 SetupClientModuleTypes();
                 return ClientWeaver.Weave(module);

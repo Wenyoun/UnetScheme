@@ -19,13 +19,5 @@ namespace Zyq.Game.Client
             Entity entity = EntityFactory.CreatePlayer(eid, gid, position);
             Client.Ins.EntityMgr.AddEntity(entity);
         }
-
-        [Recv(NetMsgId.Msg_Create_Player1)]
-        public static void RecvRsp(byte v1,
-                                   double v2,
-                                   Test1 v4,
-                                   int v5)
-        {
-        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
+using Zyq.Game.Base.Protocol;
 
 namespace Zyq.Game.Client
 {
@@ -18,26 +19,12 @@ namespace Zyq.Game.Client
                                     double v10,
                                     string v11,
                                     Vector2 v12,
-                                    Test1 test1,
                                     Vector3 v13,
                                     Vector4 v14,
-                                    Quaternion v15)
+                                    Quaternion v15,
+                                    Login login,
+                                    LoginData data)
         {
         }
-    }
-
-    public struct Test1
-    {
-        public int v1;
-        public double v2;
-        public Test2 v3;
-        public string v4;
-    }
-
-    public struct Test2
-    {
-        public int v1;
-        public double v2;
-        public string v3;
     }
 }

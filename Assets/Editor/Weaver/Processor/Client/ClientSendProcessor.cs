@@ -31,6 +31,7 @@ namespace Zyq.Weaver
                 {
                     ParameterDefinition parm = parms[i];
                     byte index = (byte)(method.IsStatic ? i : i + 1);
+                    TypeDefinition parmType = parm.ParameterType as TypeDefinition;
 
                     if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
                     {
@@ -38,15 +39,26 @@ namespace Zyq.Weaver
                         processor.Append(processor.Create(OpCodes.Ldarg_S, index));
                         processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parm.ParameterType.ToString()));
                     }
-                    else
+                    else if(parmType != null && parmType.IsEnum)
                     {
-                        TypeDefinition parmType = parm.ParameterType as TypeDefinition;
-                        if (parmType != null && parmType.IsValueType)
+                        processor.Append(processor.Create(OpCodes.Ldloc_0));
+                        processor.Append(processor.Create(OpCodes.Ldarg_S, index));
+                        processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, typeof(int).ToString()));
+                    }
+                    else if (parmType != null)
+                    {
+                        if (parmType.IsArray)
                         {
-                            MethodDefinition serialize = StructMethodFactory.CreateSerialize(module, parmType);
-                            processor.Append(processor.Create(OpCodes.Ldarga_S, index));
-                            processor.Append(processor.Create(OpCodes.Ldloc_0));
-                            processor.Append(processor.Create(OpCodes.Call, serialize));
+                        }
+                        else
+                        {
+                            if (parmType != null && parmType.IsValueType)
+                            {
+                                MethodDefinition serialize = StructMethodFactory.CreateSerialize(module, parmType);
+                                processor.Append(processor.Create(OpCodes.Ldarga_S, index));
+                                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                processor.Append(processor.Create(OpCodes.Call, serialize));
+                            }
                         }
                     }
                 }

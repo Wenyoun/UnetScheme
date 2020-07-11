@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
+using Zyq.Game.Base.Protocol;
 using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
@@ -78,15 +79,15 @@ namespace Zyq.Game.Client
             {
                 m_Connection = new Connection();
             }
+
             m_Connection.OnConnect(network);
             RegisterProtocols(m_Connection);
 
-            Test1 test1 = new Test1();
-            test1.v1 = 10;
-            test1.v2 = 10.999f;
-            test1.v3 = new Test2() { v1 = 10, v2 = 10.2222f, v3 = "ktest" };
-            test1.v4 = "test";
-            Sender.RpcLogin(1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, test1, Vector3.zero, Vector4.zero, Quaternion.identity);
+            LoginData data = new LoginData();
+            data.Username = "Username";
+            data.Password = "Password";
+
+            Sender.RpcLogin(1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity, Login.Log4, data);
         }
 
         public override void OnNetDisconnect(NetworkConnection network)

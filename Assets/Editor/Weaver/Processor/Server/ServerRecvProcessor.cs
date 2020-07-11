@@ -48,17 +48,27 @@ namespace Zyq.Weaver
                             if (i > 0)
                             {
                                 ParameterDefinition parm = parms[i];
+                                TypeDefinition parmType = parm.ParameterType as TypeDefinition;
                                 protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
+
                                 if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
                                 {
                                     processor.Append(processor.Create(OpCodes.Ldloc_0));
                                     processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parm.ParameterType.FullName));
                                     processor.Append(processor.Create(OpCodes.Stloc, i));
                                 }
-                                else
+                                else if (parmType != null && parmType.IsEnum)
                                 {
-                                    TypeDefinition parmType = parm.ParameterType as TypeDefinition;
-                                    if (parmType != null && parmType.IsValueType)
+                                    processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                    processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, typeof(int).ToString()));
+                                    processor.Append(processor.Create(OpCodes.Stloc, i));
+                                }
+                                else if (parmType != null)
+                                {
+                                    if (parmType.IsArray)
+                                    {
+                                    }
+                                    else if (parmType.IsValueType)
                                     {
                                         MethodDefinition deserialize = StructMethodFactory.CreateDeserialize(module, parmType);
                                         processor.Append(processor.Create(OpCodes.Ldloca, i));
@@ -73,6 +83,7 @@ namespace Zyq.Weaver
 
                         processor.Append(processor.Create(OpCodes.Ldarg_0));
                         processor.Append(processor.Create(OpCodes.Call, getConnection));
+
                         for (int i = 0; i < parms.Count; ++i)
                         {
                             if (i > 0)

@@ -109,17 +109,27 @@ namespace Zyq.Weaver
                                         for (int i = 0; i < parms.Count; ++i)
                                         {
                                             ParameterDefinition parm = parms[i];
+                                            TypeDefinition parmType = parm.ParameterType as TypeDefinition;
                                             handler.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
+
                                             if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
                                             {
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
                                                 handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parm.ParameterType.FullName));
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, i + 1));
                                             }
-                                            else
+                                            else if (parmType != null && parmType.IsEnum)
                                             {
-                                                TypeDefinition parmType = parm.ParameterType as TypeDefinition;
-                                                if (parmType != null && parmType.IsValueType)
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
+                                                handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, typeof(int).ToString()));
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, i + 1));
+                                            }
+                                            else if (parmType != null)
+                                            {
+                                                if(parmType.IsArray)
+                                                {
+                                                }
+                                                else if (parmType.IsValueType)
                                                 {
                                                     MethodDefinition deserialize = StructMethodFactory.CreateDeserialize(module, parmType);
                                                     handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, i + 1));

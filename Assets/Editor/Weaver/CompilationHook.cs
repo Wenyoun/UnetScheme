@@ -52,13 +52,7 @@ namespace Zyq.Weaver
         {
             if (EditorApplication.isPlaying ||
                 assemblyPath.IndexOf(".Editor") >= 0 ||
-                assemblyPath.IndexOf("-Editor") >= 0 ||
-                assemblyPath.IndexOf("Zyq.Game.Base") >= 0)
-            {
-                return;
-            }
-
-            if (assemblyPath.IndexOf("Zyq.Game") == -1)
+                assemblyPath.IndexOf("-Editor") >= 0)
             {
                 return;
             }
