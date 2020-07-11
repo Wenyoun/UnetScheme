@@ -6,5 +6,6 @@
         Log2,
         Log3,
         Log4,
+        Log5,
     }
 }

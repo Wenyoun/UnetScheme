@@ -7,7 +7,7 @@ namespace Zyq.Weaver
     {
         public static bool Weave(ModuleDefinition module)
         {
-            return true;
+            return StructProcessor.Weave(module);
         }
     }
 }
