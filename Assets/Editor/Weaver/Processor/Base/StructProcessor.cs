@@ -1,5 +1,4 @@
 ﻿using Mono.CecilX;
-using Mono.CecilX.Cil;
 using System.Collections.Generic;
 
 namespace Zyq.Weaver
@@ -12,7 +11,9 @@ namespace Zyq.Weaver
 
             foreach (TypeDefinition type in module.Types)
             {
-                if (type.IsValueType && type.ToString().IndexOf("Zyq.Game.Base.Protocol") >= 0)
+                if (!type.IsEnum &&
+                    type.IsValueType &&
+                    type.ToString().IndexOf("Zyq.Game.Base.Protocol") >= 0)
                 {
                     structs.Add(type);
                 }
@@ -20,6 +21,8 @@ namespace Zyq.Weaver
 
             foreach (TypeDefinition type in structs)
             {
+                StructMethodFactory.CreateSerialize(module, type);
+                StructMethodFactory.CreateDeserialize(module, type);
             }
 
             return structs.Count > 0;

@@ -30,6 +30,7 @@ namespace Zyq.Weaver
                 for (int i = 0; i < parms.Count; ++i)
                 {
                     ParameterDefinition parm = parms[i];
+                    TypeDefinition parmType = parm.ParameterType.Resolve();
                     byte index = (byte)(method.IsStatic ? i : i + 1);
 
                     if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
@@ -38,12 +39,20 @@ namespace Zyq.Weaver
                         processor.Append(processor.Create(OpCodes.Ldarg_S, index));
                         processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parm.ParameterType.ToString()));
                     }
-                    else
+                    else if (parmType != null && parmType.IsEnum)
                     {
-                        TypeDefinition parmType = parm.ParameterType as TypeDefinition;
-                        if (parmType != null && parmType.IsValueType)
+                        processor.Append(processor.Create(OpCodes.Ldloc_0));
+                        processor.Append(processor.Create(OpCodes.Ldarg_S, index));
+                        processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, typeof(int).ToString()));
+                    }
+                    else if (parmType != null)
+                    {
+                        if (parmType.IsArray)
                         {
-                            MethodDefinition serialize = StructMethodFactory.CreateSerialize(module, parmType);
+                        }
+                        else if (parmType.IsValueType)
+                        {
+                            MethodReference serialize = StructMethodFactory.FindSerialize(module, parmType);
                             processor.Append(processor.Create(OpCodes.Ldarga_S, index));
                             processor.Append(processor.Create(OpCodes.Ldloc_0));
                             processor.Append(processor.Create(OpCodes.Call, serialize));

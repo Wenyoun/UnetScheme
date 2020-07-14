@@ -5,6 +5,16 @@ namespace Zyq.Weaver
 {
     public static class StructMethodFactory
     {
+        public static MethodReference FindSerialize(ModuleDefinition module, TypeDefinition type)
+        {
+            return module.ImportReference(ResolveHelper.ResolveMethod(type, "Serialize"));
+        }
+
+        public static MethodReference FindDeserialize(ModuleDefinition module, TypeDefinition type)
+        {
+            return module.ImportReference(ResolveHelper.ResolveMethod(type, "Deserialize"));
+        }
+
         public static MethodDefinition CreateSerialize(ModuleDefinition module, TypeDefinition type)
         {
             MethodDefinition serialize = MethodFactory.CreateMethod(module,

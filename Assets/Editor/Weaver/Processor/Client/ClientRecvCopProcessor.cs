@@ -109,7 +109,7 @@ namespace Zyq.Weaver
                                         for (int i = 0; i < parms.Count; ++i)
                                         {
                                             ParameterDefinition parm = parms[i];
-                                            TypeDefinition parmType = parm.ParameterType as TypeDefinition;
+                                            TypeDefinition parmType = parm.ParameterType.Resolve();
                                             handler.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
 
                                             if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
@@ -131,9 +131,9 @@ namespace Zyq.Weaver
                                                 }
                                                 else if (parmType.IsValueType)
                                                 {
-                                                    MethodDefinition deserialize = StructMethodFactory.CreateDeserialize(module, parmType);
+                                                    MethodReference deserialize = StructMethodFactory.FindDeserialize(module, parmType);
                                                     handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, i + 1));
-                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Initobj, parmType));
+                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Initobj, module.ImportReference(parmType)));
                                                     handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, i + 1));
                                                     handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
                                                     handlerProcessor.Append(handlerProcessor.Create(OpCodes.Call, deserialize));

@@ -25,6 +25,7 @@ namespace Zyq.Game.Client
                                     Login login,
                                     LoginData data)
         {
+
         }
     }
 }

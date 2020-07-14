@@ -33,7 +33,7 @@ namespace Zyq.Weaver
                     {
                         ParameterDefinition parm = parms[i];
                         byte index = (byte)(method.IsStatic ? i : i + 1);
-                        TypeDefinition parmType = parm.ParameterType as TypeDefinition;
+                        TypeDefinition parmType = parm.ParameterType.Resolve();
 
                         if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
                         {
@@ -54,7 +54,7 @@ namespace Zyq.Weaver
                             }
                             else if (parmType.IsValueType)
                             {
-                                MethodDefinition serialize = StructMethodFactory.CreateSerialize(module, parmType);
+                                MethodReference serialize = StructMethodFactory.FindSerialize(module, parmType);
                                 processor.Append(processor.Create(OpCodes.Ldarga_S, index));
                                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                                 processor.Append(processor.Create(OpCodes.Call, serialize));
