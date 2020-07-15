@@ -4,7 +4,7 @@ using Zyq.Game.Base.Protocol;
 
 namespace Zyq.Game.Server
 {
-    public class Recver
+    public class ServerRecver
     {
         [Recv(NetMsgId.Msg_Login_Req)]
         public static void OnLoginHandler(Connection connection,
@@ -28,7 +28,7 @@ namespace Zyq.Game.Server
         {
             Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" + v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15 + ":" + login + ":" + data.Username + "," + data.Password);
 
-            Sender.RpcTargetLoginResult(connection, true);
+            ServerSender.RpcTargetLoginResult(connection, true);
 
             Vector3 position = new Vector3(1, 0, 1);
 
@@ -36,7 +36,7 @@ namespace Zyq.Game.Server
 
             Server.Ins.EntityMgr.AddEntity(entity);
 
-            Sender.BroadcastCreatePlayer(entity.Eid, entity.Gid, position);
+            ServerSender.BroadcastCreatePlayer(entity.Eid, entity.Gid, position);
         }
     }
 }

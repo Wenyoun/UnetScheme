@@ -4,7 +4,7 @@ using Zyq.Game.Base.Protocol;
 
 namespace Zyq.Game.Client
 {
-    public class Sender
+    public class ClientSender
     {
         [Send(NetMsgId.Msg_Login_Req)]
         public static void RpcLogin(byte v1,
@@ -25,7 +25,6 @@ namespace Zyq.Game.Client
                                     Login login,
                                     LoginData data)
         {
-
         }
     }
 }

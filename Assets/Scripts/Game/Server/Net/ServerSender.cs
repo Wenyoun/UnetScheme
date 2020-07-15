@@ -3,7 +3,7 @@ using Zyq.Game.Base;
 
 namespace Zyq.Game.Server
 {
-    public class Sender
+    public class ServerSender
     {
         [Send(NetMsgId.Msg_Login_Res)]
         public static void RpcTargetLoginResult(Connection connection, bool result)

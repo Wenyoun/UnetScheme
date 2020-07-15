@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
-using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
 {
-    public static class Recver
+    public static class ClientRecver
     {
         [Recv(NetMsgId.Msg_Login_Res)]
         public static void OnLoginRsp(bool result)
