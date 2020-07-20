@@ -54,7 +54,7 @@ namespace Zyq.Weaver
 
                             if (parm.ParameterType.IsArray)
                             {
-                                ArrayReadFactory.CreateParamReadInstruction(module, protoMethodImpl, processor, parmType);
+                                ArrayReadFactory.CreateMethodVariableReadInstruction(module, protoMethodImpl, processor, parmType);
                             }
                             else if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
                             {

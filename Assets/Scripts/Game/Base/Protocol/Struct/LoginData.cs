@@ -45,11 +45,11 @@
                 }
             }
         }
-
         public void testRead(UnityEngine.Networking.NetworkReader r)
         {
             Username = r.ReadString();
             Password = r.ReadString();
+
             int len1 = r.ReadInt32();
             if (len1 > 0)
             {

@@ -34,7 +34,7 @@ namespace Zyq.Weaver
 
                 if (field.FieldType.IsArray)
                 {
-                    ArrayWriteFactory.CreateStructWriteInstruction(module, serialize, processor, field, fieldType);
+                    ArrayWriteFactory.CreateStructFieldWriteInstruction(module, serialize, processor, field, fieldType);
                 }
                 else if (BaseTypeFactory.IsBaseType(fieldType.ToString()) || fieldType.IsEnum)
                 {
@@ -84,7 +84,7 @@ namespace Zyq.Weaver
 
                 if (field.FieldType.IsArray)
                 {
-                    ArrayReadFactory.CreateStructReadInstruction(module, deserialize, processor, field, fieldType);
+                    ArrayReadFactory.CreateStructFieldReadInstruction(module, deserialize, processor, field, fieldType);
                 }
                 else if (BaseTypeFactory.IsBaseType(fieldType.ToString()) || fieldType.IsEnum)
                 {

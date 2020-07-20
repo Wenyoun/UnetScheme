@@ -5,7 +5,7 @@ namespace Zyq.Weaver
 {
     public static class ArrayWriteFactory
     {
-        public static void CreateStructWriteInstruction(ModuleDefinition module, MethodDefinition method, ILProcessor processor, FieldDefinition field, TypeDefinition fieldType)
+        public static void CreateStructFieldWriteInstruction(ModuleDefinition module, MethodDefinition method, ILProcessor processor, FieldDefinition field, TypeDefinition fieldType)
         {
             int lenIndex = method.Body.Variables.Count;
             int checkIndex = method.Body.Variables.Count + 1;
@@ -23,7 +23,7 @@ namespace Zyq.Weaver
             Instruction goto4 = processor.Create(OpCodes.Nop);
             Instruction goto5 = processor.Create(OpCodes.Nop);
 
-            //int len = this.Arr != null ? this.Arr.Length : 0;
+            //int len = this.Field != null ? this.Field.Length : 0;
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldfld, field));
             processor.Append(processor.Create(OpCodes.Brtrue_S, goto1));
@@ -54,13 +54,13 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Ldc_I4_0));
             processor.Append(processor.Create(OpCodes.Stloc, intIndex));
 
-            //go to
+            //go to check
             processor.Append(processor.Create(OpCodes.Br_S, goto4));
             processor.Append(goto3);
 
             if (BaseTypeFactory.IsBaseType(fieldType.ToString()) || fieldType.IsEnum)
             {
-                //writer.Write(this.Arr[i]);
+                //writer.Write(this.Field[i]);
                 processor.Append(processor.Create(OpCodes.Ldarg_1));
                 processor.Append(processor.Create(OpCodes.Ldarg_0));
                 processor.Append(processor.Create(OpCodes.Ldfld, field));
@@ -78,7 +78,7 @@ namespace Zyq.Weaver
             }
             else if (fieldType.IsValueType)
             {
-                //this.Arr[i].Serialize(writer);
+                //this.Field[i].Serialize(writer);
                 processor.Append(processor.Create(OpCodes.Ldarg_0));
                 processor.Append(processor.Create(OpCodes.Ldfld, field));
                 processor.Append(processor.Create(OpCodes.Ldloc, intIndex));
@@ -107,7 +107,7 @@ namespace Zyq.Weaver
             processor.Append(goto5);
         }
 
-        public static void CreateParamWriteInstruction(ModuleDefinition module, MethodDefinition method, ILProcessor processor, TypeDefinition parmType, byte argIndex)
+        public static void CreateMethodParamWriteInstruction(ModuleDefinition module, MethodDefinition method, ILProcessor processor, TypeDefinition parmType, byte argIndex)
         {
             int lenIndex = method.Body.Variables.Count;
             int checkIndex = method.Body.Variables.Count + 1;
@@ -125,7 +125,7 @@ namespace Zyq.Weaver
             Instruction goto4 = processor.Create(OpCodes.Nop);
             Instruction goto5 = processor.Create(OpCodes.Nop);
 
-            //int len = arr != null ? arr.Length : 0;
+            //int len = param != null ? param.Length : 0;
             processor.Append(processor.Create(OpCodes.Ldarg_S, argIndex));
             processor.Append(processor.Create(OpCodes.Brtrue_S, goto1));
             processor.Append(processor.Create(OpCodes.Ldc_I4_0));
@@ -154,13 +154,13 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Ldc_I4_0));
             processor.Append(processor.Create(OpCodes.Stloc, intIndex));
 
-            //go to
+            //go to check
             processor.Append(processor.Create(OpCodes.Br_S, goto4));
             processor.Append(goto3);
 
             if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
             {
-                //writer.Write(v[i]);
+                //writer.Write(param[i]);
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                 processor.Append(processor.Create(OpCodes.Ldarg_S, argIndex));
                 processor.Append(processor.Create(OpCodes.Ldloc, intIndex));
@@ -177,7 +177,7 @@ namespace Zyq.Weaver
             }
             else if (parmType.IsValueType)
             {
-                //v[i].Serialize(writer);
+                //param[i].Serialize(writer);
                 processor.Append(processor.Create(OpCodes.Ldarg_S, argIndex));
                 processor.Append(processor.Create(OpCodes.Ldloc, intIndex));
                 processor.Append(processor.Create(OpCodes.Ldelema, module.ImportReference(parmType)));

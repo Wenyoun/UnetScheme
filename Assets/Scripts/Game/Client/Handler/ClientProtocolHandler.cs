@@ -39,19 +39,28 @@ namespace Zyq.Game.Client
         {
             NetworkReader reader = msg.reader;
             int v1 = reader.ReadInt32();
+            int[] v2 = null;
             int len1 = reader.ReadInt32();
-            int[] v2 = new int[len1];
-            for (int i = 0; i < len1; ++i)
+            if (len1 > 0)
             {
-                v2[i] = reader.ReadInt32();
+                v2 = new int[len1];
+                for (int i = 0; i < len1; ++i)
+                {
+                    v2[i] = reader.ReadInt32();
+                }
             }
+
+            LoginData[] v3 = null;
             int len2 = reader.ReadInt32();
-            LoginData[] v3 = new LoginData[len2];
-            for (int i = 0; i < len2; ++i)
+            if (len2 > 0)
             {
-                v3[i].testRead(reader);
+                v3 = new LoginData[len2];
+                for (int i = 0; i < len2; ++i)
+                {
+                    v3[i].testRead(reader);
+                }
             }
-            //ClientRecver.OnRecvArray(v1, v2, v3);
+            ClientRecver.OnRecvArray(v1, v2, v3);
         }
     }
 }

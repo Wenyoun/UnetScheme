@@ -35,7 +35,7 @@ namespace Zyq.Weaver
 
                     if (parm.ParameterType.IsArray)
                     {
-                        ArrayWriteFactory.CreateParamWriteInstruction(module, method, processor, parmType, index);
+                        ArrayWriteFactory.CreateMethodParamWriteInstruction(module, method, processor, parmType, index);
                     }
                     else if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
                     {

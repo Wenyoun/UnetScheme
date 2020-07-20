@@ -21,7 +21,7 @@ namespace Zyq.Game.Client
         }
 
         [Recv(NetMsgId.Msg_Create_Player2)]
-        public static void OnRecvArray(int v1, int[] v2, int v3, LoginData[] v4, int[] v5, string v6, string[] v7, Vector3[] v8, int v9)
+        public static void OnRecvArray(int v1, int[] v2, LoginData[] v4)
         {
         }
     }
