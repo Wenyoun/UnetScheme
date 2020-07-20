@@ -87,7 +87,7 @@ namespace Zyq.Game.Client
             data.Username = "Username";
             data.Password = "Password";
 
-            ClientSender.RpcLogin(1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity, Login.Log4, data);
+            ClientSender.RpcLogin(1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity, Login.Log5, data);
         }
 
         public override void OnNetDisconnect(NetworkConnection network)

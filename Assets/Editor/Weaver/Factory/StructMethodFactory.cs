@@ -39,14 +39,19 @@ namespace Zyq.Weaver
                 }
                 else
                 {
-                    TypeDefinition fieldType = field.FieldType as TypeDefinition;
-                    if (fieldType != null && fieldType.IsValueType)
+                    TypeDefinition fieldType = field.FieldType.Resolve();
+                    if (field.FieldType.IsArray)
                     {
-                        MethodDefinition ser = CreateSerialize(module, fieldType);
+                    }
+                    else if (fieldType.IsEnum)
+                    {
+                    }
+                    else if(fieldType.IsValueType)
+                    {
                         processor.Append(processor.Create(OpCodes.Ldarg_0));
                         processor.Append(processor.Create(OpCodes.Ldflda, field));
                         processor.Append(processor.Create(OpCodes.Ldarg_1));
-                        processor.Append(processor.Create(OpCodes.Call, ser));
+                        processor.Append(processor.Create(OpCodes.Call, CreateSerialize(module, fieldType)));
                     }
                 }
             }
