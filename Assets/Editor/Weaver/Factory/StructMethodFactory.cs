@@ -30,29 +30,32 @@ namespace Zyq.Weaver
 
             foreach (FieldDefinition field in type.Fields)
             {
-                if (BaseTypeFactory.IsBaseType(field.FieldType.ToString()))
+                TypeDefinition fieldType = field.FieldType.Resolve();
+
+                if (field.FieldType.IsArray)
+                {
+                    ArrayWriteFactory.CreateStructWriteInstruction(module, serialize, processor, field, fieldType);
+                }
+                else if (BaseTypeFactory.IsBaseType(fieldType.ToString()) || fieldType.IsEnum)
                 {
                     processor.Append(processor.Create(OpCodes.Ldarg_1));
                     processor.Append(processor.Create(OpCodes.Ldarg_0));
                     processor.Append(processor.Create(OpCodes.Ldfld, field));
-                    processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, field.FieldType.ToString()));
+                    if (fieldType.IsEnum)
+                    {
+                        processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, typeof(int).ToString()));
+                    }
+                    else
+                    {
+                        processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, fieldType.ToString()));
+                    }
                 }
-                else
+                else if (fieldType.IsValueType)
                 {
-                    TypeDefinition fieldType = field.FieldType.Resolve();
-                    if (field.FieldType.IsArray)
-                    {
-                    }
-                    else if (fieldType.IsEnum)
-                    {
-                    }
-                    else if(fieldType.IsValueType)
-                    {
-                        processor.Append(processor.Create(OpCodes.Ldarg_0));
-                        processor.Append(processor.Create(OpCodes.Ldflda, field));
-                        processor.Append(processor.Create(OpCodes.Ldarg_1));
-                        processor.Append(processor.Create(OpCodes.Call, CreateSerialize(module, fieldType)));
-                    }
+                    processor.Append(processor.Create(OpCodes.Ldarg_0));
+                    processor.Append(processor.Create(OpCodes.Ldflda, field));
+                    processor.Append(processor.Create(OpCodes.Ldarg_1));
+                    processor.Append(processor.Create(OpCodes.Call, CreateSerialize(module, fieldType)));
                 }
             }
 
@@ -77,24 +80,33 @@ namespace Zyq.Weaver
 
             foreach (FieldDefinition field in type.Fields)
             {
-                if (BaseTypeFactory.IsBaseType(field.FieldType.ToString()))
+                TypeDefinition fieldType = field.FieldType.Resolve();
+
+                if (field.FieldType.IsArray)
+                {
+                    ArrayReadFactory.CreateStructReadInstruction(module, deserialize, processor, field, fieldType);
+                }
+                else if (BaseTypeFactory.IsBaseType(fieldType.ToString()) || fieldType.IsEnum)
                 {
                     processor.Append(processor.Create(OpCodes.Ldarg_0));
                     processor.Append(processor.Create(OpCodes.Ldarg_1));
-                    processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, field.FieldType.ToString()));
+                    if (fieldType.IsEnum)
+                    {
+                        processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, typeof(int).ToString()));
+                    }
+                    else
+                    {
+                        processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, fieldType.ToString()));
+                    }
                     processor.Append(processor.Create(OpCodes.Stfld, field));
                 }
-                else
+                else if (fieldType.IsValueType)
                 {
-                    TypeDefinition fieldType = field.FieldType as TypeDefinition;
-                    if (fieldType != null && fieldType.IsValueType)
-                    {
-                        MethodDefinition dser = CreateDeserialize(module, fieldType);
-                        processor.Append(processor.Create(OpCodes.Ldarg_0));
-                        processor.Append(processor.Create(OpCodes.Ldflda, field));
-                        processor.Append(processor.Create(OpCodes.Ldarg_1));
-                        processor.Append(processor.Create(OpCodes.Call, dser));
-                    }
+                    MethodDefinition dser = CreateDeserialize(module, fieldType);
+                    processor.Append(processor.Create(OpCodes.Ldarg_0));
+                    processor.Append(processor.Create(OpCodes.Ldflda, field));
+                    processor.Append(processor.Create(OpCodes.Ldarg_1));
+                    processor.Append(processor.Create(OpCodes.Call, dser));
                 }
             }
 

@@ -39,25 +39,34 @@ namespace Zyq.Game.Client
 
             writer.Write(v1);
 
-            int length1 = v2.Length;
+            int length1 = v2 != null ? v2.Length : 0;
             writer.Write(length1);
-            for (int i = 0; i < length1; ++i)
+            if (length1 > 0)
             {
-                writer.Write(v2[i]);
+                for (int i = 0; i < length1; ++i)
+                {
+                    writer.Write(v2[i]);
+                }
             }
 
-            int length2 = v3.Length;
+            int length2 = v3 != null ? v3.Length : 0;
             writer.Write(length2);
-            for (int i = 0; i < length2; ++i)
+            if (length2 > 0)
             {
-                writer.Write(v3[i]);
+                for (int i = 0; i < length2; ++i)
+                {
+                    writer.Write(v3[i]);
+                }
             }
 
-            int length3 = v4.Length;
+            int length3 = v4 != null ? v4.Length : 0;
             writer.Write(length3);
-            for (int i = 0; i < length2; ++i)
+            if (length3 > 0)
             {
-                v4[i].test(writer);
+                for (int i = 0; i < length3; ++i)
+                {
+                    v4[i].testWrite(writer);
+                }
             }
         }
     }

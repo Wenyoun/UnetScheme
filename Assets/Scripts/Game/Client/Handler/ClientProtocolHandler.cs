@@ -1,4 +1,5 @@
 ﻿using Zyq.Game.Base;
+using Zyq.Game.Base.Protocol;
 using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
@@ -32,6 +33,25 @@ namespace Zyq.Game.Client
                     entity.Dispatcher(MessageConstants.Sync_Attribute);
                 }
             }
+        }
+
+        private void OnTest(NetworkMessage msg)
+        {
+            NetworkReader reader = msg.reader;
+            int v1 = reader.ReadInt32();
+            int len1 = reader.ReadInt32();
+            int[] v2 = new int[len1];
+            for (int i = 0; i < len1; ++i)
+            {
+                v2[i] = reader.ReadInt32();
+            }
+            int len2 = reader.ReadInt32();
+            LoginData[] v3 = new LoginData[len2];
+            for (int i = 0; i < len2; ++i)
+            {
+                v3[i].testRead(reader);
+            }
+            //ClientRecver.OnRecvArray(v1, v2, v3);
         }
     }
 }
