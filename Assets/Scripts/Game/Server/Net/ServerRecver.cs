@@ -24,7 +24,9 @@ namespace Zyq.Game.Server
             Vector4 v14,
             Quaternion v15,
             Login login,
-            LoginData data)
+            Login[] logins,
+            LoginData data,
+            LoginData[] datas)
         {
             Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" + v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15 + ":" + login + ":" + data.Username + "," + data.Password);
 
@@ -37,11 +39,6 @@ namespace Zyq.Game.Server
             Server.Ins.EntityMgr.AddEntity(entity);
 
             ServerSender.BroadcastCreatePlayer(entity.Eid, entity.Gid, position);
-        }
-
-        [Recv(NetMsgId.Msg_Create_Player2)]
-        public static void OnRecvArray(Connection connection, int v1, int[] v2, LoginData[] v4)
-        {
         }
     }
 }

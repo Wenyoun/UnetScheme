@@ -83,11 +83,24 @@ namespace Zyq.Game.Client
             m_Connection.OnConnect(network);
             RegisterProtocols(m_Connection);
 
+            Login[] logins = new Login[3];
+            logins[0] = Login.Log1;
+            logins[1] = Login.Log3;
+            logins[2] = Login.Log5;
+
             LoginData data = new LoginData();
             data.Username = "Username";
             data.Password = "Password";
 
-            ClientSender.RpcLogin(1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity, Login.Log5, data);
+            LoginData[] datas = new LoginData[3];
+            datas[0].Username = "Username0";
+            datas[0].Password = "Password0";
+            datas[1].Username = "Username1";
+            datas[1].Password = "Password1";
+            datas[2].Username = "Username2";
+            datas[2].Password = "Password2";
+
+            ClientSender.RpcLogin(1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity, Login.Log5, logins, data, datas);
         }
 
         public override void OnNetDisconnect(NetworkConnection network)

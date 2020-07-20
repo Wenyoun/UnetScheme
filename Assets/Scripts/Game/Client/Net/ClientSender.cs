@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
 using Zyq.Game.Base.Protocol;
-using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
 {
@@ -24,50 +23,10 @@ namespace Zyq.Game.Client
                                     Vector4 v14,
                                     Quaternion v15,
                                     Login login,
-                                    LoginData data)
+                                    Login[] logins,
+                                    LoginData data,
+                                    LoginData[] datas)
         {
-        }
-
-        [Send(NetMsgId.Msg_Create_Player2)]
-        public static void _____RpcArray(int v1, int[] v2, string[] v3, Login[] v4, Vector3[] v5, LoginData[] v6)
-        {
-        }
-
-        public static void RpcArray(int v1, int[] v2, string[] v3, LoginData[] v4)
-        {
-            NetworkWriter writer = new NetworkWriter();
-
-            writer.Write(v1);
-
-            int length1 = v2 != null ? v2.Length : 0;
-            writer.Write(length1);
-            if (length1 > 0)
-            {
-                for (int i = 0; i < length1; ++i)
-                {
-                    writer.Write(v2[i]);
-                }
-            }
-
-            int length2 = v3 != null ? v3.Length : 0;
-            writer.Write(length2);
-            if (length2 > 0)
-            {
-                for (int i = 0; i < length2; ++i)
-                {
-                    writer.Write(v3[i]);
-                }
-            }
-
-            int length3 = v4 != null ? v4.Length : 0;
-            writer.Write(length3);
-            if (length3 > 0)
-            {
-                for (int i = 0; i < length3; ++i)
-                {
-                    v4[i].testWrite(writer);
-                }
-            }
         }
     }
 }
