@@ -13,6 +13,7 @@
         {
         }
     }
+
     public struct LoginData
     {
         public string Username;
@@ -45,6 +46,7 @@
                 }
             }
         }
+
         public void testRead(UnityEngine.Networking.NetworkReader r)
         {
             Username = r.ReadString();

@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
+using Zyq.Game.Base.Protocol;
 
 namespace Zyq.Game.Server
 {
-    public class ChangeAttributeCop : AbsCop
+    public class ServerChangeAttributeCop : AbsCop
     {
         public override void OnInit()
         {
@@ -19,6 +20,11 @@ namespace Zyq.Game.Server
                     attribute.Hp12 = new Vector3(k, k, k);
                 });
             }
+        }
+
+        [Recv(NetMsgId.Msg_Create_Player1)]
+        public void OnRecvArray(int v1, int[] v2, LoginData[] v4)
+        {
         }
     }
 }

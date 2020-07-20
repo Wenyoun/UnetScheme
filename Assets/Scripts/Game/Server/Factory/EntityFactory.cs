@@ -15,7 +15,7 @@ namespace Zyq.Game.Server
             entity.AddSyncAttribute(new BaseAttribute());
             entity.AddFeture(new ConnectionFeture(connection));
             entity.AddFeture(new ServerObjectFeture(position));
-            entity.AddCop<ChangeAttributeCop>();
+            entity.AddCop<ServerChangeAttributeCop>();
 
             return entity;
         }

@@ -90,62 +90,63 @@ namespace Zyq.Weaver
 
                                 foreach (MethodDetail wrapper in methods)
                                 {
-                                    MethodDefinition handler = MethodFactory.CreateMethod(module,
+                                    MethodDefinition handlerMethodImpl = MethodFactory.CreateMethod(module,
                                                                                           type,
                                                                                           "OnHandlerProtocol_" + wrapper.MsgId,
                                                                                           MethodAttributes.Private | MethodAttributes.HideBySig,
                                                                                           true);
                                     {
-                                        handler.Parameters.Add(new ParameterDefinition(module.ImportReference(WeaverProgram.NetowrkMessageType)));
-                                        handler.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
+                                        handlerMethodImpl.Parameters.Add(new ParameterDefinition("msg", ParameterAttributes.None, module.ImportReference(WeaverProgram.NetowrkMessageType)));
+                                        handlerMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
 
-                                        ILProcessor handlerProcessor = handler.Body.GetILProcessor();
+                                        ILProcessor handlerProcessor = handlerMethodImpl.Body.GetILProcessor();
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Nop));
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldarg_1));
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.NetworkMessageReaderField)));
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc_0));
 
+                                        List<int> indexs = new List<int>();
                                         Collection<ParameterDefinition> parms = wrapper.Method.Parameters;
                                         for (int i = 0; i < parms.Count; ++i)
                                         {
                                             ParameterDefinition parm = parms[i];
                                             TypeDefinition parmType = parm.ParameterType.Resolve();
-                                            handler.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
+                                            handlerMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
+                                            int index = handlerMethodImpl.Body.Variables.Count - 1;
+                                            indexs.Add(index);
 
-                                            if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
+                                            if (parm.ParameterType.IsArray)
+                                            {
+                                                ArrayReadFactory.CreateMethodVariableReadInstruction(module, handlerMethodImpl, handlerProcessor, parmType);
+                                            }
+                                            else if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
                                             {
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
-                                                handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parm.ParameterType.FullName));
-                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, i + 1));
+                                                if (parmType.IsEnum)
+                                                {
+                                                    handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, typeof(int).ToString()));
+                                                }
+                                                else
+                                                {
+                                                    handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, parmType.FullName));
+                                                }
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, index));
                                             }
-                                            else if (parmType != null && parmType.IsEnum)
+                                            else if (parmType.IsValueType)
                                             {
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, index));
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Initobj, module.ImportReference(parmType)));
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, index));
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
-                                                handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, typeof(int).ToString()));
-                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, i + 1));
-                                            }
-                                            else if (parmType != null)
-                                            {
-                                                if(parmType.IsArray)
-                                                {
-                                                }
-                                                else if (parmType.IsValueType)
-                                                {
-                                                    MethodReference deserialize = StructMethodFactory.FindDeserialize(module, parmType);
-                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, i + 1));
-                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Initobj, module.ImportReference(parmType)));
-                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, i + 1));
-                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
-                                                    handlerProcessor.Append(handlerProcessor.Create(OpCodes.Call, deserialize));
-                                                }
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Call, StructMethodFactory.FindDeserialize(module, parmType)));
                                             }
                                         }
 
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldarg_0));
 
-                                        for (int i = 0; i < parms.Count; ++i)
+                                        for (int i = 0; i < indexs.Count; ++i)
                                         {
-                                            handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc, i + 1));
+                                            handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc, indexs[i]));
                                         }
 
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Call, wrapper.Method));
@@ -158,7 +159,7 @@ namespace Zyq.Weaver
                                         processor.Append(processor.Create(OpCodes.Ldloc_0));
                                         processor.Append(processor.Create(OpCodes.Ldc_I4, wrapper.MsgId));
                                         processor.Append(processor.Create(OpCodes.Ldarg_0));
-                                        processor.Append(processor.Create(OpCodes.Ldftn, handler));
+                                        processor.Append(processor.Create(OpCodes.Ldftn, handlerMethodImpl));
                                         processor.Append(processor.Create(OpCodes.Newobj, module.ImportReference(typeof(NetworkMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));
                                         processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionFetureRegisterHandlerMethod)));
                                         processor.Append(processor.Create(OpCodes.Nop));

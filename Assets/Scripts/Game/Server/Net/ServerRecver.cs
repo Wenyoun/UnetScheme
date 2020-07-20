@@ -38,5 +38,10 @@ namespace Zyq.Game.Server
 
             ServerSender.BroadcastCreatePlayer(entity.Eid, entity.Gid, position);
         }
+
+        [Recv(NetMsgId.Msg_Create_Player2)]
+        public static void OnRecvArray(Connection connection, int v1, int[] v2, LoginData[] v4)
+        {
+        }
     }
 }

@@ -52,10 +52,9 @@ namespace Zyq.Weaver
                     }
                     else if (parmType.IsValueType)
                     {
-                        MethodReference serialize = StructMethodFactory.FindSerialize(module, parmType);
                         processor.Append(processor.Create(OpCodes.Ldarga_S, index));
                         processor.Append(processor.Create(OpCodes.Ldloc_0));
-                        processor.Append(processor.Create(OpCodes.Call, serialize));
+                        processor.Append(processor.Create(OpCodes.Call, StructMethodFactory.FindSerialize(module, parmType)));
                     }
                 }
 

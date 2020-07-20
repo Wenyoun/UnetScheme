@@ -32,7 +32,7 @@ namespace Zyq.Weaver
                     MethodDefinition method = methods[key];
 
                     MethodDefinition protoMethodImpl = MethodFactory.CreateMethod(module, protocol, "OnProtocol_" + key, MethodAttributes.Private | MethodAttributes.HideBySig, true);
-                    protoMethodImpl.Parameters.Add(new ParameterDefinition(module.ImportReference(WeaverProgram.NetowrkMessageType)));
+                    protoMethodImpl.Parameters.Add(new ParameterDefinition("msg", ParameterAttributes.None, module.ImportReference(WeaverProgram.NetowrkMessageType)));
                     protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
 
                     {
@@ -42,6 +42,7 @@ namespace Zyq.Weaver
                         processor.Append(processor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.NetworkMessageReaderField)));
                         processor.Append(processor.Create(OpCodes.Stloc_0));
 
+                        List<int> indexs = new List<int>();
                         Collection<ParameterDefinition> parms = method.Parameters;
                         for (int i = 0; i < parms.Count; ++i)
                         {
@@ -50,33 +51,33 @@ namespace Zyq.Weaver
                                 ParameterDefinition parm = parms[i];
                                 TypeDefinition parmType = parm.ParameterType.Resolve();
                                 protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
+                                int index = protoMethodImpl.Body.Variables.Count - 1;
+                                indexs.Add(index);
 
-                                if (BaseTypeFactory.IsBaseType(parm.ParameterType.ToString()))
+                                if (parm.ParameterType.IsArray)
+                                {
+                                    ArrayReadFactory.CreateMethodVariableReadInstruction(module, protoMethodImpl, processor, parmType);
+                                }
+                                else if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
                                 {
                                     processor.Append(processor.Create(OpCodes.Ldloc_0));
-                                    processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parm.ParameterType.FullName));
-                                    processor.Append(processor.Create(OpCodes.Stloc, i));
+                                    if (parmType.IsEnum)
+                                    {
+                                        processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, typeof(int).ToString()));
+                                    }
+                                    else
+                                    {
+                                        processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parmType.FullName));
+                                    }
+                                    processor.Append(processor.Create(OpCodes.Stloc, index));
                                 }
-                                else if (parmType != null && parmType.IsEnum)
+                                else if (parmType.IsValueType)
                                 {
+                                    processor.Append(processor.Create(OpCodes.Ldloca, index));
+                                    processor.Append(processor.Create(OpCodes.Initobj, module.ImportReference(parmType)));
+                                    processor.Append(processor.Create(OpCodes.Ldloca, index));
                                     processor.Append(processor.Create(OpCodes.Ldloc_0));
-                                    processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, typeof(int).ToString()));
-                                    processor.Append(processor.Create(OpCodes.Stloc, i));
-                                }
-                                else if (parmType != null)
-                                {
-                                    if (parmType.IsArray)
-                                    {
-                                    }
-                                    else if (parmType.IsValueType)
-                                    {
-                                        MethodReference deserialize = StructMethodFactory.FindDeserialize(module, parmType);
-                                        processor.Append(processor.Create(OpCodes.Ldloca, i));
-                                        processor.Append(processor.Create(OpCodes.Initobj, module.ImportReference(parmType)));
-                                        processor.Append(processor.Create(OpCodes.Ldloca, i));
-                                        processor.Append(processor.Create(OpCodes.Ldloc_0));
-                                        processor.Append(processor.Create(OpCodes.Call, deserialize));
-                                    }
+                                    processor.Append(processor.Create(OpCodes.Call, StructMethodFactory.FindDeserialize(module, parmType)));
                                 }
                             }
                         }
@@ -84,12 +85,9 @@ namespace Zyq.Weaver
                         processor.Append(processor.Create(OpCodes.Ldarg_0));
                         processor.Append(processor.Create(OpCodes.Call, getConnection));
 
-                        for (int i = 0; i < parms.Count; ++i)
+                        for (int i = 0; i < indexs.Count; ++i)
                         {
-                            if (i > 0)
-                            {
-                                processor.Append(processor.Create(OpCodes.Ldloc, i));
-                            }
+                            processor.Append(processor.Create(OpCodes.Ldloc, indexs[i]));
                         }
 
                         processor.Append(processor.Create(OpCodes.Call, method));

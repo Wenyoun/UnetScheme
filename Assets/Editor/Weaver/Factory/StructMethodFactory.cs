@@ -23,7 +23,7 @@ namespace Zyq.Weaver
                                                                     MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
                                                                     true);
 
-            serialize.Parameters.Add(new ParameterDefinition(module.ImportReference(WeaverProgram.NetworkWriterType)));
+            serialize.Parameters.Add(new ParameterDefinition("writer", ParameterAttributes.None, module.ImportReference(WeaverProgram.NetworkWriterType)));
 
             ILProcessor processor = serialize.Body.GetILProcessor();
             processor.Append(processor.Create(OpCodes.Nop));
@@ -73,7 +73,7 @@ namespace Zyq.Weaver
                                                                       MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
                                                                       true);
 
-            deserialize.Parameters.Add(new ParameterDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
+            deserialize.Parameters.Add(new ParameterDefinition("reader", ParameterAttributes.None, module.ImportReference(WeaverProgram.NetworkReaderType)));
 
             ILProcessor processor = deserialize.Body.GetILProcessor();
             processor.Append(processor.Create(OpCodes.Nop));
