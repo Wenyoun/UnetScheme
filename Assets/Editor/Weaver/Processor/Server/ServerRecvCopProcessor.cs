@@ -112,6 +112,7 @@ namespace Zyq.Weaver
                                             ParameterDefinition parm = parms[i];
                                             TypeDefinition parmType = parm.ParameterType.Resolve();
                                             handlerMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(parm.ParameterType)));
+
                                             int index = handlerMethodImpl.Body.Variables.Count - 1;
                                             indexs.Add(index);
 
@@ -119,24 +120,17 @@ namespace Zyq.Weaver
                                             {
                                                 ArrayReadFactory.CreateMethodVariableReadInstruction(module, handlerMethodImpl, handlerProcessor, parmType);
                                             }
-                                            else if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
+                                            else if (BaseTypeFactory.IsBaseType(parmType))
                                             {
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
-                                                if (parmType.IsEnum)
-                                                {
-                                                    handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, typeof(int).ToString()));
-                                                }
-                                                else
-                                                {
-                                                    handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, parmType.FullName));
-                                                }
-                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, i + 1));
+                                                handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, parmType));
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, index));
                                             }
                                             else if (parmType.IsValueType)
                                             {
-                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, i + 1));
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, index));
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Initobj, module.ImportReference(parmType)));
-                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, i + 1));
+                                                handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, index));
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Call, StructMethodFactory.FindDeserialize(module, parmType)));
                                             }

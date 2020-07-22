@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
+using UnityEngine;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
-using UnityEngine;
 using UnityEngine.Networking;
+using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
@@ -44,14 +44,19 @@ namespace Zyq.Weaver
             Mappers.Add("UnityEngine.Quaternion", new TypeWrapper(typeof(Quaternion), "ReadQuaternion", "Write"));
         }
 
-        public static bool IsBaseType(string type)
+        public static bool IsBaseType(TypeDefinition type)
         {
-            return Mappers.ContainsKey(type);
+            return type.IsEnum || Mappers.ContainsKey(type.ToString());
         }
 
-        public static bool IsSystemBaseType(string type)
+        public static bool IsSystemBaseType(TypeDefinition type)
         {
-            return Mappers.ContainsKey(type) && type.IndexOf("System.") >= 0;
+            return type.IsEnum || (Mappers.ContainsKey(type.FullName) && type.FullName.IndexOf("System.") >= 0);
+        }
+
+        public static Instruction CreateReadInstruction(ModuleDefinition module, ILProcessor processor, TypeDefinition type)
+        {
+            return CreateReadInstruction(module, processor, type.IsEnum ? typeof(int).ToString() : type.FullName);
         }
 
         public static Instruction CreateReadInstruction(ModuleDefinition module, ILProcessor processor, string type)
@@ -64,6 +69,11 @@ namespace Zyq.Weaver
             }
 
             return null;
+        }
+
+        public static Instruction CreateWriteInstruction(ModuleDefinition module, ILProcessor processor, TypeDefinition type)
+        {
+            return CreateWriteInstruction(module, processor, type.IsEnum ? typeof(int).FullName : type.FullName);
         }
 
         public static Instruction CreateWriteInstruction(ModuleDefinition module, ILProcessor processor, string type)

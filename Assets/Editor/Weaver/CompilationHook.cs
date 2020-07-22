@@ -14,9 +14,9 @@ namespace Zyq.Weaver
         [InitializeOnLoadMethod]
         private static void OnInitializeOnLoad()
         {
-            //EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             CompilationPipeline.assemblyCompilationFinished += OnAssemblyCompilationFinished;
-            //OnPlayModeStateChanged(PlayModeStateChange.ExitingEditMode);
+            OnPlayModeStateChanged(PlayModeStateChange.ExitingEditMode);
         }
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)

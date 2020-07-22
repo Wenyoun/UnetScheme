@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using Mono.CecilX;
+﻿using Mono.CecilX;
+using UnityEngine;
+using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
@@ -24,11 +25,26 @@ namespace Zyq.Weaver
                 if (type.BaseType != null && type.BaseType.FullName == WeaverProgram.AbsCopType.FullName)
                 {
                     cops.Add(type);
+                    continue;
                 }
 
                 if (type.CustomAttributes.Count > 0 && type.CustomAttributes[0].AttributeType.FullName == WeaverProgram.SyncClassType.FullName)
                 {
                     syncs.Add(type);
+                    continue;
+                }
+
+                if (type.CustomAttributes.Count > 0 && type.CustomAttributes[0].AttributeType.FullName == WeaverProgram.ProtocolType.FullName)
+                {
+                    if (protocol == null)
+                    {
+                        protocol = type;
+                    }
+                    else
+                    {
+                        Debug.LogError("只能存在一个用[" + type.CustomAttributes[0].AttributeType.FullName + "]修饰的class");
+                    }
+                    continue;
                 }
 
                 foreach (MethodDefinition method in type.Methods)
@@ -49,21 +65,16 @@ namespace Zyq.Weaver
                                 {
                                     recv.Add(msgId, method);
                                 }
+                                else
+                                {
+                                    Debug.LogError("[" + methodAttr.AttributeType.FullName + "]" + "只能修饰static方法,在" + type.FullName + "中的[" + method.FullName + "]方法");
+                                }
                             }
                             else if (methodAttr.AttributeType.FullName == WeaverProgram.BroadcastType.FullName)
                             {
                                 broadcast.Add(msgId, method);
                             }
                         }
-                    }
-                }
-
-                if (type.CustomAttributes.Count > 0)
-                {
-                    CustomAttribute typeAttr = type.CustomAttributes[0];
-                    if (typeAttr.AttributeType.FullName == WeaverProgram.ProtocolType.FullName)
-                    {
-                        protocol = type;
                     }
                 }
             }

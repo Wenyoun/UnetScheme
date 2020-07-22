@@ -48,8 +48,6 @@ namespace Zyq.Weaver
                         SetMethod = set
                     };
 
-                    type.Methods.Add(get);
-                    type.Methods.Add(set);
                     type.Properties.Add(propertyDefinition);
 
                     gets.Add(field, get);
@@ -81,7 +79,7 @@ namespace Zyq.Weaver
                 processor.Append(processor.Create(OpCodes.Ldarg_1));
                 processor.Append(processor.Create(OpCodes.Ldarg_0));
                 processor.Append(processor.Create(OpCodes.Ldfld, dirty));
-                processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, dirty.FieldType.FullName));
+                processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, dirty.FieldType.Resolve()));
 
                 serialize.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
 
@@ -155,7 +153,7 @@ namespace Zyq.Weaver
 
             ILProcessor processor = set.Body.GetILProcessor();
 
-            if (BaseTypeFactory.IsSystemBaseType(field.FieldType.ToString()))
+            if (BaseTypeFactory.IsSystemBaseType(field.FieldType.Resolve()))
             {
                 if (field.FieldType.IsValueType)
                 {
@@ -248,7 +246,7 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Ldarg_1));
             processor.Append(processor.Create(OpCodes.Ldarg_0));
             processor.Append(processor.Create(OpCodes.Ldfld, field));
-            processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, field.FieldType.FullName));
+            processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, field.FieldType.Resolve()));
             processor.Append(end);
         }
     }

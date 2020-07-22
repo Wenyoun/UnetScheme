@@ -119,17 +119,10 @@ namespace Zyq.Weaver
                                             {
                                                 ArrayReadFactory.CreateMethodVariableReadInstruction(module, handlerMethodImpl, handlerProcessor, parmType);
                                             }
-                                            else if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
+                                            else if (BaseTypeFactory.IsBaseType(parmType))
                                             {
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
-                                                if (parmType.IsEnum)
-                                                {
-                                                    handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, typeof(int).ToString()));
-                                                }
-                                                else
-                                                {
-                                                    handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, parmType.FullName));
-                                                }
+                                                handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, parmType));
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, index));
                                             }
                                             else if (parmType.IsValueType)

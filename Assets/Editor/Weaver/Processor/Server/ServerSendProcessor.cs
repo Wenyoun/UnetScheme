@@ -39,18 +39,11 @@ namespace Zyq.Weaver
                         {
                             ArrayWriteFactory.CreateMethodParamWriteInstruction(module, method, processor, parmType, index);
                         }
-                        else if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
+                        else if (BaseTypeFactory.IsBaseType(parmType))
                         {
                             processor.Append(processor.Create(OpCodes.Ldloc_0));
                             processor.Append(processor.Create(OpCodes.Ldarg_S, index));
-                            if (parmType.IsEnum)
-                            {
-                                processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, typeof(int).ToString()));
-                            }
-                            else
-                            {
-                                processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parmType.ToString()));
-                            }
+                            processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parmType));
                         }
                         else if (parmType.IsValueType)
                         {

@@ -56,17 +56,10 @@ namespace Zyq.Weaver
                             {
                                 ArrayReadFactory.CreateMethodVariableReadInstruction(module, protoMethodImpl, processor, parmType);
                             }
-                            else if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
+                            else if (BaseTypeFactory.IsBaseType(parmType))
                             {
                                 processor.Append(processor.Create(OpCodes.Ldloc_0));
-                                if (parmType.IsEnum)
-                                {
-                                    processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, typeof(int).ToString()));
-                                }
-                                else
-                                {
-                                    processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parmType.FullName));
-                                }
+                                processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parmType));
                                 processor.Append(processor.Create(OpCodes.Stloc, index));
                             }
                             else if (parmType.IsValueType)

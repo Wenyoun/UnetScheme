@@ -36,19 +36,12 @@ namespace Zyq.Weaver
                 {
                     ArrayWriteFactory.CreateStructFieldWriteInstruction(module, serialize, processor, field, fieldType);
                 }
-                else if (BaseTypeFactory.IsBaseType(fieldType.ToString()) || fieldType.IsEnum)
+                else if (BaseTypeFactory.IsBaseType(fieldType))
                 {
                     processor.Append(processor.Create(OpCodes.Ldarg_1));
                     processor.Append(processor.Create(OpCodes.Ldarg_0));
                     processor.Append(processor.Create(OpCodes.Ldfld, field));
-                    if (fieldType.IsEnum)
-                    {
-                        processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, typeof(int).ToString()));
-                    }
-                    else
-                    {
-                        processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, fieldType.ToString()));
-                    }
+                    processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, fieldType));
                 }
                 else if (fieldType.IsValueType)
                 {
@@ -86,18 +79,11 @@ namespace Zyq.Weaver
                 {
                     ArrayReadFactory.CreateStructFieldReadInstruction(module, deserialize, processor, field, fieldType);
                 }
-                else if (BaseTypeFactory.IsBaseType(fieldType.ToString()) || fieldType.IsEnum)
+                else if (BaseTypeFactory.IsBaseType(fieldType))
                 {
                     processor.Append(processor.Create(OpCodes.Ldarg_0));
                     processor.Append(processor.Create(OpCodes.Ldarg_1));
-                    if (fieldType.IsEnum)
-                    {
-                        processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, typeof(int).ToString()));
-                    }
-                    else
-                    {
-                        processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, fieldType.ToString()));
-                    }
+                    processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, fieldType));
                     processor.Append(processor.Create(OpCodes.Stfld, field));
                 }
                 else if (fieldType.IsValueType)

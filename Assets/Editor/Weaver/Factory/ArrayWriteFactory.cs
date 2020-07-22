@@ -58,7 +58,7 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Br_S, goto4));
             processor.Append(goto3);
 
-            if (BaseTypeFactory.IsBaseType(fieldType.ToString()) || fieldType.IsEnum)
+            if (BaseTypeFactory.IsBaseType(fieldType))
             {
                 //writer.Write(this.Field[i]);
                 processor.Append(processor.Create(OpCodes.Ldarg_1));
@@ -67,14 +67,7 @@ namespace Zyq.Weaver
                 processor.Append(processor.Create(OpCodes.Ldloc, intIndex));
                 processor.Append(processor.Create(OpCodes.Ldelema, module.ImportReference(fieldType)));
                 processor.Append(processor.Create(OpCodes.Ldobj, module.ImportReference(fieldType)));
-                if (fieldType.IsEnum)
-                {
-                    processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, typeof(int).ToString()));
-                }
-                else
-                {
-                    processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, fieldType.ToString()));
-                }
+                processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, fieldType));
             }
             else if (fieldType.IsValueType)
             {
@@ -158,7 +151,7 @@ namespace Zyq.Weaver
             processor.Append(processor.Create(OpCodes.Br_S, goto4));
             processor.Append(goto3);
 
-            if (BaseTypeFactory.IsBaseType(parmType.ToString()) || parmType.IsEnum)
+            if (BaseTypeFactory.IsBaseType(parmType))
             {
                 //writer.Write(param[i]);
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
@@ -166,14 +159,7 @@ namespace Zyq.Weaver
                 processor.Append(processor.Create(OpCodes.Ldloc, intIndex));
                 processor.Append(processor.Create(OpCodes.Ldelema, module.ImportReference(parmType)));
                 processor.Append(processor.Create(OpCodes.Ldobj, module.ImportReference(parmType)));
-                if (parmType.IsEnum)
-                {
-                    processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, typeof(int).ToString()));
-                }
-                else
-                {
-                    processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parmType.ToString()));
-                }
+                processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parmType));
             }
             else if (parmType.IsValueType)
             {
