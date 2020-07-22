@@ -6,11 +6,21 @@ namespace Zyq.Weaver
 {
     public static class CheckHelper
     {
-        public static bool CheckStructFileds(TypeDefinition structType, TypeDefinition fieldType)
+        public static bool CheckStructFiled(string module, TypeDefinition type, TypeDefinition fieldType)
         {
             if (!BaseTypeFactory.IsBaseType(fieldType) && !fieldType.IsValueType)
             {
-                Debug.LogError("结构体[" + structType.FullName + "]中的字段只能为[基本类型，字符串，结构体，基本类型数组，字符串数组，结构体数组]而不能为[" + fieldType.FullName + "]");
+                Debug.LogError(module + ": [" + type.FullName + "]中的字段只能为[基本类型，字符串，枚举，结构体，基本类型数组，字符串数组，枚举数组，结构体数组]而不能为[" + fieldType.FullName + "]");
+                return false;
+            }
+            return true;
+        }
+
+        public static bool CheckSyncFiled(string module, TypeDefinition type, TypeDefinition fieldType)
+        {
+            if (!BaseTypeFactory.IsBaseType(fieldType) && !fieldType.IsEnum)
+            {
+                Debug.LogError(module + ": [" + type.FullName + "]中的字段只能为[基本类型，字符串，枚举]而不能为[" + fieldType.FullName + "]");
                 return false;
             }
             return true;
@@ -30,7 +40,7 @@ namespace Zyq.Weaver
                 }
                 else if (!BaseTypeFactory.IsBaseType(parmType) && !parmType.IsValueType)
                 {
-                    Debug.LogError(module + ": 方法[" + method.FullName + "]中的参数只能为[基本类型，字符串，结构体，基本类型数组，字符串数组，结构体数组]而不能为[" + parmType.FullName + "]");
+                    Debug.LogError(module + ": 方法[" + method.FullName + "]中的参数只能为[基本类型，字符串，枚举，结构体，基本类型数组，字符串数组，枚举数组，结构体数组]而不能为[" + parmType.FullName + "]");
                     return false;
                 }
             }
@@ -54,7 +64,7 @@ namespace Zyq.Weaver
                 }
                 else if (!BaseTypeFactory.IsBaseType(parmType) && !parmType.IsValueType)
                 {
-                    Debug.LogError(module + ": 方法[" + method.FullName + "]中的参数只能为[基本类型，字符串，结构体，基本类型数组，字符串数组，结构体数组]而不能为[" + parmType.FullName + "]");
+                    Debug.LogError(module + ": 方法[" + method.FullName + "]中的参数只能为[基本类型，字符串，枚举，结构体，基本类型数组，字符串数组，枚举数组，结构体数组]而不能为[" + parmType.FullName + "]");
                     return false;
                 }
             }

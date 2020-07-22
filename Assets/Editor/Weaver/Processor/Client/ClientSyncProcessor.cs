@@ -55,7 +55,14 @@ namespace Zyq.Weaver
 
                 for (int i = 0; i < fields.Count; ++i)
                 {
-                    WriteDeserializeInstruction(module, deserialize, processor, fields[i], i, offset);
+                    FieldDefinition field = fields[i];
+
+                    if (!CheckHelper.CheckSyncFiled("Client", type, field.FieldType.Resolve()))
+                    {
+                        continue;
+                    }
+
+                    WriteDeserializeInstruction(module, deserialize, processor, field, i, offset);
                 }
 
                 processor.Append(processor.Create(OpCodes.Nop));

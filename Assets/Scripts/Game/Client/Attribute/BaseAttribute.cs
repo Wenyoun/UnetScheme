@@ -41,7 +41,6 @@ namespace Zyq.Game.Client
         {
             return false;
         }
-
         public void Serialize(NetworkWriter writer)
         {
         }

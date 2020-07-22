@@ -1,5 +1,4 @@
-﻿using System;
-using Mono.CecilX;
+﻿using Mono.CecilX;
 using Mono.CecilX.Cil;
 using System.Collections.Generic;
 
@@ -38,6 +37,12 @@ namespace Zyq.Weaver
                 for (int i = 0; i < fields.Count; ++i)
                 {
                     FieldDefinition field = fields[i];
+
+                    if (!CheckHelper.CheckSyncFiled("Server", type, field.FieldType.Resolve()))
+                    {
+                        continue;
+                    }
+
                     string name = field.Name;
                     MethodDefinition get = CreateGetMethod(module, type, field, name);
                     MethodDefinition set = CreateSetMethod(module, type, field, name, dirty, i);

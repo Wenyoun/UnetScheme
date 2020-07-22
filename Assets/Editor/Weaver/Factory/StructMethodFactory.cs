@@ -32,7 +32,7 @@ namespace Zyq.Weaver
             {
                 TypeDefinition fieldType = field.FieldType.Resolve();
 
-                if (!CheckHelper.CheckStructFileds(type, fieldType))
+                if (!CheckHelper.CheckStructFiled("Base", type, fieldType))
                 {
                     continue;
                 }
@@ -80,7 +80,7 @@ namespace Zyq.Weaver
             {
                 TypeDefinition fieldType = field.FieldType.Resolve();
 
-                if (!CheckHelper.CheckStructFileds(type, fieldType))
+                if (!CheckHelper.CheckStructFiled("Base", type, fieldType))
                 {
                     continue;
                 }
