@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
-using Mono.Collections.Generic;
 using UnityEngine.Networking;
+using Mono.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
@@ -17,7 +17,6 @@ namespace Zyq.Weaver
             }
 
             MethodReference getConnection = ResolveHelper.ResolveMethod(protocol, "get_Connection");
-
             {
                 //public void Register();
                 MethodDefinition registerMethod = ResolveHelper.ResolveMethod(protocol, "Register");
@@ -30,6 +29,11 @@ namespace Zyq.Weaver
                 foreach (short key in methods.Keys)
                 {
                     MethodDefinition method = methods[key];
+
+                    if (!CheckHelper.CheckMethodFirstParams("Server", method))
+                    {
+                        continue;
+                    }
 
                     MethodDefinition protoMethodImpl = MethodFactory.CreateMethod(module, protocol, "OnProtocol_" + key, MethodAttributes.Private | MethodAttributes.HideBySig, true);
                     protoMethodImpl.Parameters.Add(new ParameterDefinition("msg", ParameterAttributes.None, module.ImportReference(WeaverProgram.NetowrkMessageType)));

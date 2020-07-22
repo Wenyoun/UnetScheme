@@ -32,6 +32,11 @@ namespace Zyq.Weaver
             {
                 TypeDefinition fieldType = field.FieldType.Resolve();
 
+                if (!CheckHelper.CheckStructFileds(type, fieldType))
+                {
+                    continue;
+                }
+
                 if (field.FieldType.IsArray)
                 {
                     ArrayWriteFactory.CreateStructFieldWriteInstruction(module, serialize, processor, field, fieldType);
@@ -74,6 +79,11 @@ namespace Zyq.Weaver
             foreach (FieldDefinition field in type.Fields)
             {
                 TypeDefinition fieldType = field.FieldType.Resolve();
+
+                if (!CheckHelper.CheckStructFileds(type, fieldType))
+                {
+                    continue;
+                }
 
                 if (field.FieldType.IsArray)
                 {

@@ -13,6 +13,11 @@ namespace Zyq.Weaver
             {
                 MethodDefinition method = methods[msgId];
 
+                if (!CheckHelper.CheckMethodParams("Server", method))
+                {
+                    continue;
+                }
+
                 ILProcessor processor = method.Body.GetILProcessor();
                 method.Body.Variables.Clear();
                 method.Body.Instructions.Clear();

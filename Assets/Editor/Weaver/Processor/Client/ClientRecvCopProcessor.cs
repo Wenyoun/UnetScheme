@@ -90,6 +90,11 @@ namespace Zyq.Weaver
 
                                 foreach (MethodDetail wrapper in methods)
                                 {
+                                    if (!CheckHelper.CheckMethodParams("Client", wrapper.Method))
+                                    {
+                                        continue;
+                                    }
+
                                     MethodDefinition handlerMethodImpl = MethodFactory.CreateMethod(module,
                                                                                           type,
                                                                                           "OnHandlerProtocol_" + wrapper.MsgId,

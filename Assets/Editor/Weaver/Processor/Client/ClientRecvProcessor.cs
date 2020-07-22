@@ -17,7 +17,6 @@ namespace Zyq.Weaver
             }
 
             MethodReference getConnection = ResolveHelper.ResolveMethod(protocol, "get_Connection");
-
             {
                 //public void Register();
                 MethodDefinition registerMethod = ResolveHelper.ResolveMethod(protocol, "Register");
@@ -27,11 +26,16 @@ namespace Zyq.Weaver
                 ILProcessor registerProcessor = registerMethod.Body.GetILProcessor();
                 registerProcessor.Append(registerProcessor.Create(OpCodes.Nop));
 
-                foreach (short key in methods.Keys)
+                foreach (short msgId in methods.Keys)
                 {
-                    MethodDefinition method = methods[key];
+                    MethodDefinition method = methods[msgId];
 
-                    MethodDefinition protoMethodImpl = MethodFactory.CreateMethod(module, protocol, "OnProtocol_" + key, MethodAttributes.Private | MethodAttributes.HideBySig, true);
+                    if (!CheckHelper.CheckMethodParams("Client", method))
+                    {
+                        continue;
+                    }
+
+                    MethodDefinition protoMethodImpl = MethodFactory.CreateMethod(module, protocol, "OnProtocol_" + msgId, MethodAttributes.Private | MethodAttributes.HideBySig, true);
                     protoMethodImpl.Parameters.Add(new ParameterDefinition("msg", ParameterAttributes.None, module.ImportReference(WeaverProgram.NetowrkMessageType)));
                     protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
 
@@ -84,7 +88,7 @@ namespace Zyq.Weaver
 
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldarg_0));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Call, getConnection));
-                    registerProcessor.Append(registerProcessor.Create(OpCodes.Ldc_I4, key));
+                    registerProcessor.Append(registerProcessor.Create(OpCodes.Ldc_I4, msgId));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldarg_0));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldftn, protoMethodImpl));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Newobj, module.ImportReference(typeof(NetworkMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));

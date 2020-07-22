@@ -9,9 +9,19 @@ namespace Zyq.Weaver
     {
         public static void Weave(ModuleDefinition module, Dictionary<short, MethodDefinition> methods)
         {
+            if (module == null || methods.Count == 0)
+            {
+                return;
+            }
+
             foreach (short msgId in methods.Keys)
             {
                 MethodDefinition method = methods[msgId];
+
+                if (!CheckHelper.CheckMethodParams("Client", method))
+                {
+                    continue;
+                }
 
                 ILProcessor processor = method.Body.GetILProcessor();
                 method.Body.Variables.Clear();

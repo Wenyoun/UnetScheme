@@ -8,6 +8,11 @@ namespace Zyq.Weaver
     {
         public static void Weave(ModuleDefinition module, List<TypeDefinition> syncs)
         {
+            if (module == null || syncs.Count == 0)
+            {
+                return;
+            }
+
             foreach (TypeDefinition type in syncs)
             {
                 List<FieldDefinition> fields = new List<FieldDefinition>();
