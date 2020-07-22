@@ -9,9 +9,9 @@ namespace Zyq.Weaver
     {
         public static void Weave(ModuleDefinition module, Dictionary<short, MethodDefinition> methods)
         {
-            foreach (short key in methods.Keys)
+            foreach (short msgId in methods.Keys)
             {
-                MethodDefinition method = methods[key];
+                MethodDefinition method = methods[msgId];
 
                 ILProcessor processor = method.Body.GetILProcessor();
                 method.Body.Variables.Clear();
@@ -23,7 +23,7 @@ namespace Zyq.Weaver
                 processor.Append(processor.Create(OpCodes.Newobj, module.ImportReference(WeaverProgram.NetworkWriterCtorMethod)));
                 processor.Append(processor.Create(OpCodes.Stloc_0));
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
-                processor.Append(processor.Create(OpCodes.Ldc_I4, key));
+                processor.Append(processor.Create(OpCodes.Ldc_I4, msgId));
                 processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.NetworkWriterStartMessageMethod)));
 
                 Collection<ParameterDefinition> parms = method.Parameters;
