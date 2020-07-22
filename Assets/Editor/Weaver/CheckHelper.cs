@@ -18,7 +18,7 @@ namespace Zyq.Weaver
 
         public static bool CheckSyncFiled(string module, TypeDefinition type, TypeDefinition fieldType)
         {
-            if (!BaseTypeFactory.IsBaseType(fieldType) && !fieldType.IsEnum)
+            if (!BaseTypeFactory.IsBaseType(fieldType))
             {
                 Debug.LogError(module + ": [" + type.FullName + "]中的字段只能为[基本类型，字符串，枚举]而不能为[" + fieldType.FullName + "]");
                 return false;
