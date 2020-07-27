@@ -30,7 +30,19 @@ namespace Zyq.Game.Server
         {
             Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" + v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15 + ":" + login + ":" + data.Username + "," + data.Password);
 
-            ServerSender.RpcTargetLoginResult(connection, true);
+            LoginData k = new LoginData();
+            k.Scores = new int[3];
+            for (int i = 0; i < 3; ++i)
+            {
+                k.Scores[i] = i + 1;
+            }
+            k.Logins = new Login[4];
+            for (int i = 0; i < 4; ++i)
+            {
+                k.Logins[i] = (Login)i;
+            }
+
+            ServerSender.RpcTargetLoginResult(connection, true, k);
 
             Vector3 position = new Vector3(1, 0, 1);
 

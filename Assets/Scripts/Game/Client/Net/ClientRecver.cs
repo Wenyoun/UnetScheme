@@ -7,7 +7,7 @@ namespace Zyq.Game.Client
     public static class ClientRecver
     {
         [Recv(NetMsgId.Msg_Login_Res)]
-        public static void OnLoginRsp(bool result)
+        public static void OnLoginRsp(bool result, LoginData data)
         {
             Debug.Log("客户端收到服务器的登陆结果:" + (result ? "登录成功" : "登录失败"));
         }

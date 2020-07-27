@@ -8,6 +8,7 @@ namespace Zyq.Weaver
 {
     public static class CompilationHook
     {
+        private const string Base = "Zyq.Game.Base";
         private const string Server = "Zyq.Game.Server";
         private const string Client = "Zyq.Game.Client";
 
@@ -23,6 +24,7 @@ namespace Zyq.Weaver
         {
             if (state == PlayModeStateChange.ExitingEditMode)
             {
+                CompilationHook.CheckWeaveAssemblies(Base);
                 CompilationHook.CheckWeaveAssemblies(Client);
                 CompilationHook.CheckWeaveAssemblies(Server);
             }
