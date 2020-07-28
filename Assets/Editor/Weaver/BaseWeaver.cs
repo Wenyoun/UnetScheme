@@ -1,5 +1,4 @@
 ﻿using Mono.CecilX;
-using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {

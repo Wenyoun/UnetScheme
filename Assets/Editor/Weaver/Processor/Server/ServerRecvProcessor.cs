@@ -30,7 +30,7 @@ namespace Zyq.Weaver
                 {
                     MethodDefinition method = methods[key];
 
-                    if (!CheckHelper.CheckMethodFirstParams("Server", method))
+                    if (!CheckHelper.CheckMethodFirstParams(WeaverProgram.Server, method))
                     {
                         continue;
                     }

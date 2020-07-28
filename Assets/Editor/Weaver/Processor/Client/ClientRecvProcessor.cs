@@ -30,7 +30,7 @@ namespace Zyq.Weaver
                 {
                     MethodDefinition method = methods[msgId];
 
-                    if (!CheckHelper.CheckMethodParams("Client", method))
+                    if (!CheckHelper.CheckMethodParams(WeaverProgram.Client, method))
                     {
                         continue;
                     }

@@ -90,7 +90,7 @@ namespace Zyq.Weaver
 
                                 foreach (MethodDetail wrapper in methods)
                                 {
-                                    if (!CheckHelper.CheckMethodParams("Client", wrapper.Method))
+                                    if (!CheckHelper.CheckMethodParams(WeaverProgram.Client, wrapper.Method))
                                     {
                                         continue;
                                     }

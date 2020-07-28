@@ -38,7 +38,7 @@ namespace Zyq.Weaver
                 {
                     FieldDefinition field = fields[i];
 
-                    if (!CheckHelper.CheckSyncFiled("Server", type, field.FieldType.Resolve()))
+                    if (!CheckHelper.CheckSyncFiled(WeaverProgram.Server, type, field.FieldType.Resolve()))
                     {
                         continue;
                     }

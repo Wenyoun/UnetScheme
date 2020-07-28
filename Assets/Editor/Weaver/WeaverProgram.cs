@@ -8,12 +8,20 @@ namespace Zyq.Weaver
 {
     public static class WeaverProgram
     {
+        #region  User Module
+        public const string Base = "Zyq.Game.Base.dll";
+        public const string Server = "Zyq.Game.Server.dll";
+        public const string Client = "Zyq.Game.Client.dll";
+        #endregion
+
+        #region  AssemblyDefinition
         public static AssemblyDefinition UnityAssembly;
         public static AssemblyDefinition BaseAssembly;
         public static AssemblyDefinition NetworkingAssembly;
         public static AssemblyDefinition CurrentAssembly;
+        #endregion
 
-        #region  networking
+        #region  Networking
         public static TypeReference NetowrkMessageType;
         public static FieldReference NetworkMessageReaderField;
         public static MethodReference NetowrkMessageCtorMethod;
@@ -24,7 +32,7 @@ namespace Zyq.Weaver
         public static TypeReference NetworkReaderType;
         #endregion
 
-        #region  attribute
+        #region  Attribute
         public static TypeReference SendType;
         public static TypeReference RecvType;
         public static TypeReference ProtocolType;
@@ -78,17 +86,37 @@ namespace Zyq.Weaver
                 SetupUnityTypes();
                 try
                 {
-                    if (Weave(unityEngineDLL, networkingDLL, assemblyPath, depAssemblyPaths, baseModuleRuntimeDLL))
-                    {
-                        return true;
-                    }
+                    return Weave(unityEngineDLL, networkingDLL, assemblyPath, depAssemblyPaths, baseModuleRuntimeDLL);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Exception:" + e);
+                    Debug.LogError("Weave出错啦: " + e);
                 }
+                finally
+                {
+                    if (UnityAssembly != null)
+                    {
+                        UnityAssembly.Dispose();
+                        UnityAssembly = null;
+                    }
+                    if (NetworkingAssembly != null)
+                    {
+                        NetworkingAssembly.Dispose();
+                        NetworkingAssembly = null;
+                    }
+                    if (BaseAssembly != null)
+                    {
+                        BaseAssembly.Dispose();
+                        BaseAssembly = null;
+                    }
+                    if (CurrentAssembly != null)
+                    {
+                        CurrentAssembly.Dispose();
+                        CurrentAssembly = null;
+                    }
+                }
+                return false;
             }
-            return false;
         }
 
         private static bool Weave(string unityEngineDLL, string networkingDLL, string assemblyPath, string[] depAssemblyPaths, string baseModuleRuntimeDLL)
@@ -109,7 +137,14 @@ namespace Zyq.Weaver
 
                 if (WeaveModule(CurrentAssembly.MainModule, baseModuleRuntimeDLL))
                 {
-                    CurrentAssembly.Write(new WriterParameters { WriteSymbols = true });
+                    try
+                    {
+                        CurrentAssembly.Write(new WriterParameters { WriteSymbols = true });
+                    }
+                    finally
+                    {
+                        asmResolver.Dispose();
+                    }
                     return true;
                 }
             }
@@ -119,18 +154,18 @@ namespace Zyq.Weaver
 
         private static bool WeaveModule(ModuleDefinition module, string baseModuleRuntimeDLL)
         {
-            if(module.Name.EndsWith("Zyq.Game.Base.dll"))
+            if (module.Name.EndsWith(Base))
             {
                 return BaseWeaver.Weave(module);
             }
-            else if (module.Name.EndsWith("Zyq.Game.Client.dll"))
+            else if (module.Name.EndsWith(Client))
             {
                 BaseAssembly = AssemblyDefinition.ReadAssembly(baseModuleRuntimeDLL);
                 SetupBaseModuleTypes();
                 SetupClientModuleTypes();
                 return ClientWeaver.Weave(module);
             }
-            else if (module.Name.EndsWith("Zyq.Game.Server.dll"))
+            else if (module.Name.EndsWith(Server))
             {
                 BaseAssembly = AssemblyDefinition.ReadAssembly(baseModuleRuntimeDLL);
                 SetupBaseModuleTypes();

@@ -8,10 +8,6 @@ namespace Zyq.Weaver
 {
     public static class CompilationHook
     {
-        private const string Base = "Zyq.Game.Base";
-        private const string Server = "Zyq.Game.Server";
-        private const string Client = "Zyq.Game.Client";
-
         [InitializeOnLoadMethod]
         private static void OnInitializeOnLoad()
         {
@@ -24,9 +20,9 @@ namespace Zyq.Weaver
         {
             if (state == PlayModeStateChange.ExitingEditMode)
             {
-                CompilationHook.CheckWeaveAssemblies(Base);
-                CompilationHook.CheckWeaveAssemblies(Client);
-                CompilationHook.CheckWeaveAssemblies(Server);
+                CompilationHook.CheckWeaveAssemblies(WeaverProgram.Base);
+                CompilationHook.CheckWeaveAssemblies(WeaverProgram.Client);
+                CompilationHook.CheckWeaveAssemblies(WeaverProgram.Server);
             }
         }
 
@@ -43,7 +39,7 @@ namespace Zyq.Weaver
                     }
                 }
 
-                if (SessionState.GetBool(Client, false))
+                if (SessionState.GetBool(module, false))
                 {
                     UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
                 }
@@ -52,23 +48,18 @@ namespace Zyq.Weaver
 
         private static void OnAssemblyCompilationFinished(string assemblyPath, CompilerMessage[] messages)
         {
-            if (EditorApplication.isPlaying ||
-                assemblyPath.IndexOf(".Editor") >= 0 ||
-                assemblyPath.IndexOf("-Editor") >= 0)
+            if (EditorApplication.isPlaying || assemblyPath.IndexOf(".Editor") >= 0 || assemblyPath.IndexOf("-Editor") >= 0)
             {
                 return;
             }
 
             string networkingRuntimeDLL = Helpers.FindNetworkingRuntime();
-
             string unityEngineCoreModuleRuntimeDLL = UnityEditorInternal.InternalEditorUtility.GetEngineCoreModuleAssemblyPath();
-
             string baseModuleRuntimeDLL = Helpers.FindBaseRuntime();
-
             HashSet<string> dependencyPaths = Helpers.GetDependecyPaths(assemblyPath);
 
             bool result = WeaverProgram.WeaveAssemblies(unityEngineCoreModuleRuntimeDLL, networkingRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray());
-            string module = Path.GetFileName(assemblyPath).Replace(".dll", "");
+            string module = Path.GetFileName(assemblyPath);
             SessionState.SetBool(module, result);
         }
     }

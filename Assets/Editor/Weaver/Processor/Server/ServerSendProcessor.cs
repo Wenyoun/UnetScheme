@@ -13,7 +13,7 @@ namespace Zyq.Weaver
             {
                 MethodDefinition method = methods[msgId];
 
-                if (!CheckHelper.CheckMethodFirstParams("Server", method))
+                if (!CheckHelper.CheckMethodFirstParams(WeaverProgram.Server, method))
                 {
                     continue;
                 }
