@@ -2,6 +2,7 @@
 using Mono.CecilX;
 using Mono.CecilX.Cil;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Zyq.Weaver
 {
@@ -34,6 +35,12 @@ namespace Zyq.Weaver
 
                         Instruction first = method.Body.Instructions[0];
                         Instruction last = method.Body.Instructions[method.Body.Instructions.Count - 1];
+
+                        MethodReference beginRef = method.Body.Instructions[1].Operand as MethodReference;
+                        if (beginRef != null && beginRef.FullName == begin.FullName)
+                        {
+                            continue;
+                        }
 
                         Instruction nop = processor.Create(OpCodes.Nop);
 
