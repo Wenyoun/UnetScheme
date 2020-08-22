@@ -50,6 +50,8 @@ namespace Zyq.Weaver
                 ServerReplaceProcessor.Weave(module, gets, sets);
             }
 
+            ProfilerProcessor.Weave(module);
+
             return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || broadcastAttributeMethods.Count > 0 || copTypes.Count > 0 || syncAttributeTypes.Count > 0;
         }
     }

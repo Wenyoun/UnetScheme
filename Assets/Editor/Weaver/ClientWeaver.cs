@@ -42,6 +42,8 @@ namespace Zyq.Weaver
                 ClientSyncProcessor.Weave(module, syncTypes);
             }
 
+            ProfilerProcessor.Weave(module);
+
             return sendAttributeMethods.Count > 0 || recvAttributeMethods.Count > 0 || copTypes.Count > 0 || syncTypes.Count > 0;
         }
     }
