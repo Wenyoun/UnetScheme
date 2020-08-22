@@ -2,7 +2,6 @@
 using Mono.CecilX;
 using Mono.CecilX.Cil;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Zyq.Weaver
 {
@@ -17,6 +16,14 @@ namespace Zyq.Weaver
 
             foreach (TypeDefinition type in module.Types)
             {
+                if (!type.IsInterface && type.FullName != typeof(ProfilerManager).FullName)
+                {
+                    types.Add(type);
+                }
+            }
+
+            foreach (TypeDefinition type in types)
+            {
                 foreach (MethodDefinition method in type.Methods)
                 {
                     string methodName = method.Name;
@@ -25,12 +32,14 @@ namespace Zyq.Weaver
                         methodName.IndexOf(".cctor") == -1 &&
                         methodName.IndexOf(".ctor") == -1)
                     {
-                        if (method.Body.Instructions.Count <= 2)
+                        if (method.Body == null ||
+                            method.Body.Instructions == null ||
+                            method.Body.Instructions.Count <= 2)
                         {
                             continue;
                         }
 
-                        string name = type.Name + "." + methodName;
+                        string name = type.FullName + "." + methodName;
                         ILProcessor processor = method.Body.GetILProcessor();
 
                         Instruction first = method.Body.Instructions[0];

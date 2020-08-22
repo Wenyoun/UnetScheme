@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using UnityEngine;
 
 namespace Base
 {
@@ -12,6 +15,7 @@ namespace Base
             public double MinTime;
             public double MaxTime;
             public double TotalTime;
+            
             public DateTime Timestamp;
             public bool IsEnter;
 
@@ -27,48 +31,102 @@ namespace Base
 
             public override string ToString()
             {
-                return Name + ":" + Count + ":" + MinTime + ":" + MaxTime + ":" + TotalTime;
+                return Name + "," + Count + "," + MinTime + "," + MaxTime + "," + TotalTime;
             }
         }
 
-        private static Dictionary<string, Sampler> profilers = new Dictionary<string, Sampler>();
+        private static string full;
+        private static Dictionary<string, Sampler> samplers;
+        
+        public static void Config(string path, string filename)
+        {
+            full = string.Concat(path, "/", filename);
+            samplers = new Dictionary<string, Sampler>();
+        }
 
         public static void Begin(string name)
         {
-            Sampler sampler = null;
-            if (!profilers.TryGetValue(name, out sampler))
+            if (samplers != null)
             {
-                sampler = new Sampler(name);
-                profilers.Add(name, sampler);
-            }
+                Sampler sampler = null;
+                if (!samplers.TryGetValue(name, out sampler))
+                {
+                    sampler = new Sampler(name);
+                    samplers.Add(name, sampler);
+                }
 
-            if (!sampler.IsEnter)
-            {
-                sampler.IsEnter = true;
-                sampler.Timestamp = DateTime.Now;
+                if (!sampler.IsEnter)
+                {
+                    sampler.IsEnter = true;
+                    sampler.Timestamp = DateTime.Now;
+                }
             }
         }
 
         public static void End(string name)
         {
-            Sampler sampler = null;
-            if (profilers.TryGetValue(name, out sampler))
+            if (samplers != null)
             {
-                if (sampler.IsEnter)
+                Sampler sampler = null;
+                if (samplers.TryGetValue(name, out sampler))
                 {
-                    sampler.Count += 1;
-                    sampler.IsEnter = false;
-                    double time = (DateTime.Now - sampler.Timestamp).TotalMilliseconds;
-                    if (sampler.MinTime > time)
+                    if (sampler.IsEnter)
                     {
-                        sampler.MinTime = time;
+                        sampler.Count += 1;
+                        sampler.IsEnter = false;
+                        double time = (DateTime.Now - sampler.Timestamp).TotalMilliseconds;
+                        if (sampler.MinTime > time)
+                        {
+                            sampler.MinTime = time;
+                        }
+
+                        if (sampler.MaxTime < time)
+                        {
+                            sampler.MaxTime = time;
+                        }
+
+                        sampler.TotalTime += time;
                     }
-                    if (sampler.MaxTime < time)
-                    {
-                        sampler.MaxTime = time;
-                    }
-                    sampler.TotalTime += time;
                 }
+            }
+        }
+
+        public static void Dispose()
+        {
+            if (full != null && samplers != null && samplers.Count > 0)
+            {
+                DateTime start = DateTime.Now;
+                
+                List<string> keys = new List<string>(samplers.Keys);
+                keys.Sort();
+
+                StringBuilder builder = new StringBuilder();
+
+                foreach (string key in keys)
+                {
+                    Sampler sampler = samplers[key];
+                    if (sampler.Count > 1)
+                    {
+                        builder.Append(sampler.ToString() + "\n");
+                    }
+                }
+
+                using (FileStream stream = File.Open(full, FileMode.OpenOrCreate, FileAccess.Write))
+                {
+                    byte[] buffer = Encoding.UTF8.GetBytes(builder.ToString());
+                    stream.Write(buffer, 0, buffer.Length);
+                    stream.Flush();
+                    stream.Close();
+                }
+
+                
+                DateTime end = DateTime.Now;
+                
+                Debug.Log("save path = " + full + ",write time = " + (end - start).Milliseconds);
+                
+                samplers.Clear();
+                full = null;
+                samplers = null;
             }
         }
     }

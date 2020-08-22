@@ -20,6 +20,7 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
     {
         SettingMgr.Config();
         GlobalMgr.Config();
+        ProfilerManager.Config("/Users/yinhuayong/Desktop", "test.txt");
     }
 
     public void OnInit()
@@ -36,6 +37,7 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
         }
         mComposeLts.Clear();
         mComposeDys.Clear();
+        ProfilerManager.Dispose();
     }
 
     public void OnUpdate(float delta)

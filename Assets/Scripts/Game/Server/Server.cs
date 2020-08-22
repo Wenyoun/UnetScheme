@@ -9,7 +9,7 @@ namespace Zyq.Game.Server
         public static Server Ins = new Server();
 
         #region Fields
-        public ServerEntityMgr m_EntityMgr;
+        private ServerEntityMgr m_EntityMgr;
         private SyncAttributeMgr m_SyncAttributeMgr;
         private Dictionary<int, Connection> m_Connections;
         #endregion
@@ -21,7 +21,6 @@ namespace Zyq.Game.Server
         private Server()
         {
         }
-
         public override void OnInit()
         {
             base.OnInit();

@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Compilation;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Zyq.Weaver
 {
@@ -48,10 +49,15 @@ namespace Zyq.Weaver
 
         private static void OnAssemblyCompilationFinished(string assemblyPath, CompilerMessage[] messages)
         {
-            if (EditorApplication.isPlaying || assemblyPath.IndexOf(".Editor") >= 0 || assemblyPath.IndexOf("-Editor") >= 0)
+            if (EditorApplication.isPlaying ||
+                assemblyPath.IndexOf(".Editor") >= 0 ||
+                assemblyPath.IndexOf("-Editor") >= 0 ||
+                assemblyPath.IndexOf("Assembly-CSharp.dll") >= 0)
             {
                 return;
             }
+
+            Debug.Log(assemblyPath);
 
             string networkingRuntimeDLL = Helpers.FindNetworkingRuntime();
             string unityEngineCoreModuleRuntimeDLL = UnityEditorInternal.InternalEditorUtility.GetEngineCoreModuleAssemblyPath();
