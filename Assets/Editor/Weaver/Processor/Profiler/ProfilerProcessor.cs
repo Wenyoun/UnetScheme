@@ -26,16 +26,20 @@ namespace Zyq.Weaver
             {
                 foreach (MethodDefinition method in type.Methods)
                 {
+                    string methodName = method.Name;
                     if (method.IsAbstract ||
-                        method.IsGetter ||
-                        method.IsSetter ||
                         method.IsConstructor ||
+                        methodName.IndexOf("get_") >= 0 ||
+                        methodName.IndexOf("set_") >= 0 ||
+                        methodName.IndexOf(".cctor") >= 0 ||
+                        methodName.IndexOf(".ctor") >= 0 ||
                         !method.HasBody ||
                         method.Body.Instructions.Count <= 2)
                     {
                         continue;
                     }
 
+                    string name = type.FullName + "." + methodName;
                     ILProcessor processor = method.Body.GetILProcessor();
 
                     MethodReference beginRef = method.Body.Instructions[1].Operand as MethodReference;
@@ -64,8 +68,6 @@ namespace Zyq.Weaver
                             }
                         }
                     }
-
-                    string name = type.FullName + "." + method.Name;
 
                     processor.InsertBefore(first, processor.Create(OpCodes.Ldstr, name));
                     processor.InsertBefore(first, processor.Create(OpCodes.Call, begin));

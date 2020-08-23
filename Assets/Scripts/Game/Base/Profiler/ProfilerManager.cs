@@ -15,7 +15,7 @@ namespace Zyq.Game.Base
             public double MinTime;
             public double MaxTime;
             public double TotalTime;
-            
+
             public DateTime Timestamp;
             public bool IsEnter;
 
@@ -31,13 +31,17 @@ namespace Zyq.Game.Base
 
             public override string ToString()
             {
-                return Name + "," + Count + "," + MinTime + "," + MaxTime + "," + TotalTime;
+                return Name + "," +
+                       Count + "," +
+                       string.Format("{0:N3}", MinTime) + "," +
+                       string.Format("{0:N3}", MaxTime) + "," +
+                       string.Format("{0:N3}", TotalTime);
             }
         }
 
         private static string full;
         private static Dictionary<string, Sampler> samplers;
-        
+
         public static void Config(string path, string filename)
         {
             full = string.Concat(path, "/", filename);
@@ -96,7 +100,7 @@ namespace Zyq.Game.Base
             if (full != null && samplers != null && samplers.Count > 0)
             {
                 DateTime start = DateTime.Now;
-                
+
                 List<string> keys = new List<string>(samplers.Keys);
                 keys.Sort();
 
@@ -111,6 +115,11 @@ namespace Zyq.Game.Base
                     }
                 }
 
+                if (File.Exists(full))
+                {
+                    File.Delete(full);
+                }
+                
                 using (FileStream stream = File.Open(full, FileMode.OpenOrCreate, FileAccess.Write))
                 {
                     byte[] buffer = Encoding.UTF8.GetBytes(builder.ToString());
@@ -118,11 +127,11 @@ namespace Zyq.Game.Base
                     stream.Flush();
                     stream.Close();
                 }
-                
+
                 DateTime end = DateTime.Now;
-                
+
                 Debug.Log("save path = " + full + ",write time = " + (end - start).Milliseconds);
-                
+
                 samplers.Clear();
                 full = null;
                 samplers = null;

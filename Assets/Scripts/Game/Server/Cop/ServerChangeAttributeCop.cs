@@ -10,7 +10,7 @@ namespace Zyq.Game.Server
         {
             BaseAttribute attribute = Entity.GetSyncAttribute<BaseAttribute>();
             ConnectionFeture connection = Entity.GetFeture<ConnectionFeture>();
-            for (int i = 1; i < 10; ++i)
+            for (int i = 1; i < 100; ++i)
             {
                 int k = i;
                 Server.Ins.TimerMgr.Register(i, () =>
