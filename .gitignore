@@ -63,5 +63,4 @@ Assets/PocoSDK.meta
 /ProjectSettings/ProjectVersion.txt
 ProjectSettings.asset
 .DS_Store
-Assets/Plugins.meta
-Assets/Plugins/
+Assets/Plugins/Editor/JetBrains

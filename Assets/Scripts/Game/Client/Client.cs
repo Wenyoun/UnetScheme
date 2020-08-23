@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Net.Sockets.Kcp;
+using UnityEngine;
 using Zyq.Game.Base;
 using Zyq.Game.Base.Protocol;
 using UnityEngine.Networking;
@@ -21,6 +22,7 @@ namespace Zyq.Game.Client
 
         private Client()
         {
+            Kcp kcp = new Kcp(1, null);
         }
 
         public override void OnInit()
