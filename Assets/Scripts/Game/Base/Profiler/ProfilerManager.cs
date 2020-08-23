@@ -33,9 +33,9 @@ namespace Zyq.Game.Base
             {
                 return Name + "," +
                        Count + "," +
-                       string.Format("{0:N3}", MinTime) + "," +
-                       string.Format("{0:N3}", MaxTime) + "," +
-                       string.Format("{0:N3}", TotalTime);
+                       MinTime.ToString("f3") + "," +
+                       MaxTime.ToString("f3") + "," +
+                       TotalTime.ToString("f3");
             }
         }
 
