@@ -61,3 +61,5 @@ Assets/PocoSDK.meta
 /Res
 /Logs
 /ProjectSettings/ProjectVersion.txt
+ProjectSettings.asset
+.DS_Store

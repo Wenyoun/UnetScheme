@@ -21,6 +21,7 @@ namespace Zyq.Game.Server
         private Server()
         {
         }
+        
         public override void OnInit()
         {
             base.OnInit();

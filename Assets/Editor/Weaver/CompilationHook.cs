@@ -57,6 +57,13 @@ namespace Zyq.Weaver
                 return;
             }
 
+            if (assemblyPath.IndexOf(WeaverProgram.Base) == -1 &&
+               assemblyPath.IndexOf(WeaverProgram.Client) == -1 &&
+               assemblyPath.IndexOf(WeaverProgram.Server) == -1)
+            {
+                return;
+            }
+
             Debug.Log(assemblyPath);
 
             string networkingRuntimeDLL = Helpers.FindNetworkingRuntime();

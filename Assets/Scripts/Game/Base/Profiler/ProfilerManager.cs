@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
+using System.Collections.Generic;
 
-namespace Base
+namespace Zyq.Game.Base
 {
     public class ProfilerManager
     {
@@ -118,7 +118,6 @@ namespace Base
                     stream.Flush();
                     stream.Close();
                 }
-
                 
                 DateTime end = DateTime.Now;
                 
