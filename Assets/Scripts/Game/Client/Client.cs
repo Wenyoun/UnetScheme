@@ -22,7 +22,6 @@ namespace Zyq.Game.Client
 
         private Client()
         {
-            Kcp kcp = new Kcp(1, null);
         }
 
         public override void OnInit()
