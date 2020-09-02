@@ -1,8 +1,9 @@
-﻿using System.Net.Sockets.Kcp;
+﻿using Base.Net.Impl;
 using UnityEngine;
 using Zyq.Game.Base;
 using Zyq.Game.Base.Protocol;
 using UnityEngine.Networking;
+using System.Collections.Generic;
 
 namespace Zyq.Game.Client
 {
@@ -38,10 +39,27 @@ namespace Zyq.Game.Client
             m_EntityMgr = null;
             m_Connection.Dispose();
             m_Connection = null;
+            serverSession.Dispose();
+            foreach (var udp in udps)
+            {
+                udp.Dispose();
+            }
+            udps = null;
         }
+
+        private KcpUdpServer serverSession;
+        private List<KcpUdpClient> udps = new List<KcpUdpClient>();
 
         public void OnStartClient()
         {
+            serverSession = new KcpUdpServer();
+            serverSession.Bind(10000);
+
+            for (int i = 0; i < 1; ++i)
+            {
+                KcpUdpClient udp = new KcpUdpClient();
+                udp.Connect("127.0.0.1", 10000);
+            }
         }
 
         public void OnStopClient()

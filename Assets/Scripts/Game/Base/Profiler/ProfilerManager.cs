@@ -3,39 +3,39 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEditor.Rendering;
 
 namespace Zyq.Game.Base
 {
     public class ProfilerManager
     {
-        private class Sampler
+        private struct Sampler
         {
-            public string Name;
             public int Count;
-            public double MinTime;
-            public double MaxTime;
-            public double TotalTime;
-
-            public DateTime Timestamp;
+            public float MinTime;
+            public float MaxTime;
+            public float TotalTime;
+            public float Realtime;
             public bool IsEnter;
 
             public Sampler(string name)
             {
-                Name = name;
                 Count = 0;
                 MinTime = 999999999;
                 MaxTime = -999999999;
                 TotalTime = 0;
+                Realtime = Time.realtimeSinceStartup;
                 IsEnter = false;
             }
 
             public override string ToString()
             {
-                return Name + "," +
-                       Count + "," +
-                       MinTime.ToString("f3") + "," +
-                       MaxTime.ToString("f3") + "," +
-                       TotalTime.ToString("f3");
+                return Count + "," + Convert(MinTime) + "," + Convert(MaxTime) + "," + Convert(TotalTime);
+            }
+
+            private float Convert(float time)
+            {
+                return ((int) (time * 1000 * 10000)) / 10000.0f;
             }
         }
 
@@ -48,11 +48,11 @@ namespace Zyq.Game.Base
             samplers = new Dictionary<string, Sampler>();
         }
 
-        public static void Begin(string name)
+        public static void BeginSample(string name)
         {
             if (samplers != null)
             {
-                Sampler sampler = null;
+                Sampler sampler;
                 if (!samplers.TryGetValue(name, out sampler))
                 {
                     sampler = new Sampler(name);
@@ -62,33 +62,30 @@ namespace Zyq.Game.Base
                 if (!sampler.IsEnter)
                 {
                     sampler.IsEnter = true;
-                    sampler.Timestamp = DateTime.Now;
+                    sampler.Realtime = Time.realtimeSinceStartup;
                 }
             }
         }
 
-        public static void End(string name)
+        public static void EndSample(string name)
         {
             if (samplers != null)
             {
-                Sampler sampler = null;
-                if (samplers.TryGetValue(name, out sampler))
+                if (samplers.TryGetValue(name, out Sampler sampler))
                 {
                     if (sampler.IsEnter)
                     {
                         sampler.Count += 1;
                         sampler.IsEnter = false;
-                        double time = (DateTime.Now - sampler.Timestamp).TotalMilliseconds;
+                        float time = Time.realtimeSinceStartup - sampler.Realtime;
                         if (sampler.MinTime > time)
                         {
                             sampler.MinTime = time;
                         }
-
                         if (sampler.MaxTime < time)
                         {
                             sampler.MaxTime = time;
                         }
-
                         sampler.TotalTime += time;
                     }
                 }
@@ -106,12 +103,16 @@ namespace Zyq.Game.Base
 
                 StringBuilder builder = new StringBuilder();
 
-                foreach (string key in keys)
+                int length = keys.Count;
+                int lastLength = length;
+                for(int i=0; i<length; ++i)
                 {
+                    string key = keys[i];
                     Sampler sampler = samplers[key];
-                    if (sampler.Count > 1)
+                    builder.Append(key).Append(",").Append(sampler.ToString());
+                    if (i != lastLength)
                     {
-                        builder.Append(sampler.ToString() + "\n");
+                        builder.Append("\n");
                     }
                 }
 

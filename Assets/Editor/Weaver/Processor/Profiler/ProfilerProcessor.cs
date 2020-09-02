@@ -7,19 +7,28 @@ namespace Zyq.Weaver
 {
     public class ProfilerProcessor
     {
+        private static List<string> BlackList = new List<string>()
+        {
+            typeof(ProfilerManager).FullName,
+        };
+        
         public static void Weave(ModuleDefinition module)
         {
-            MethodReference begin = module.ImportReference(typeof(ProfilerManager).GetMethod("Begin", new System.Type[] { typeof(string) }));
-            MethodReference end = module.ImportReference(typeof(ProfilerManager).GetMethod("End", new System.Type[] { typeof(string) }));
+            return;
+            MethodReference begin = module.ImportReference(typeof(ProfilerManager).GetMethod("BeginSample", new System.Type[] { typeof(string) }));
+            MethodReference end = module.ImportReference(typeof(ProfilerManager).GetMethod("EndSample", new System.Type[] { typeof(string) }));
 
             List<TypeDefinition> types = new List<TypeDefinition>();
 
             foreach (TypeDefinition type in module.Types)
             {
-                if (!type.IsInterface && type.FullName != typeof(ProfilerManager).FullName)
+                if (type.IsInterface ||
+                    BlackList.Contains(type.FullName))
                 {
-                    types.Add(type);
+                    continue;
                 }
+
+                types.Add(type);
             }
 
             foreach (TypeDefinition type in types)
