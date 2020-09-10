@@ -10,28 +10,37 @@ namespace Base.Net.Impl
     {
         private Kcp kcp;
         private long conId;
+        private ulong conv;
         private Socket udp;
         private EndPoint point;
         private byte[] outputBuffer;
+        private bool isDispose;
+        private bool isConnected;
 
         public KcpConn(uint conv, Socket udp)
         {
-            this.conId = 1;
+            this.conId = conv;
             this.udp = udp;
+            this.conv = conv;
             this.point = null;
             this.kcp = new Kcp(conv, this);
             this.kcp.NoDelay(1, 10, 2, 1);
             this.outputBuffer = new byte[2048];
+            this.isDispose = false;
+            this.isConnected = false;
         }
 
         public KcpConn(long conId, uint conv, Socket udp, EndPoint point)
         {
             this.udp = udp;
+            this.conv = conv;
             this.conId = conId;
             this.point = point;
             this.kcp = new Kcp(conv, this);
             this.kcp.NoDelay(1, 10, 2, 1);
             this.outputBuffer = new byte[2048];
+            this.isDispose = false;
+            this.isConnected = false;
         }
 
         public IMemoryOwner<byte> RentBuffer(int length)
@@ -41,7 +50,7 @@ namespace Base.Net.Impl
 
         public void Output(IMemoryOwner<byte> memory, int length)
         {
-            if (udp != null)
+            if (!isDispose && udp != null)
             {
                 memory.Memory.Span.Slice(0, length).CopyTo(new Span<byte>(outputBuffer, 0, outputBuffer.Length));
                 if (point == null)
@@ -55,9 +64,19 @@ namespace Base.Net.Impl
             }
         }
 
+        public int PeekSize()
+        {
+            if (!isDispose && kcp != null)
+            {
+                return kcp.PeekSize();
+            }
+
+            return -1;
+        }
+
         public int Send(byte[] buffer, int offset, int length)
         {
-            if (buffer != null && kcp != null)
+            if (!isDispose && buffer != null && kcp != null)
             {
                 return kcp.Send(new Span<byte>(buffer, offset, length));
             }
@@ -67,7 +86,7 @@ namespace Base.Net.Impl
 
         public int Recv(byte[] buffer, int offset, int length)
         {
-            if (buffer != null && kcp != null)
+            if (!isDispose && buffer != null && kcp != null)
             {
                 return kcp.Recv(new Span<byte>(buffer, offset, length));
             }
@@ -77,7 +96,7 @@ namespace Base.Net.Impl
 
         internal void Update(DateTime now)
         {
-            if (udp != null && kcp != null)
+            if (!isDispose && udp != null && kcp != null)
             {
                 kcp.Update(now);
             }
@@ -85,7 +104,7 @@ namespace Base.Net.Impl
 
         internal void Input(byte[] buffer, int offset, int length)
         {
-            if (kcp != null)
+            if (!isDispose && kcp != null)
             {
                 kcp.Input(new Span<byte>(buffer, offset, length));
             }
@@ -93,16 +112,32 @@ namespace Base.Net.Impl
 
         public void Dispose()
         {
-            conId = 0;
-            if (kcp != null)
+            if (!isDispose)
             {
-                kcp.Dispose();
-                kcp = null;
-            }
+                isDispose = true;
+                
+                if (kcp != null)
+                {
+                    kcp.Dispose();
+                    kcp = null;
+                }
 
-            udp = null;
-            point = null;
-            outputBuffer = null;
+                udp = null;
+                point = null;
+                outputBuffer = null;
+            }
         }
+
+        #region Properties 
+        public ulong Conv => conv;
+        
+        public long ConId => conId;
+
+        public bool IsConnected
+        {
+            get => isConnected;
+            internal set => isConnected = value;
+        }
+        #endregion
     }
 }

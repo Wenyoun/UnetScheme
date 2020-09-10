@@ -55,11 +55,17 @@ namespace Zyq.Game.Client
             serverSession = new KcpUdpServer();
             serverSession.Bind(10000);
 
-            for (int i = 0; i < 1; ++i)
+            for (int i = 0; i < 100; ++i)
             {
                 KcpUdpClient udp = new KcpUdpClient();
-                udp.Connect("127.0.0.1", 10000);
+                udp.Connect("127.0.0.1", 10000, null);
+                udps.Add(udp);
             }
+            
+            serverSession.SetConnectCallback((KcpConn con) =>
+            {
+                Debug.Log("连接成功...");
+            });
         }
 
         public void OnStopClient()

@@ -11,6 +11,7 @@ namespace Base.Net.Impl
     {
         private Socket udp;
         private bool isDispose;
+        private Action<KcpConn> connectCallback;
         private ConcurrentDictionary<long, KcpConn> cons;
 
         public KcpUdpServer()
@@ -20,34 +21,48 @@ namespace Base.Net.Impl
             udp = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         }
 
+        ~KcpUdpServer()
+        {
+            Dispose();
+        }
+
         public void Bind(int port)
         {
             udp.Bind(new IPEndPoint(IPAddress.Any, port));
-            ThreadPool.QueueUserWorkItem(UpdateLooper);
+            ThreadPool.QueueUserWorkItem(UpdateKcpLooper);
             ThreadPool.QueueUserWorkItem(RecvUpdDataLooper);
-            ThreadPool.QueueUserWorkItem(RecvKcpDataLooper);
         }
 
         public void Dispose()
         {
-            isDispose = true;
-
-            if (cons != null)
+            if (!isDispose)
             {
-                foreach (KcpConn con in cons.Values)
+                isDispose = true;
+
+                if (cons != null)
                 {
-                    con.Dispose();
+                    foreach (KcpConn con in cons.Values)
+                    {
+                        con.Dispose();
+                    }
+
+                    cons.Clear();
                 }
 
-                cons.Clear();
-                cons = null;
-            }
+                if (udp != null)
+                {
+                    udp.Dispose();
+                }
 
-            if (udp != null)
-            {
-                udp.Dispose();
                 udp = null;
+                cons = null;
+                connectCallback = null;
             }
+        }
+
+        public void SetConnectCallback(Action<KcpConn> callback)
+        {
+            connectCallback = callback;
         }
 
         private void RecvUpdDataLooper(object obj)
@@ -55,7 +70,7 @@ namespace Base.Net.Impl
             try
             {
                 uint startConvId = 10000;
-                byte[] buffer = new byte[2048];
+                byte[] buffer = new byte[1500];
                 EndPoint remote = new IPEndPoint(IPAddress.Any, 0);
                 while (!isDispose && udp != null)
                 {
@@ -64,14 +79,11 @@ namespace Base.Net.Impl
                         continue;
                     }
 
-                    if (isDispose)
-                    {
-                        throw new ObjectDisposedException("KcpUdpServer already dispose!");
-                    }
-                    
-                    KcpConn con = null;
+                    CheckDispose();
+
                     int count = udp.ReceiveFrom(buffer, SocketFlags.None, ref remote);
                     long conId = GetConId(remote);
+                    KcpConn con = null;
                     if (!cons.TryGetValue(conId, out con))
                     {
                         if (count == 4)
@@ -81,26 +93,43 @@ namespace Base.Net.Impl
                             {
                                 uint conv = startConvId++;
                                 con = new KcpConn(conId, conv, udp, remote.Create(remote.Serialize()));
-                                cons.TryAdd(conId, con);
-                                
-                                int size = KcpHelper.Encode32u(buffer, 0, conv);
-                                con.Send(buffer, 0, size);
+                                if(cons.TryAdd(conId, con)){
+                                    KcpHelper.Encode32u(buffer, 0, KcpHelper.Flag);
+                                    KcpHelper.Encode32u(buffer, 4, conv);
+                                    con.Send(buffer, 0, 8);
+                                }
                             }
                         }
                     }
                     else
                     {
                         con.Input(buffer, 0, count);
+
+                        if (!con.IsConnected)
+                        {
+                            int size = con.Recv(buffer, 0, buffer.Length);
+
+                            if (size == 8)
+                            {
+                                uint flag = KcpHelper.Decode32u(buffer, 0);
+                                uint conv = KcpHelper.Decode32u(buffer, 4);
+                                if (flag == KcpHelper.Flag && conv == con.Conv)
+                                {
+                                    con.IsConnected = true;
+                                    connectCallback?.Invoke(con);
+                                }
+                            }
+                        }
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.Log(e.ToString());
+                Debug.LogError(e.ToString());
             }
         }
 
-        private void UpdateLooper(object obj)
+        private void UpdateKcpLooper(object obj)
         {
             try
             {
@@ -121,51 +150,24 @@ namespace Base.Net.Impl
             }
         }
 
-        private void RecvKcpDataLooper(object obj)
-        {
-            try
-            {
-                byte[] buffer = new byte[2048];
-                while (!isDispose && udp != null && cons != null)
-                {
-                    foreach (KcpConn con in cons.Values)
-                    {
-                        int count = -1;
-                        do
-                        {
-                            count = con.Recv(buffer, 0, buffer.Length);
-                            if (count < 0)
-                            {
-                                break;
-                            }
-
-                            if (count == 4)
-                            {
-                                uint flag = KcpHelper.Decode32u(buffer, 0);
-                                if (flag == KcpHelper.Flag)
-                                {
-                                    Debug.Log("Server: 连接确认建立..." + cons.Count);
-                                }
-                            }
-                            else
-                            {
-                                con.Send(buffer, 0, count);
-                            }
-                        } while (count > 0);
-                    }
-
-                    Thread.Sleep(1);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e.ToString());
-            }
-        }
-
         private long GetConId(EndPoint endPoint)
         {
             return endPoint.GetHashCode() * 100000 + ((IPEndPoint) endPoint).Port;
+        }
+
+        private void CheckDispose()
+        {
+            if (isDispose)
+            {
+                throw new KcpServerException("KcpUdpClient client already dispose");
+            }
+        }
+    }
+
+    public class KcpServerException : Exception
+    {
+        public KcpServerException(string message) : base(message)
+        {
         }
     }
 }
