@@ -66,6 +66,12 @@ namespace Base.Net.Impl
             if (!isDispose)
             {
                 isDispose = true;
+                status = None;
+
+                if (notifyEvent != null)
+                {
+                    notifyEvent.Set();
+                }
 
                 if (con != null)
                 {
@@ -76,13 +82,6 @@ namespace Base.Net.Impl
                 {
                     udp.Dispose();
                 }
-
-                if (notifyEvent != null)
-                {
-                    notifyEvent.Set();
-                }
-
-                status = None;
             }
         }
 
@@ -111,7 +110,7 @@ namespace Base.Net.Impl
                 int time = 0;
                 int timeout = 5000;
                 udp.Connect(point);
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[KcpHelper.Length];
                 while (!isDispose && status == Connecting)
                 {
                     KcpHelper.Encode32u(buffer, 0, KcpHelper.Flag);
