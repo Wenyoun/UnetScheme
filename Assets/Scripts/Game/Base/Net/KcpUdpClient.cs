@@ -191,7 +191,7 @@ namespace Base.Net.Impl
         {
             try
             {
-                byte[] buffer = new byte[1500];
+                byte[] buffer = new byte[KcpHelper.Length];
                 while (!isDispose && status == Success)
                 {
                     if (!udp.Poll(100000, SelectMode.SelectRead))

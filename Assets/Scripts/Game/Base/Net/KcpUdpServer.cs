@@ -53,10 +53,6 @@ namespace Base.Net.Impl
                 {
                     udp.Dispose();
                 }
-
-                udp = null;
-                cons = null;
-                connectCallback = null;
             }
         }
 
@@ -70,9 +66,9 @@ namespace Base.Net.Impl
             try
             {
                 uint startConvId = 10000;
-                byte[] buffer = new byte[1500];
+                byte[] buffer = new byte[KcpHelper.Length];
                 EndPoint remote = new IPEndPoint(IPAddress.Any, 0);
-                while (!isDispose && udp != null)
+                while (!isDispose)
                 {
                     if (!udp.Poll(100000, SelectMode.SelectRead))
                     {
@@ -82,7 +78,7 @@ namespace Base.Net.Impl
                     CheckDispose();
 
                     int count = udp.ReceiveFrom(buffer, SocketFlags.None, ref remote);
-                    long conId = GetConId(remote);
+                    long conId = CptConId(remote);
                     KcpConn con = null;
                     if (!cons.TryGetValue(conId, out con))
                     {
@@ -134,7 +130,7 @@ namespace Base.Net.Impl
         {
             try
             {
-                while (!isDispose && udp != null && cons != null)
+                while (!isDispose)
                 {
                     DateTime now = DateTime.Now;
                     foreach (KcpConn con in cons.Values)
@@ -151,7 +147,7 @@ namespace Base.Net.Impl
             }
         }
 
-        private long GetConId(EndPoint endPoint)
+        private long CptConId(EndPoint endPoint)
         {
             return endPoint.GetHashCode() * 100000 + ((IPEndPoint) endPoint).Port;
         }

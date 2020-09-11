@@ -2,6 +2,7 @@
 {
     internal class KcpHelper
     {
+        public const int Length = 1500;
         public const uint Flag = 0xffffffff;
 
         internal static int Encode32u(byte[] p, int offset, uint w)
