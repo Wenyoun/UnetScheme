@@ -9,13 +9,13 @@ namespace Base.Net.Impl
     public class KcpConn : IKcpCallback, IDisposable
     {
         private Kcp kcp;
+        private uint conv;
         private long conId;
-        private ulong conv;
         private Socket udp;
         private EndPoint point;
-        private byte[] outputBuffer;
         private bool isDispose;
         private bool isConnected;
+        private byte[] outputBuffer;
 
         public KcpConn(uint conv, Socket udp)
         {
@@ -25,9 +25,9 @@ namespace Base.Net.Impl
             this.point = null;
             this.kcp = new Kcp(conv, this);
             this.kcp.NoDelay(1, 10, 2, 1);
-            this.outputBuffer = new byte[2048];
             this.isDispose = false;
             this.isConnected = false;
+            this.outputBuffer = new byte[1500];
         }
 
         public KcpConn(long conId, uint conv, Socket udp, EndPoint point)
@@ -38,9 +38,9 @@ namespace Base.Net.Impl
             this.point = point;
             this.kcp = new Kcp(conv, this);
             this.kcp.NoDelay(1, 10, 2, 1);
-            this.outputBuffer = new byte[2048];
             this.isDispose = false;
             this.isConnected = false;
+            this.outputBuffer = new byte[1500];
         }
 
         public IMemoryOwner<byte> RentBuffer(int length)
@@ -94,22 +94,6 @@ namespace Base.Net.Impl
             return -10;
         }
 
-        internal void Update(DateTime now)
-        {
-            if (!isDispose && udp != null && kcp != null)
-            {
-                kcp.Update(now);
-            }
-        }
-
-        internal void Input(byte[] buffer, int offset, int length)
-        {
-            if (!isDispose && kcp != null)
-            {
-                kcp.Input(new Span<byte>(buffer, offset, length));
-            }
-        }
-
         public void Dispose()
         {
             if (!isDispose)
@@ -128,8 +112,26 @@ namespace Base.Net.Impl
             }
         }
 
-        #region Properties 
-        public ulong Conv => conv;
+        #region internal
+        internal void Update(DateTime now)
+        {
+            if (!isDispose && udp != null && kcp != null)
+            {
+                kcp.Update(now);
+            }
+        }
+
+        internal void Input(byte[] buffer, int offset, int length)
+        {
+            if (!isDispose && kcp != null)
+            {
+                kcp.Input(new Span<byte>(buffer, offset, length));
+            }
+        }
+        #endregion
+
+        #region properties 
+        public uint Conv => conv;
         
         public long ConId => conId;
 

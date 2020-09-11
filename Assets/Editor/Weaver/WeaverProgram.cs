@@ -8,20 +8,20 @@ namespace Zyq.Weaver
 {
     public static class WeaverProgram
     {
-        #region  User Module
+        #region User Module
         public const string Base = "Zyq.Game.Base.dll";
         public const string Server = "Zyq.Game.Server.dll";
         public const string Client = "Zyq.Game.Client.dll";
         #endregion
 
-        #region  AssemblyDefinition
+        #region AssemblyDefinition
         public static AssemblyDefinition UnityAssembly;
         public static AssemblyDefinition BaseAssembly;
         public static AssemblyDefinition NetworkingAssembly;
         public static AssemblyDefinition CurrentAssembly;
         #endregion
 
-        #region  Networking
+        #region Networking
         public static TypeReference NetowrkMessageType;
         public static FieldReference NetworkMessageReaderField;
         public static MethodReference NetowrkMessageCtorMethod;
@@ -32,7 +32,7 @@ namespace Zyq.Weaver
         public static TypeReference NetworkReaderType;
         #endregion
 
-        #region  Attribute
+        #region Attribute
         public static TypeReference SendType;
         public static TypeReference RecvType;
         public static TypeReference ProtocolType;

@@ -12,7 +12,7 @@ namespace Zyq.Game.Client
         //连接失败
         ConnectedError,
         //连接超时
-        ConnectedTimeout,
+        ConnectingTimeout,
         //连接成功
         Connected,
         //连接断开

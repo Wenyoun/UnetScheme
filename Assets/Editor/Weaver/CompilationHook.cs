@@ -58,8 +58,8 @@ namespace Zyq.Weaver
             }
 
             if (assemblyPath.IndexOf(WeaverProgram.Base) == -1 &&
-               assemblyPath.IndexOf(WeaverProgram.Client) == -1 &&
-               assemblyPath.IndexOf(WeaverProgram.Server) == -1)
+                assemblyPath.IndexOf(WeaverProgram.Client) == -1 &&
+                assemblyPath.IndexOf(WeaverProgram.Server) == -1)
             {
                 return;
             }

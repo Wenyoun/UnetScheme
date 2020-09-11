@@ -200,40 +200,41 @@ namespace Zyq.Game.Client
             switch (mNetState)
             {
                 case NetState.Connecting:
-                {
-                    if (IsConnected())
                     {
-                        mNetState = NetState.Connected;
-                        StartWorkingThread();
-                        mNetHandler.OnConnectedSuccess();
+                        if (IsConnected())
+                        {
+                            mNetState = NetState.Connected;
+                            StartWorkingThread();
+                            mNetHandler.OnConnectedSuccess();
+                        }
                     }
-                }
                     break;
-                case NetState.ConnectedError:
-                {
-                    DisConnect();
-                    mNetHandler.OnConnectedFailed();
-                }
-                    break;
-                case NetState.ConnectedTimeout:
-                {
-                    DisConnect();
-                    mNetHandler.OnConnectedTimeout();
-                }
+                case NetState.ConnectingTimeout:
+                    {
+                        DisConnect();
+                        mNetHandler.OnConnectedTimeout();
+                    }
                     break;
                 case NetState.Connected:
-                {
-                    if (!IsConnected())
                     {
-                        mNetState = NetState.Disconneted;
+                        if (!IsConnected())
+                        {
+                            mNetState = NetState.Disconneted;
+                        }
                     }
-                }
                     break;
+                case NetState.ConnectedError:
+                    {
+                        DisConnect();
+                        mNetHandler.OnConnectedFailed();
+                    }
+                    break;
+               
                 case NetState.Disconneted:
-                {
-                    DisConnect();
-                    mNetHandler.OnDisConnected();
-                }
+                    {
+                        DisConnect();
+                        mNetHandler.OnDisConnected();
+                    }
                     break;
             }
 
@@ -262,9 +263,9 @@ namespace Zyq.Game.Client
                 {
                     mNetState = NetState.ConnectedError;
                 }
-                else if(status == KcpUdpClient.ConnectStatus.Timeout)
+                else if (status == KcpUdpClient.ConnectStatus.Timeout)
                 {
-                    mNetState = NetState.ConnectedTimeout;
+                    mNetState = NetState.ConnectingTimeout;
                 }
                 else if (status == KcpUdpClient.ConnectStatus.Success)
                 {

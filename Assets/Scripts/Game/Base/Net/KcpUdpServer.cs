@@ -93,7 +93,8 @@ namespace Base.Net.Impl
                             {
                                 uint conv = startConvId++;
                                 con = new KcpConn(conId, conv, udp, remote.Create(remote.Serialize()));
-                                if(cons.TryAdd(conId, con)){
+                                if (cons.TryAdd(conId, con))
+                                {
                                     KcpHelper.Encode32u(buffer, 0, KcpHelper.Flag);
                                     KcpHelper.Encode32u(buffer, 4, conv);
                                     con.Send(buffer, 0, 8);
@@ -146,7 +147,7 @@ namespace Base.Net.Impl
             }
             catch (Exception e)
             {
-                Debug.Log(e.ToString());
+                Debug.LogError(e.ToString());
             }
         }
 
@@ -159,7 +160,7 @@ namespace Base.Net.Impl
         {
             if (isDispose)
             {
-                throw new KcpServerException("KcpUdpClient client already dispose");
+                throw new KcpServerException("KcpUdpServer server already dispose");
             }
         }
     }

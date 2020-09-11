@@ -114,8 +114,8 @@ namespace Base.Net.Impl
                 byte[] buffer = new byte[1024];
                 while (!isDispose && status == Connecting)
                 {
-                    int count = KcpHelper.Encode32u(buffer, 0, KcpHelper.Flag);
-                    udp.Send(buffer, 0, count, SocketFlags.None);
+                    KcpHelper.Encode32u(buffer, 0, KcpHelper.Flag);
+                    udp.Send(buffer, 0, 4, SocketFlags.None);
                     if (!udp.Poll(100000, SelectMode.SelectRead))
                     {
                         time += 100;
@@ -131,7 +131,7 @@ namespace Base.Net.Impl
 
                     CheckDispose();
 
-                    count = udp.Receive(buffer, 0, buffer.Length, SocketFlags.None);
+                    int count = udp.Receive(buffer, 0, buffer.Length, SocketFlags.None);
                     if (count == 32)
                     {
                         uint flag = KcpHelper.Decode32u(buffer, 24);
@@ -151,7 +151,7 @@ namespace Base.Net.Impl
 
                                 status = Success;
                                 ThreadPool.QueueUserWorkItem(UpdateLooper);
-                                ThreadPool.QueueUserWorkItem(RecvUpdDataLooper);
+                                ThreadPool.QueueUserWorkItem(RecvUdpDataLooper);
 
                                 connectCallback?.Invoke(ConnectStatus.Success);
 
@@ -165,7 +165,7 @@ namespace Base.Net.Impl
             {
                 status = Error;
                 connectCallback?.Invoke(ConnectStatus.Error);
-                Debug.Log(e.ToString());
+                Debug.LogError(e.ToString());
             }
         }
 
@@ -187,7 +187,7 @@ namespace Base.Net.Impl
             }
         }
 
-        private void RecvUpdDataLooper(object obj)
+        private void RecvUdpDataLooper(object obj)
         {
             try
             {
@@ -221,7 +221,7 @@ namespace Base.Net.Impl
         {
             if (status == Error)
             {
-                throw new KcpClientException("KcpUdpClient client have a error");
+                throw new KcpClientException("KcpUdpClient client error");
             }
 
             if (isDispose)
@@ -234,7 +234,7 @@ namespace Base.Net.Impl
 
         public bool IsConnected
         {
-            get { return status == Success; }
+            get { return !isDispose && status == Success; }
         }
 
         #endregion
