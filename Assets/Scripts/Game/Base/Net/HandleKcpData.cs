@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Collections.Concurrent;
-using UnityEngine;
 
 namespace Zyq.Game.Base
 {
@@ -19,14 +18,10 @@ namespace Zyq.Game.Base
         {
             packet = new Packet();
 
-            int offset = 0;
-            int size = con.Recv(rawBuffer, offset, rawBuffer.Length);
+            int size = con.Recv(rawBuffer, 0, rawBuffer.Length);
             if (size > 0)
             {
-                int length = handler.ParseHeadLength(rawBuffer, offset);
-                offset += PacketHandler.HeadLength;
-                length -= PacketHandler.HeadLength;
-                packet = handler.HandleRecv(rawBuffer, offset, length);
+                packet = handler.HandleRecv(rawBuffer, 0, size);
                 return true;
             }
 
@@ -57,8 +52,8 @@ namespace Zyq.Game.Base
         public bool TryRecvKcpData(ServerChannel channel, out Packet packet, IKcpConnect kcpConnect)
         {
             packet = new Packet();
-            int offset = 0;
-            int size = channel.Recv(rawBuffer, offset, rawBuffer.Length);
+            
+            int size = channel.Recv(rawBuffer, 0, rawBuffer.Length);
             if (size == 8)
             {
                 uint flag = KcpHelper.Decode32u(rawBuffer, 0);
@@ -89,10 +84,7 @@ namespace Zyq.Game.Base
 
             if (size > 0)
             {
-                int length = handler.ParseHeadLength(rawBuffer, offset);
-                offset += PacketHandler.HeadLength;
-                length -= PacketHandler.HeadLength;
-                packet = handler.HandleRecv(rawBuffer, offset, length);
+                packet = handler.HandleRecv(rawBuffer, 0, size);
                 return true;
             }
 
@@ -143,28 +135,34 @@ namespace Zyq.Game.Base
 
             //3.写入消息
             memory.Write(packet.Buffer);
-
+            
             return total;
         }
 
 
         public Packet HandleRecv(byte[] buffer, int offset, int total)
         {
-            if (total > buffer.Length - offset)
+            //解析长度
+            int length = ParseHeadLength(buffer, offset);
+            
+            if ((length + 2) > total)
             {
                 throw new IOException("PacketHandler HandleRecv total > buffer.Length - offset");
             }
+            
+            offset += HeadLength;
 
             //消息格式
             //2个字节消息长度,2个字节消息类型长度,N字节消息数据长度
-            ByteReadMemory memory = new ByteReadMemory(buffer, offset, total);
+            ByteReadMemory memory = new ByteReadMemory(buffer, offset, length);
 
             //2个字节消息类型
             ushort cmd = memory.ReadUShort();
+            length -= 2;
 
-            //(total - 2)个字节的消息数据
-            ByteBuffer byteBuffer = ByteBuffer.Allocate(total);
-            memory.Read(byteBuffer, total - 2);
+            //(length - 2)个字节的消息数据
+            ByteBuffer byteBuffer = ByteBuffer.Allocate(length);
+            memory.Read(byteBuffer, length);
 
             return new Packet(cmd, byteBuffer);
         }

@@ -124,7 +124,7 @@ namespace Zyq.Game.Base
         
         private void CheckCount(int count)
         {
-            if (m_Count > count && m_Count > 0)
+            if (m_Count < count || m_Count <= 0)
             {
                 throw new EndOfStreamException("ByteWriteMemory buffer out of range");
             }

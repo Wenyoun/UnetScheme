@@ -45,7 +45,7 @@ namespace Zyq.Game.Client
 
         public void OnStartClient()
         {
-            for (int i = 0; i < 100; ++i)
+            for (int i = 0; i < 1; ++i)
             {
                 ClientNetworkMgr.Connect("127.0.0.1", 50000, this);
             }
@@ -131,7 +131,17 @@ namespace Zyq.Game.Client
 
         public void OnServerConnect(IChannel channel)
         {
-            Debug.Log("Client:1111111111111111111");
+            Debug.Log("Client:1111111111111111111:" + channel.ChannelId);
+            Packet packet = new Packet();
+            packet.Cmd = 1;
+            packet.Buffer = ByteBuffer.Allocate(10240);
+            string k = "";
+            for (int i = 0; i < 1000; ++i)
+            {
+                k += "yinhuayong";
+            }
+            packet.Buffer.Write(k);
+            channel.Send(packet);
         }
 
         public void OnServerDisconnect(IChannel channel)

@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-using UnityEngine;
 
 namespace Zyq.Game.Base
 {
@@ -125,8 +120,7 @@ namespace Zyq.Game.Base
 
         private void CheckCount(int count)
         {
-            int readableCount = m_Count - m_Offset;
-            if (readableCount < count)
+            if (m_Count <= 0 || m_Count < count)
             {
                 throw new EndOfStreamException("ByteReadMemory buffer out of range");
             }
