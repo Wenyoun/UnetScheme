@@ -1,24 +1,26 @@
-﻿using Base.Net.Impl;
-using UnityEngine;
+﻿using UnityEngine;
 using Zyq.Game.Base;
 using Zyq.Game.Base.Protocol;
 using UnityEngine.Networking;
-using System.Collections.Generic;
 
 namespace Zyq.Game.Client
 {
-    public class Client : AbsMachine
+    public class Client : AbsMachine, IClient
     {
         public static Client Ins = new Client();
 
         #region Fields
-        public Connection m_Connection;
-        public ClientEntityMgr m_EntityMgr;
+
+        private Connection m_Connection;
+        private ClientEntityMgr m_EntityMgr;
+
         #endregion
 
         #region Properties
+
         public Connection Connection => m_Connection;
         public ClientEntityMgr EntityMgr => m_EntityMgr;
+
         #endregion
 
         private Client()
@@ -28,44 +30,23 @@ namespace Zyq.Game.Client
         public override void OnInit()
         {
             base.OnInit();
-            m_Connection = null;
             m_EntityMgr = new ClientEntityMgr();
+            ClientNetworkMgr.Init(this);
         }
 
         public override void OnRemove()
         {
             base.OnRemove();
+            ClientNetworkMgr.Dispose();
             m_EntityMgr.Dispose();
-            m_EntityMgr = null;
             m_Connection.Dispose();
+            m_EntityMgr = null;
             m_Connection = null;
-            serverSession.Dispose();
-            foreach (var udp in udps)
-            {
-                udp.Dispose();
-            }
-            udps = null;
         }
-
-        private KcpUdpServer serverSession;
-        private List<KcpUdpClient> udps = new List<KcpUdpClient>();
 
         public void OnStartClient()
         {
-            serverSession = new KcpUdpServer();
-            serverSession.Bind(10000);
-
-            for (int i = 0; i < 1000; ++i)
-            {
-                KcpUdpClient udp = new KcpUdpClient();
-                udp.Connect("127.0.0.1", 10000, null);
-                udps.Add(udp);
-            }
-            
-            serverSession.SetConnectCallback((KcpConn con) =>
-            {
-                Debug.Log("连接成功...");
-            });
+            ClientNetworkMgr.Connect("127.0.0.1", 50000);
         }
 
         public void OnStopClient()
@@ -83,6 +64,9 @@ namespace Zyq.Game.Client
         public override void OnUpdate(float delta)
         {
             base.OnUpdate(delta);
+
+            ClientNetworkMgr.Dispatcher();
+
             if (m_EntityMgr != null)
             {
                 m_EntityMgr.OnUpdate(delta);
@@ -125,7 +109,8 @@ namespace Zyq.Game.Client
             datas[2].Username = "Username2";
             datas[2].Password = "Password2";
 
-            ClientSender.RpcLogin(1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero, Vector4.zero, Quaternion.identity, Login.Log5, logins, data, datas);
+            ClientSender.RpcLogin(1, true, 2, 3, 4, 5, 6, 7, 8, 9, "yinhuayong", Vector2.zero, Vector3.zero,
+                Vector4.zero, Quaternion.identity, Login.Log5, logins, data, datas);
         }
 
         public override void OnNetDisconnect(NetworkConnection network)
@@ -140,6 +125,16 @@ namespace Zyq.Game.Client
         {
             connection.RegisterProtocol<AutoProtocolHandler>();
             connection.RegisterProtocol<ClientProtocolHandler>();
+        }
+
+        public void OnServerConnect(IChannel channel)
+        {
+            Debug.Log("Client:1111111111111111111");
+        }
+
+        public void OnServerDisconnect(IChannel channel)
+        {
+            Debug.Log("Server:2222222222222222222");
         }
     }
 }

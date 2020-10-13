@@ -1,0 +1,172 @@
+﻿using System.IO;
+using System.Collections.Concurrent;
+using UnityEngine;
+
+namespace Zyq.Game.Base
+{
+    public class ClientDataProcessingCenter
+    {
+        private byte[] rawBuffer;
+        private PacketHandler handler;
+
+        public ClientDataProcessingCenter()
+        {
+            handler = new PacketHandler();
+            rawBuffer = new byte[ushort.MaxValue];
+        }
+
+        public bool TryRecvKcpData(KcpConn con, out Packet packet)
+        {
+            packet = new Packet();
+
+            int offset = 0;
+            int size = con.Recv(rawBuffer, offset, rawBuffer.Length);
+            if (size > 0)
+            {
+                int length = handler.ParseHeadLength(rawBuffer, offset);
+                offset += PacketHandler.HeadLength;
+                length -= PacketHandler.HeadLength;
+                packet = handler.HandleRecv(rawBuffer, offset, length);
+                return true;
+            }
+
+            return false;
+        }
+
+        public void TrySendKcpData(KcpConn con, ConcurrentQueue<Packet> sendPacketQueue)
+        {
+            while (sendPacketQueue.TryDequeue(out Packet packet))
+            {
+                int size = handler.HandleSend(rawBuffer, packet);
+                con.Send(rawBuffer, 0, size);
+            }
+        }
+    }
+
+    public class ServerDataProcessingCenter
+    {
+        private byte[] rawBuffer;
+        private PacketHandler handler;
+
+        public ServerDataProcessingCenter()
+        {
+            handler = new PacketHandler();
+            rawBuffer = new byte[ushort.MaxValue];
+        }
+
+        public bool TryRecvKcpData(ServerChannel channel, out Packet packet, IKcpConnect kcpConnect)
+        {
+            packet = new Packet();
+            int offset = 0;
+            int size = channel.Recv(rawBuffer, offset, rawBuffer.Length);
+            if (size == 8)
+            {
+                uint flag = KcpHelper.Decode32u(rawBuffer, 0);
+                uint conv = KcpHelper.Decode32u(rawBuffer, 4);
+
+                if (flag == KcpHelper.ConnectFlag && conv == channel.Conv)
+                {
+                    channel.SetConnectedStatus(true);
+                    if (kcpConnect != null)
+                    {
+                        kcpConnect.OnKcpConnect(channel);
+                    }
+
+                    return false;
+                }
+                else if (flag == KcpHelper.DisconnectFlag && conv == channel.Conv)
+                {
+                    channel.SetConnectedStatus(false);
+                    if (kcpConnect != null)
+                    {
+                        kcpConnect.OnKcpDisconnect(channel);
+                    }
+
+                    channel.Disconnect();
+                    return false;
+                }
+            }
+
+            if (size > 0)
+            {
+                int length = handler.ParseHeadLength(rawBuffer, offset);
+                offset += PacketHandler.HeadLength;
+                length -= PacketHandler.HeadLength;
+                packet = handler.HandleRecv(rawBuffer, offset, length);
+                return true;
+            }
+
+            return false;
+        }
+
+        public void TrySendKcpData(ServerChannel channel, ConcurrentQueue<Packet> sendPacketQueue)
+        {
+            while (sendPacketQueue.TryDequeue(out Packet packet))
+            {
+                int size = handler.HandleSend(rawBuffer, packet);
+                channel.Send(rawBuffer, 0, size);
+            }
+        }
+    }
+
+    public class PacketHandler
+    {
+        public const int HeadLength = 2;
+
+        public ushort ParseHeadLength(byte[] buffer, int offset)
+        {
+            ByteReadMemory memory = new ByteReadMemory(buffer, offset, HeadLength);
+            return memory.ReadUShort();
+        }
+
+        public int HandleSend(byte[] buffer, Packet packet)
+        {
+            //消息格式
+            //2个字节消息长度,2个字节消息类型长度,N字节消息数据长度
+            int total = 4 + packet.Buffer.ReadableLength;
+
+            if (total > buffer.Length)
+            {
+                throw new IOException("PacketHandler HandleSend total > buffer.Length");
+            }
+
+            //消息长度 = 消息类型长度 + N字节消息数据长度
+            int length = total - 2;
+
+            ByteWriteMemory memory = new ByteWriteMemory(buffer);
+
+            //1.写入消息长度2字节
+            memory.Write((ushort) length);
+
+            //2.写入消息类型2字节
+            memory.Write(packet.Cmd);
+
+            //3.写入消息
+            memory.Write(packet.Buffer);
+
+            return total;
+        }
+
+
+        public Packet HandleRecv(byte[] buffer, int offset, int total)
+        {
+            if (total > buffer.Length - offset)
+            {
+                throw new IOException("PacketHandler HandleRecv total > buffer.Length - offset");
+            }
+
+            //消息格式
+            //2个字节消息长度,2个字节消息类型长度,N字节消息数据长度
+            ByteReadMemory memory = new ByteReadMemory(buffer, offset, total);
+
+            //2个字节消息类型
+            ushort cmd = memory.ReadUShort();
+
+            //(total - 2)个字节的消息数据
+            ByteBuffer byteBuffer = ByteBuffer.Allocate(total);
+            memory.Read(byteBuffer, total - 2);
+
+            return new Packet(cmd, byteBuffer);
+        }
+    }
+}

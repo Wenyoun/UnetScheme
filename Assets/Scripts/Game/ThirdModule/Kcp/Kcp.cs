@@ -305,7 +305,6 @@ namespace Net.KcpImpl
                         rcv_queue = null;
                     }
 
-
                     disposedValue = true;
                 }
             }
@@ -313,7 +312,6 @@ namespace Net.KcpImpl
             {
                 m_disposing = false;
             }
-
         }
 
         // 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
@@ -1125,7 +1123,7 @@ namespace Net.KcpImpl
         /// <summary>
         /// flush pending data
         /// </summary>
-        void Flush()
+        public void Flush()
         {
             var current_ = current;
             var buffer_ = buffer;

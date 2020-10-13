@@ -1,9 +1,10 @@
-﻿namespace Base.Net.Impl
+﻿namespace Zyq.Game.Base
 {
     internal class KcpHelper
     {
         public const int Length = 1500;
-        public const uint Flag = 0xffffffff;
+        public const uint ConnectFlag = 0xfffffffe;
+        public const uint DisconnectFlag = 0xffffffff;
 
         internal static int Encode32u(byte[] p, int offset, uint w)
         {

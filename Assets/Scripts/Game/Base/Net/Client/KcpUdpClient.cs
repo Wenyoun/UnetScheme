@@ -1,51 +1,42 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
 
-namespace Base.Net.Impl
+namespace Zyq.Game.Base
 {
     public class KcpUdpClient : IDisposable
     {
-        public enum ConnectStatus
-        {
-            Error,
-            Timeout,
-            Success
-        }
-
         #region 连接状态
 
-        private const byte None = 0;
-        private const byte Error = 1;
-        private const byte Timeout = 2;
-        private const byte Success = 3;
-        private const byte Connecting = 4;
+        public const byte None = 0;
+        public const byte Error = 1;
+        public const byte Timeout = 2;
+        public const byte Success = 3;
+        public const byte Connecting = 4;
 
         #endregion
 
         private Socket udp;
         private KcpConn con;
-        private EndPoint point;
         private volatile byte status;
         private volatile bool isDispose;
-        private AutoResetEvent notifyEvent;
-        private Action<ConnectStatus> connectCallback;
+        private ConcurrentQueue<Packet> sendPacketQueue;
+        private ConcurrentQueue<Packet> recvPacketQueue;
 
         public KcpUdpClient()
         {
+            udp = null;
+            con = null;
             status = None;
             isDispose = false;
-            notifyEvent = new AutoResetEvent(false);
+            sendPacketQueue = new ConcurrentQueue<Packet>();
+            recvPacketQueue = new ConcurrentQueue<Packet>();
         }
 
-        ~KcpUdpClient()
-        {
-            Dispose();
-        }
-
-        public void Connect(string host, int port, Action<ConnectStatus> connectCallback)
+        public void Connect(string host, int port)
         {
             CheckDispose();
 
@@ -54,11 +45,36 @@ namespace Base.Net.Impl
                 return;
             }
 
+            ClearQueue(sendPacketQueue);
+            ClearQueue(recvPacketQueue);
             status = Connecting;
-            this.connectCallback = connectCallback;
-            point = new IPEndPoint(IPAddress.Parse(host), port);
             udp = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            ThreadPool.QueueUserWorkItem(ConnectLooper);
+            ThreadPool.QueueUserWorkItem(ConnectLooper, new IPEndPoint(IPAddress.Parse(host), port));
+        }
+
+        public void Send(Packet packet)
+        {
+            sendPacketQueue.Enqueue(packet);
+        }
+
+        public bool Recv(out Packet packet)
+        {
+            return recvPacketQueue.TryDequeue(out packet);
+        }
+
+        public long ConId
+        {
+            get { return con.ConId; }
+        }
+
+        public bool IsConnected
+        {
+            get { return status == Success; }
+        }
+
+        public byte Status
+        {
+            get { return status; }
         }
 
         public void Dispose()
@@ -68,9 +84,9 @@ namespace Base.Net.Impl
                 isDispose = true;
                 status = None;
 
-                if (notifyEvent != null)
+                if (udp != null)
                 {
-                    notifyEvent.Set();
+                    udp.Dispose();
                 }
 
                 if (con != null)
@@ -78,29 +94,10 @@ namespace Base.Net.Impl
                     con.Dispose();
                 }
 
-                if (udp != null)
-                {
-                    udp.Dispose();
-                }
+                ClearQueue(sendPacketQueue);
+
+                ClearQueue(recvPacketQueue);
             }
-        }
-
-        public int Send(byte[] buffer, int offset, int length)
-        {
-            CheckDispose();
-            return con.Send(buffer, offset, length);
-        }
-
-        public int Recv(byte[] buffer, int offset, int length)
-        {
-            CheckDispose();
-
-            if (con.PeekSize() <= 0)
-            {
-                notifyEvent.WaitOne();
-            }
-
-            return con.Recv(buffer, offset, length);
         }
 
         private void ConnectLooper(object obj)
@@ -109,11 +106,11 @@ namespace Base.Net.Impl
             {
                 int time = 0;
                 int timeout = 5000;
-                udp.Connect(point);
+                udp.Connect((EndPoint) obj);
                 byte[] buffer = new byte[KcpHelper.Length];
                 while (!isDispose && status == Connecting)
                 {
-                    KcpHelper.Encode32u(buffer, 0, KcpHelper.Flag);
+                    KcpHelper.Encode32u(buffer, 0, KcpHelper.ConnectFlag);
                     udp.Send(buffer, 0, 4, SocketFlags.None);
                     if (!udp.Poll(100000, SelectMode.SelectRead))
                     {
@@ -121,7 +118,6 @@ namespace Base.Net.Impl
                         if (time > timeout)
                         {
                             status = Timeout;
-                            connectCallback?.Invoke(ConnectStatus.Timeout);
                             break;
                         }
 
@@ -135,25 +131,22 @@ namespace Base.Net.Impl
                     {
                         uint flag = KcpHelper.Decode32u(buffer, 24);
                         uint conv = KcpHelper.Decode32u(buffer, 28);
-                        if (flag == KcpHelper.Flag)
+                        if (flag == KcpHelper.ConnectFlag)
                         {
                             con = new KcpConn(conv, udp);
-
                             con.Input(buffer, 0, count);
+                            
                             count = con.Recv(buffer, 0, buffer.Length);
                             if (count == 8)
                             {
-                                KcpHelper.Encode32u(buffer, 0, KcpHelper.Flag);
+                                KcpHelper.Encode32u(buffer, 0, KcpHelper.ConnectFlag);
                                 KcpHelper.Encode32u(buffer, 4, conv);
                                 con.Send(buffer, 0, 8);
-                                con.Update(DateTime.Now);
+                                con.Flush();
 
                                 status = Success;
-                                ThreadPool.QueueUserWorkItem(UpdateLooper);
+                                ThreadPool.QueueUserWorkItem(UpdateKcpLooper);
                                 ThreadPool.QueueUserWorkItem(RecvUdpDataLooper);
-
-                                connectCallback?.Invoke(ConnectStatus.Success);
-
                                 break;
                             }
                         }
@@ -163,17 +156,19 @@ namespace Base.Net.Impl
             catch (Exception e)
             {
                 status = Error;
-                connectCallback?.Invoke(ConnectStatus.Error);
                 Debug.LogError(e.ToString());
             }
         }
 
-        private void UpdateLooper(object obj)
+        private void UpdateKcpLooper(object obj)
         {
             try
             {
+                ClientDataProcessingCenter process = new ClientDataProcessingCenter();
                 while (!isDispose && status == Success)
                 {
+                    CheckDispose();
+                    process.TrySendKcpData(con, sendPacketQueue);
                     con.Update(DateTime.Now);
                     Thread.Sleep(10);
                 }
@@ -181,7 +176,6 @@ namespace Base.Net.Impl
             catch (Exception e)
             {
                 status = Error;
-                notifyEvent.Set();
                 Debug.LogError(e.ToString());
             }
         }
@@ -190,6 +184,7 @@ namespace Base.Net.Impl
         {
             try
             {
+                ClientDataProcessingCenter process = new ClientDataProcessingCenter();
                 byte[] buffer = new byte[KcpHelper.Length];
                 while (!isDispose && status == Success)
                 {
@@ -204,14 +199,16 @@ namespace Base.Net.Impl
                     if (count > 0)
                     {
                         con.Input(buffer, 0, count);
-                        notifyEvent.Set();
+                        if (process.TryRecvKcpData(con, out Packet packet))
+                        {
+                            recvPacketQueue.Enqueue(packet);
+                        }
                     }
                 }
             }
             catch (Exception e)
             {
                 status = Error;
-                notifyEvent.Set();
                 Debug.LogError(e.ToString());
             }
         }
@@ -229,20 +226,18 @@ namespace Base.Net.Impl
             }
         }
 
-        #region Properties
-
-        public bool IsConnected
+        private void ClearQueue(ConcurrentQueue<Packet> queue)
         {
-            get { return !isDispose && status == Success; }
+            while (queue.TryDequeue(out Packet packet))
+            {
+            }
         }
 
-        #endregion
-    }
-
-    public class KcpClientException : Exception
-    {
-        public KcpClientException(string message) : base(message)
+        private class KcpClientException : Exception
         {
+            public KcpClientException(string message) : base(message)
+            {
+            }
         }
     }
 }

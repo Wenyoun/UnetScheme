@@ -1,12 +1,12 @@
 ﻿using System;
 using UnityEngine.Networking;
 using System.Collections.Generic;
+using Base.Net.Impl;
 
 namespace Zyq.Game.Base
 {
     public class Connection : IDisposable
     {
-        private bool m_Connected;
         private NetworkConnection m_Network;
         private List<IProtocolHandler> m_Handlers;
 
@@ -17,13 +17,11 @@ namespace Zyq.Game.Base
 
         public void OnConnect(NetworkConnection network)
         {
-            m_Connected = true;
             m_Network = network;
         }
 
         public void OnDisconnect(NetworkConnection network)
         {
-            m_Connected = false;
             ClearRegisterProtocols();
         }
 
@@ -37,10 +35,8 @@ namespace Zyq.Game.Base
 
         public void Dispose()
         {
-            m_Connected = false;
             ClearRegisterProtocols();
             m_Network.Dispose();
-            m_Network = null;
         }
 
         public void RegisterHandler(short id, NetworkMessageDelegate handler)
@@ -55,10 +51,7 @@ namespace Zyq.Game.Base
 
         public void Send(NetworkWriter writer)
         {
-            if (m_Connected)
-            {
-                m_Network.SendWriter(writer, 0);
-            }
+            m_Network.SendWriter(writer, 0);
         }
 
         private void ClearRegisterProtocols()

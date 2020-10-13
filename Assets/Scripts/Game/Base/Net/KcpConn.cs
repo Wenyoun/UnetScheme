@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using Net.KcpImpl;
 
-namespace Base.Net.Impl
+namespace Zyq.Game.Base
 {
     public class KcpConn : IKcpCallback, IDisposable
     {
@@ -13,9 +13,9 @@ namespace Base.Net.Impl
         private long conId;
         private Socket udp;
         private EndPoint point;
-        private bool isDispose;
-        private bool isConnected;
         private byte[] outputBuffer;
+        private volatile bool isDispose;
+        private volatile bool isConnected;
 
         public KcpConn(uint conv, Socket udp)
         {
@@ -64,16 +64,6 @@ namespace Base.Net.Impl
             }
         }
 
-        public int PeekSize()
-        {
-            if (!isDispose)
-            {
-                return kcp.PeekSize();
-            }
-
-            return -10;
-        }
-
         public int Send(byte[] buffer, int offset, int length)
         {
             if (!isDispose)
@@ -99,7 +89,7 @@ namespace Base.Net.Impl
             if (!isDispose)
             {
                 isDispose = true;
-                
+
                 if (kcp != null)
                 {
                     kcp.Dispose();
@@ -108,6 +98,15 @@ namespace Base.Net.Impl
         }
 
         #region internal
+
+        internal void Flush()
+        {
+            if (!isDispose)
+            {
+                kcp.Flush();
+            }
+        }
+
         internal void Update(DateTime now)
         {
             if (!isDispose)
@@ -123,18 +122,27 @@ namespace Base.Net.Impl
                 kcp.Input(new Span<byte>(buffer, offset, length));
             }
         }
+
         #endregion
 
-        #region properties 
-        public uint Conv => conv;
-        
-        public long ConId => conId;
+        #region properties
+
+        public uint Conv
+        {
+            get { return conv; }
+        }
+
+        public long ConId
+        {
+            get { return conId; }
+        }
 
         public bool IsConnected
         {
-            get => isConnected;
-            internal set => isConnected = value;
+            get { return isConnected; }
+            internal set { isConnected = value; }
         }
+
         #endregion
     }
 }

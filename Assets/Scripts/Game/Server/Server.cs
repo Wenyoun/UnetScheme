@@ -1,10 +1,12 @@
 ﻿using Zyq.Game.Base;
 using UnityEngine.Networking;
 using System.Collections.Generic;
+using Base.Net.Impl;
+using UnityEngine;
 
 namespace Zyq.Game.Server
 {
-    public class Server : AbsMachine
+    public class Server : AbsMachine, IServer
     {
         public static Server Ins = new Server();
 
@@ -20,6 +22,7 @@ namespace Zyq.Game.Server
 
         private Server()
         {
+            ServerNetworkMgr.Init(this);
         }
         
         public override void OnInit()
@@ -28,6 +31,7 @@ namespace Zyq.Game.Server
             m_EntityMgr = new ServerEntityMgr();
             m_SyncAttributeMgr = new SyncAttributeMgr();
             m_Connections = new Dictionary<int, Connection>();
+            StartServer();
         }
 
         public override void OnRemove()
@@ -37,6 +41,12 @@ namespace Zyq.Game.Server
             m_EntityMgr.Dispose();
             m_EntityMgr = null;
             m_SyncAttributeMgr = null;
+            ServerNetworkMgr.Dispose();
+        }
+
+        public void StartServer()
+        {
+            ServerNetworkMgr.Bind(50000);
         }
 
         public void Send(Connection connection, NetworkWriter writer)
@@ -126,6 +136,15 @@ namespace Zyq.Game.Server
             m_Connections.Clear();
             m_Connections = null;
         }
-    }
 
+        public void OnClientConnect(IChannel channel)
+        {
+            Debug.Log("Server:111111111111111");
+        }
+
+        public void OnClientDisconnect(IChannel channel)
+        {
+            Debug.Log("Server:22222222222222222");
+        }
+    }
 }
