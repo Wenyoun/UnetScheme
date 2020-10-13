@@ -170,7 +170,7 @@ namespace Zyq.Game.Base
                     CheckDispose();
                     process.TrySendKcpData(con, sendPacketQueue);
                     con.Update(DateTime.Now);
-                    Thread.Sleep(10);
+                    Thread.Sleep(5);
                 }
             }
             catch (Exception e)

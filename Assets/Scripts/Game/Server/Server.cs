@@ -139,12 +139,12 @@ namespace Zyq.Game.Server
 
         public void OnClientConnect(IChannel channel)
         {
-            Debug.Log("Server:111111111111111");
+            Debug.Log("Server:111111111111111:" + channel.ChannelId);
         }
 
         public void OnClientDisconnect(IChannel channel)
         {
-            Debug.Log("Server:22222222222222222");
+            Debug.Log("Server:22222222222222222:" + channel.ChannelId);
         }
     }
 }

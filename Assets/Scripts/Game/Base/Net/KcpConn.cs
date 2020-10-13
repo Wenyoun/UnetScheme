@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
 using Net.KcpImpl;
+using UnityEngine;
 
 namespace Zyq.Game.Base
 {

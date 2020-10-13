@@ -82,6 +82,7 @@ namespace Zyq.Game.Base
 
                     int count = udp.ReceiveFrom(buffer, SocketFlags.None, ref remote);
                     long conId = CptConId(remote);
+                    
                     ServerChannel channel;
                     if (!channels.TryGetValue(conId, out channel))
                     {
@@ -102,7 +103,7 @@ namespace Zyq.Game.Base
                             }
                         }
                     }
-                    else if (count > 24)
+                    else if (count >= 24)
                     {
                         channel.Input(buffer, 0, count);
                     }
@@ -177,6 +178,8 @@ namespace Zyq.Game.Base
                         ServerChannel channel = its.Current.Value;
                         channel.ProcessRecvPacket(process, kcpConnect);
                     }
+
+                    Thread.Sleep(5);
                 }
             }
             catch (Exception e)

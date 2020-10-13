@@ -31,7 +31,6 @@ namespace Zyq.Game.Client
         {
             base.OnInit();
             m_EntityMgr = new ClientEntityMgr();
-            ClientNetworkMgr.Init(this);
         }
 
         public override void OnRemove()
@@ -46,7 +45,10 @@ namespace Zyq.Game.Client
 
         public void OnStartClient()
         {
-            ClientNetworkMgr.Connect("127.0.0.1", 50000);
+            for (int i = 0; i < 100; ++i)
+            {
+                ClientNetworkMgr.Connect("127.0.0.1", 50000, this);
+            }
         }
 
         public void OnStopClient()
