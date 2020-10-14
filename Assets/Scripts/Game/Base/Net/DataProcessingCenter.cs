@@ -103,12 +103,11 @@ namespace Zyq.Game.Base
 
     public class PacketHandler
     {
-        public const int HeadLength = 2;
+        private const int HeadLength = 2;
 
         public ushort ParseHeadLength(byte[] buffer, int offset)
         {
-            ByteReadMemory memory = new ByteReadMemory(buffer, offset, HeadLength);
-            return memory.ReadUShort();
+            return new ByteReadMemory(buffer, offset, HeadLength).ReadUShort();
         }
 
         public int HandleSend(byte[] buffer, Packet packet)

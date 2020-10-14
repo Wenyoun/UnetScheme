@@ -25,7 +25,7 @@ namespace Zyq.Game.Base
 
     public class ByteBuffer : IDisposable
     {
-        public const int MaxStringLength = 1024 * 32;
+        private const int MaxStringLength = short.MaxValue;
 
         private static readonly UTF8Encoding ENCODING = new UTF8Encoding(false, true);
 
@@ -157,13 +157,13 @@ namespace Zyq.Game.Base
                 stringBuffer = new byte[MaxStringLength];
             }
 
-            int size = ENCODING.GetBytes(value, 0, value.Length, stringBuffer, 0);
-
-            if (size > MaxStringLength)
+            if (value.Length > MaxStringLength)
             {
-                throw new IndexOutOfRangeException("ByteBuffer.Write(string) too long: " + size + ". Limit: " +
+                throw new IndexOutOfRangeException("ByteBuffer.Write(string) too long: " + value.Length + ". Limit: " +
                                                    MaxStringLength);
             }
+
+            int size = ENCODING.GetBytes(value, 0, value.Length, stringBuffer, 0);
 
             Write((short) size);
             Write(stringBuffer, 0, size);

@@ -102,6 +102,9 @@ namespace Zyq.Game.Server
         public override void OnUpdate(float delta)
         {
             base.OnUpdate(delta);
+
+            ServerNetworkMgr.OnUpdate();
+
             if (m_EntityMgr != null)
             {
                 m_EntityMgr.OnUpdate(delta);
@@ -140,6 +143,11 @@ namespace Zyq.Game.Server
         public void OnClientConnect(IChannel channel)
         {
             Debug.Log("Server:111111111111111:" + channel.ChannelId);
+            channel.Register(1, (ChannelMessage message) =>
+            {
+                string k = message.Buffer.ReadString();
+                Debug.Log(k);
+            });
         }
 
         public void OnClientDisconnect(IChannel channel)

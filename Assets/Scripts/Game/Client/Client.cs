@@ -136,7 +136,7 @@ namespace Zyq.Game.Client
             packet.Cmd = 1;
             packet.Buffer = ByteBuffer.Allocate(10240);
             string k = "";
-            for (int i = 0; i < 1000; ++i)
+            for (int i = 0; i < 1; ++i)
             {
                 k += "yinhuayong";
             }
