@@ -63,7 +63,7 @@ namespace Net.KcpImpl
         /// <param name="conv_"></param>
         /// <param name="callback"></param>
         /// <param name="rentable">可租用内存的回调</param>
-        public Kcp(uint conv_, IKcpCallback callback, IRentable rentable = null)
+        public Kcp(uint conv_, IKcpCallback callback, IRentable rentable)
         {
             conv = conv_;
             callbackHandle = callback;
@@ -339,8 +339,9 @@ namespace Net.KcpImpl
     //extension 重构和新增加的部分
     public partial class Kcp
     {
-        IKcpCallback callbackHandle;
-        IRentable rentable;
+        private IRentable rentable;
+        private IKcpCallback callbackHandle;
+        
         /// <summary>
         /// 如果外部能够提供缓冲区则使用外部缓冲区，否则new byte[]
         /// </summary>
@@ -348,49 +349,7 @@ namespace Net.KcpImpl
         /// <returns></returns>
         internal protected BufferOwner CreateBuffer(int needSize)
         {
-            var res = rentable?.RentBuffer(needSize);
-            if (res == null)
-            {
-                return new KcpInnerBuffer(needSize);
-            }
-            else
-            {
-                if (res.Memory.Length < needSize)
-                {
-                    throw new ArgumentException($"{nameof(rentable.RentBuffer)} 指定的委托不符合标准，返回的" +
-                        $"BufferOwner.Memory.Length 小于 {nameof(needSize)}");
-                }
-            }
-
-            return res;
-        }
-
-        internal protected class KcpInnerBuffer : BufferOwner
-        {
-            private readonly Memory<byte> _memory;
-
-            public Memory<byte> Memory
-            {
-                get
-                {
-                    if (alreadyDisposed)
-                    {
-                        throw new ObjectDisposedException(nameof(KcpInnerBuffer));
-                    }
-                    return _memory;
-                }
-            }
-
-            public KcpInnerBuffer(int size)
-            {
-                _memory = new Memory<byte>(new byte[size]);
-            }
-
-            bool alreadyDisposed = false;
-            public void Dispose()
-            {
-                alreadyDisposed = true;
-            }
+            return rentable?.RentBuffer(needSize);
         }
 
         /// <summary>

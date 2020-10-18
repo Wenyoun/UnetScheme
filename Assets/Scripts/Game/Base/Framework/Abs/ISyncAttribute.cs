@@ -8,8 +8,8 @@ namespace Zyq.Game.Base
 
         bool IsSerialize();
 
-        void Serialize(NetworkWriter writer);
+        void Serialize(ByteBuffer writer);
 
-        void Deserialize(NetworkReader reader);
+        void Deserialize(ByteBuffer reader);
     }
 }

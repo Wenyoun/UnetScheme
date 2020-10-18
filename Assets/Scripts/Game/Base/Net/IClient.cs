@@ -1,6 +1,6 @@
 ﻿namespace Zyq.Game.Base
 {
-    public interface IClient
+    public interface IClientCallback
     {
         void OnServerConnect(IChannel channel);
 

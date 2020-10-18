@@ -1,6 +1,5 @@
 ﻿using Zyq.Game.Base;
 using System.Collections.Generic;
-using UnityEngine.Networking;
 
 namespace Zyq.Game.Server
 {
@@ -22,13 +21,11 @@ namespace Zyq.Game.Server
                             ISyncAttribute attribute = attributes[j];
                             if (attribute.IsSerialize())
                             {
-                                NetworkWriter writer = new NetworkWriter();
-                                writer.StartMessage(NetMsgId.Sync_Attribute);
-                                writer.Write(entity.Eid);
-                                writer.Write(attribute.SyncId);
-                                attribute.Serialize(writer);
-                                writer.FinishMessage();
-                                Server.Ins.Broadcast(writer);
+                                ByteBuffer buffer = ByteBuffer.Allocate(1400);
+                                buffer.Write(entity.Eid);
+                                buffer.Write(attribute.SyncId);
+                                attribute.Serialize(buffer);
+                                Server.Ins.Broadcast(NetMsgId.Sync_Attribute, buffer);
                             }
                         }
                     }

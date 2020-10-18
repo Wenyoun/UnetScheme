@@ -23,34 +23,18 @@ namespace Zyq.Game.Server
             Vector3 v13,
             Vector4 v14,
             Quaternion v15,
-            Login login,
-            Login[] logins,
-            LoginData data,
-            LoginData[] datas)
+            int[] v16,
+            LoginData v17)
         {
-            Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" + v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15 + ":" + login + ":" + data.Username + "," + data.Password);
-
-            LoginData k = new LoginData();
-            k.Scores = new int[3];
-            for (int i = 0; i < 3; ++i)
+            Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" +
+                      v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15);
+            Debug.Log(v16.Length);
+            for (int i = 0; i < v16.Length; ++i)
             {
-                k.Scores[i] = i + 1;
-            }
-            k.Logins = new Login[4];
-            for (int i = 0; i < 4; ++i)
-            {
-                k.Logins[i] = (Login)i;
+                Debug.Log(v16[i]);
             }
 
-            ServerSender.RpcTargetLoginResult(connection, true, k);
-
-            Vector3 position = new Vector3(1, 0, 1);
-
-            Entity entity = EntityFactory.CreatePlayer(connection, position);
-
-            Server.Ins.EntityMgr.AddEntity(entity);
-
-            ServerSender.BroadcastCreatePlayer(entity.Eid, entity.Gid, position);
+            Debug.Log(v17.Username + "," + v17.Password);
         }
     }
 }

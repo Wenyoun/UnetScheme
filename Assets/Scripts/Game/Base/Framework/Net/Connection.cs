@@ -1,26 +1,24 @@
 ﻿using System;
-using UnityEngine.Networking;
 using System.Collections.Generic;
-using Base.Net.Impl;
 
 namespace Zyq.Game.Base
 {
     public class Connection : IDisposable
     {
-        private NetworkConnection m_Network;
-        private List<IProtocolHandler> m_Handlers;
+        private IChannel channel;
+        private List<IProtocolHandler> handlers;
 
         public Connection()
         {
-            m_Handlers = new List<IProtocolHandler>();
+            handlers = new List<IProtocolHandler>();
         }
 
-        public void OnConnect(NetworkConnection network)
+        public void OnConnect(IChannel channel)
         {
-            m_Network = network;
+            this.channel = channel;
         }
 
-        public void OnDisconnect(NetworkConnection network)
+        public void OnDisconnect(IChannel channel)
         {
             ClearRegisterProtocols();
         }
@@ -30,41 +28,37 @@ namespace Zyq.Game.Base
             IProtocolHandler handler = new T();
             handler.Connection = this;
             handler.Register();
-            m_Handlers.Add(handler);
+            handlers.Add(handler);
         }
 
         public void Dispose()
         {
             ClearRegisterProtocols();
-            m_Network.Dispose();
+            channel.Dispose();
         }
 
-        public void RegisterHandler(short id, NetworkMessageDelegate handler)
+        public void RegisterHandler(ushort cmd, ChannelMessageDelegate handler)
         {
-            m_Network.RegisterHandler(id, handler);
+            channel.Register(cmd, handler);
         }
 
-        public void UnregisterHandler(short id)
+        public void UnregisterHandler(ushort cmd)
         {
-            m_Network.UnregisterHandler(id);
+            channel.Unregister(cmd);
         }
 
-        public void Send(NetworkWriter writer)
+        public void Send(ushort cmd, ByteBuffer buffer)
         {
-            m_Network.SendWriter(writer, 0);
+            channel.Send(cmd, buffer);
         }
 
         private void ClearRegisterProtocols()
         {
-            if (m_Handlers != null)
+            for (int i = 0; i < handlers.Count; ++i)
             {
-                for (int i = 0; i < m_Handlers.Count; ++i)
-                {
-                    m_Handlers[i].Unregister();
-                }
-                m_Handlers.Clear();
-                m_Handlers = null;
+                handlers[i].Unregister();
             }
+            handlers.Clear();
         }
     }
 }

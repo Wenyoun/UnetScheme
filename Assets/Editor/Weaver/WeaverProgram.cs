@@ -21,17 +21,6 @@ namespace Zyq.Weaver
         public static AssemblyDefinition CurrentAssembly;
         #endregion
 
-        #region Networking
-        public static TypeReference NetowrkMessageType;
-        public static FieldReference NetworkMessageReaderField;
-        public static MethodReference NetowrkMessageCtorMethod;
-        public static TypeReference NetworkWriterType;
-        public static MethodReference NetworkWriterCtorMethod;
-        public static MethodReference NetworkWriterStartMessageMethod;
-        public static MethodReference NetworkWriterFinishMessageMethod;
-        public static TypeReference NetworkReaderType;
-        #endregion
-
         #region Attribute
         public static TypeReference SendType;
         public static TypeReference RecvType;
@@ -39,6 +28,13 @@ namespace Zyq.Weaver
         public static TypeReference BroadcastType;
         public static TypeReference SyncClassType;
         public static TypeReference SyncFieldType;
+        #endregion
+        
+        #region Net
+        public static TypeReference ChannelMessageType;
+        public static FieldReference ChannelMessageBufferField;
+        public static TypeReference ByteBufferType;
+        public static MethodReference ByteBufferAllocateMethod;
         #endregion
 
         #region Zyq.Game.Base.IEntity
@@ -58,7 +54,7 @@ namespace Zyq.Weaver
         public static MethodReference ConnectionRegisterHandlerMethod;
         public static MethodReference ConnectionUnregisterHandlerMethod;
         #endregion
-
+        
         #region Zyq.Game.Base.ConnectionFeture
         public static TypeReference ConnectionFetureType;
         public static MethodReference ConnectionFetureRegisterHandlerMethod;
@@ -78,15 +74,13 @@ namespace Zyq.Weaver
         public static MethodReference ServerBroadcastMethod;
         #endregion
 
-        public static bool WeaveAssemblies(string unityEngineDLL, string networkingDLL, string baseModuleRuntimeDLL, string assemblyPath, string[] depAssemblyPaths)
+        public static bool WeaveAssemblies(string unityEngineDLL, string baseModuleRuntimeDLL, string assemblyPath, string[] depAssemblyPaths)
         {
             using (UnityAssembly = AssemblyDefinition.ReadAssembly(unityEngineDLL))
-            using (NetworkingAssembly = AssemblyDefinition.ReadAssembly(networkingDLL))
             {
-                SetupUnityTypes();
                 try
                 {
-                    return Weave(unityEngineDLL, networkingDLL, assemblyPath, depAssemblyPaths, baseModuleRuntimeDLL);
+                    return Weave(unityEngineDLL, assemblyPath, depAssemblyPaths, baseModuleRuntimeDLL);
                 }
                 catch (Exception e)
                 {
@@ -119,7 +113,7 @@ namespace Zyq.Weaver
             }
         }
 
-        private static bool Weave(string unityEngineDLL, string networkingDLL, string assemblyPath, string[] depAssemblyPaths, string baseModuleRuntimeDLL)
+        private static bool Weave(string unityEngineDLL, string assemblyPath, string[] depAssemblyPaths, string baseModuleRuntimeDLL)
         {
             using (DefaultAssemblyResolver asmResolver = new DefaultAssemblyResolver())
             using (CurrentAssembly = AssemblyDefinition.ReadAssembly(assemblyPath,
@@ -128,7 +122,6 @@ namespace Zyq.Weaver
                 asmResolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
                 asmResolver.AddSearchDirectory(Helpers.FindUnityEngineDLLDirectoryName());
                 asmResolver.AddSearchDirectory(Path.GetDirectoryName(unityEngineDLL));
-                asmResolver.AddSearchDirectory(Path.GetDirectoryName(networkingDLL));
 
                 foreach (string path in depAssemblyPaths)
                 {
@@ -156,6 +149,8 @@ namespace Zyq.Weaver
         {
             if (module.Name.EndsWith(Base))
             {
+                BaseAssembly = CurrentAssembly;
+                SetupBaseModuleTypes();
                 return BaseWeaver.Weave(module);
             }
             else if (module.Name.EndsWith(Client))
@@ -174,23 +169,14 @@ namespace Zyq.Weaver
             }
             return false;
         }
-
-        private static void SetupUnityTypes()
-        {
-            NetowrkMessageType = NetworkingAssembly.MainModule.GetType("UnityEngine.Networking.NetworkMessage");
-            NetworkMessageReaderField = ResolveHelper.ResolveField(NetowrkMessageType, "reader");
-
-            NetworkWriterType = NetworkingAssembly.MainModule.GetType("UnityEngine.Networking.NetworkWriter");
-
-            NetworkWriterCtorMethod = NetworkWriterType.Resolve().Methods.Single(m => m.FullName.IndexOf(".ctor()") >= 0);
-            NetworkWriterStartMessageMethod = ResolveHelper.ResolveMethod(NetworkWriterType, "StartMessage");
-            NetworkWriterFinishMessageMethod = ResolveHelper.ResolveMethod(NetworkWriterType, "FinishMessage");
-
-            NetworkReaderType = NetworkingAssembly.MainModule.GetType("UnityEngine.Networking.NetworkReader");
-        }
-
+        
         private static void SetupBaseModuleTypes()
         {
+            ChannelMessageType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ChannelMessage");
+            ChannelMessageBufferField = ResolveHelper.ResolveField(ChannelMessageType, "Buffer");
+            ByteBufferType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ByteBuffer");
+            ByteBufferAllocateMethod = ResolveHelper.ResolveMethod(ByteBufferType, "Allocate");
+                
             SendType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.SendAttribute");
             RecvType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.RecvAttribute");
             ProtocolType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ProtocolAttribute");

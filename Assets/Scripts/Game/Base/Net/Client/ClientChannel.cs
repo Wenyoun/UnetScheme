@@ -6,14 +6,13 @@ namespace Zyq.Game.Base
     public class ClientChannel : AbstractChannel
     {
         private byte status;
-        private IClient clientCallback;
         private KcpUdpClient kcpUdpClient;
+        private IClientCallback clientCallback;
 
-        public ClientChannel(IClient client)
+        public ClientChannel(IClientCallback callback)
         {
+            clientCallback = callback;
             status = KcpUdpClient.None;
-            kcpUdpClient = null;
-            clientCallback = client;
         }
 
         public override long ChannelId
@@ -26,18 +25,17 @@ namespace Zyq.Game.Base
             get { return kcpUdpClient != null && kcpUdpClient.IsConnected; }
         }
 
-        public override void Send(Packet packet)
+        public override void Send(ushort cmd, ByteBuffer buffer)
         {
             if (kcpUdpClient != null)
             {
-                kcpUdpClient.Send(packet);
+                kcpUdpClient.Send(new Packet(cmd, buffer));
             }
         }
 
         public override void Dispose()
         {
             Disconnect();
-            clientCallback = null;
             base.Dispose();
         }
 

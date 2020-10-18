@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
 using Zyq.Game.Base.Protocol;
-using UnityEngine.Networking;
 
 namespace Zyq.Game.Client
 {
@@ -41,11 +40,11 @@ namespace Zyq.Game.Client
         {
             return false;
         }
-        public void Serialize(NetworkWriter writer)
+        public void Serialize(ByteBuffer writer)
         {
         }
 
-        public void Deserialize(NetworkReader reader)
+        public void Deserialize(ByteBuffer reader)
         {
         }
     }

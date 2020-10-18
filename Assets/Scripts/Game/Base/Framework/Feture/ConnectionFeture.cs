@@ -5,11 +5,15 @@ namespace Zyq.Game.Base
     public class ConnectionFeture : IFeture
     {
         #region Fields
+
         private Connection m_Connection;
+
         #endregion
 
         #region Properties
+
         public Connection Connection => m_Connection;
+
         #endregion
 
         public ConnectionFeture(Connection connection)
@@ -17,23 +21,23 @@ namespace Zyq.Game.Base
             m_Connection = connection;
         }
 
-        public void Send(NetworkWriter writer)
+        public void Send(ushort cmd, ByteBuffer buffer)
         {
             if (m_Connection != null)
             {
-                m_Connection.Send(writer);
+                m_Connection.Send(cmd, buffer);
             }
         }
 
-        public void RegisterHandler(short id, NetworkMessageDelegate handler)
+        public void RegisterHandler(ushort cmd, ChannelMessageDelegate handler)
         {
             if (m_Connection != null)
             {
-                m_Connection.RegisterHandler(id, handler);
+                m_Connection.RegisterHandler(cmd, handler);
             }
         }
 
-        public void UnregisterHandler(short id)
+        public void UnregisterHandler(ushort id)
         {
             if (m_Connection != null)
             {

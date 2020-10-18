@@ -33,24 +33,6 @@ namespace Zyq.Game.Server
             Debug.Log("OnStopServer");
         }
 
-        public override void OnServerConnect(NetworkConnection net)
-        {
-            base.OnServerConnect(net);
-
-            Server.Ins.OnNetConnect(net);
-
-            Debug.Log("OnServerConnect");
-        }
-
-        public override void OnServerDisconnect(NetworkConnection net)
-        {
-            base.OnServerDisconnect(net);
-
-            Server.Ins.OnNetDisconnect(net);
-
-            Debug.Log("OnServerDisconnect");
-        }
-
         private void Update()
         {
             Server.Ins.OnUpdate(Time.deltaTime);

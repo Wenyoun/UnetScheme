@@ -1,28 +1,43 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Zyq.Game.Base
 {
     public class ServerNetwork : IDisposable
     {
-        private IServer serverCallback;
+        private bool isDispose;
+        private IServerCallback serverCallback;
         private KcpUdpServer kcpUdpServer;
         private Dictionary<long, IChannel> channels;
+        private ConcurrentQueue<StatusChannel> statusChannels;
 
-        public ServerNetwork(IServer serverCallback)
+        public ServerNetwork(IServerCallback callback)
         {
-            this.serverCallback = serverCallback;
+            isDispose = false;
+            serverCallback = callback;
             kcpUdpServer = new KcpUdpServer();
             channels = new Dictionary<long, IChannel>();
+            statusChannels = new ConcurrentQueue<StatusChannel>();
         }
 
         public void Bind(int port)
         {
+            if (isDispose)
+            {
+                return;
+            }
+
             kcpUdpServer.Bind(port, new KcpConnect(OnKcpConnect, OnKcpDisconnect));
         }
 
-        public void Close(long channelId)
+        public void CloseChannel(uint channelId)
         {
+            if (isDispose)
+            {
+                return;
+            }
+
             if (channels.TryGetValue(channelId, out IChannel channel))
             {
                 channels.Remove(channelId);
@@ -32,6 +47,50 @@ namespace Zyq.Game.Base
 
         public void OnUpdate()
         {
+            if (isDispose)
+            {
+                return;
+            }
+
+            CheckStatusChannels();
+
+            Dispatcher();
+        }
+
+        public void Dispose()
+        {
+            if (isDispose)
+            {
+                return;
+            }
+
+            isDispose = true;
+            channels.Clear();
+            kcpUdpServer.Dispose();
+        }
+
+        private void OnKcpConnect(IChannel channel)
+        {
+            if (isDispose)
+            {
+                return;
+            }
+
+            statusChannels.Enqueue(new StatusChannel(1, channel));
+        }
+
+        private void OnKcpDisconnect(IChannel channel)
+        {
+            if (isDispose)
+            {
+                return;
+            }
+
+            statusChannels.Enqueue(new StatusChannel(2, channel));
+        }
+
+        private void Dispatcher()
+        {
             Dictionary<long, IChannel>.Enumerator its = channels.GetEnumerator();
             while (its.MoveNext())
             {
@@ -39,34 +98,48 @@ namespace Zyq.Game.Base
             }
         }
 
-        public void Dispose()
+        private void CheckStatusChannels()
         {
-            channels.Clear();
-            kcpUdpServer.Dispose();
-        }
-
-        private void OnKcpConnect(IChannel channel)
-        {
-            if (!channels.ContainsKey(channel.ChannelId))
+            while (statusChannels.TryDequeue(out StatusChannel status))
             {
-                channels.Add(channel.ChannelId, channel);
-                if (serverCallback != null)
+                IChannel channel = status.Channel;
+
+                if (status.Status == 1)
                 {
-                    serverCallback.OnClientConnect(channel);
+                    if (!channels.ContainsKey(channel.ChannelId))
+                    {
+                        channels.Add(channel.ChannelId, channel);
+
+                        if (serverCallback != null)
+                        {
+                            serverCallback.OnClientConnect(channel);
+                        }
+                    }
+                }
+                else
+                {
+                    if (channels.ContainsKey(channel.ChannelId))
+                    {
+                        if (serverCallback != null)
+                        {
+                            serverCallback.OnClientDisconnect(channel);
+                        }
+
+                        channels.Remove(channel.ChannelId);
+                    }
                 }
             }
         }
 
-        private void OnKcpDisconnect(IChannel channel)
+        private struct StatusChannel
         {
-            if (channels.ContainsKey(channel.ChannelId))
-            {
-                if (serverCallback != null)
-                {
-                    serverCallback.OnClientDisconnect(channel);
-                }
+            public int Status;
+            public IChannel Channel;
 
-                channels.Remove(channel.ChannelId);
+            public StatusChannel(int status, IChannel channel)
+            {
+                Status = status;
+                Channel = channel;
             }
         }
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
-using UnityEngine.Networking;
 using Mono.Collections.Generic;
 using System.Collections.Generic;
+using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {
@@ -11,10 +11,10 @@ namespace Zyq.Weaver
     {
         private struct MethodDetail
         {
-            public short MsgId;
+            public ushort MsgId;
             public MethodDefinition Method;
 
-            public MethodDetail(short msgId, MethodDefinition method)
+            public MethodDetail(ushort msgId, MethodDefinition method)
             {
                 MsgId = msgId;
                 Method = method;
@@ -39,7 +39,7 @@ namespace Zyq.Weaver
                         method.CustomAttributes.Count > 0 &&
                         method.CustomAttributes[0].AttributeType.FullName == WeaverProgram.RecvType.FullName)
                     {
-                        short msgId = (short)method.CustomAttributes[0].ConstructorArguments[0].Value;
+                        ushort msgId = (ushort)method.CustomAttributes[0].ConstructorArguments[0].Value;
                         methods.Add(new MethodDetail(msgId, method));
                     }
                 }
@@ -101,13 +101,13 @@ namespace Zyq.Weaver
                                                                                           MethodAttributes.Private | MethodAttributes.HideBySig,
                                                                                           true);
                                     {
-                                        handlerMethodImpl.Parameters.Add(new ParameterDefinition("msg", ParameterAttributes.None, module.ImportReference(WeaverProgram.NetowrkMessageType)));
-                                        handlerMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
+                                        handlerMethodImpl.Parameters.Add(new ParameterDefinition("msg", ParameterAttributes.None, module.ImportReference(WeaverProgram.ChannelMessageType)));
+                                        handlerMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ByteBufferType)));
 
                                         ILProcessor handlerProcessor = handlerMethodImpl.Body.GetILProcessor();
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Nop));
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldarg_1));
-                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.NetworkMessageReaderField)));
+                                        handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.ChannelMessageBufferField)));
                                         handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc_0));
 
                                         List<int> indexs = new List<int>();
@@ -159,7 +159,7 @@ namespace Zyq.Weaver
                                         processor.Append(processor.Create(OpCodes.Ldc_I4, wrapper.MsgId));
                                         processor.Append(processor.Create(OpCodes.Ldarg_0));
                                         processor.Append(processor.Create(OpCodes.Ldftn, handlerMethodImpl));
-                                        processor.Append(processor.Create(OpCodes.Newobj, module.ImportReference(typeof(NetworkMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));
+                                        processor.Append(processor.Create(OpCodes.Newobj, module.ImportReference(typeof(ChannelMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));
                                         processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionFetureRegisterHandlerMethod)));
                                         processor.Append(processor.Create(OpCodes.Nop));
                                     }

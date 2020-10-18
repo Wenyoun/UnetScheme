@@ -1,11 +1,17 @@
-﻿namespace Zyq.Game.Base
+﻿using System.Collections.Concurrent;
+using System.Threading;
+
+namespace Zyq.Game.Base
 {
-    internal class KcpHelper
+    internal class KcpConstants
     {
         public const int Length = 1500;
-        public const uint ConnectFlag = 0xfffffffe;
+        public const uint ConnectFlag = 0xfffffff0;
         public const uint DisconnectFlag = 0xffffffff;
-
+    }
+    
+    internal static class KcpHelper
+    {
         internal static int Encode32u(byte[] p, int offset, uint w)
         {
             p[0 + offset] = (byte) (w >> 0);
@@ -23,6 +29,20 @@
             result |= (uint) (p[2 + offset] << 16);
             result |= (uint) (p[3 + offset] << 24);
             return result;
+        }
+        
+        internal static void Clear(this ConcurrentQueue<Packet> queue)
+        {
+            while (queue.TryDequeue(out Packet packet))
+            {
+            }
+        }
+
+        internal static void CreateThread(ParameterizedThreadStart start, object obj = null)
+        {
+            Thread thread = new Thread(start);
+            thread.Priority = ThreadPriority.Highest;
+            thread.Start(obj);
         }
     }
 }

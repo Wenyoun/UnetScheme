@@ -1,15 +1,15 @@
 ﻿using System;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
-using UnityEngine.Networking;
 using Mono.Collections.Generic;
 using System.Collections.Generic;
+using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {
     public static class ServerRecvProcessor
     {
-        public static void Weave(ModuleDefinition module, Dictionary<short, MethodDefinition> methods, TypeDefinition protocol)
+        public static void Weave(ModuleDefinition module, Dictionary<ushort, MethodDefinition> methods, TypeDefinition protocol)
         {
             if (module == null || methods.Count == 0 || protocol == null)
             {
@@ -26,7 +26,7 @@ namespace Zyq.Weaver
                 ILProcessor registerProcessor = registerMethod.Body.GetILProcessor();
                 registerProcessor.Append(registerProcessor.Create(OpCodes.Nop));
 
-                foreach (short key in methods.Keys)
+                foreach (ushort key in methods.Keys)
                 {
                     MethodDefinition method = methods[key];
 
@@ -35,15 +35,19 @@ namespace Zyq.Weaver
                         continue;
                     }
 
-                    MethodDefinition protoMethodImpl = MethodFactory.CreateMethod(module, protocol, "OnProtocol_" + key, MethodAttributes.Private | MethodAttributes.HideBySig, true);
-                    protoMethodImpl.Parameters.Add(new ParameterDefinition("msg", ParameterAttributes.None, module.ImportReference(WeaverProgram.NetowrkMessageType)));
-                    protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.NetworkReaderType)));
+                    MethodDefinition protoMethodImpl = MethodFactory.CreateMethod(module, 
+                                                                                  protocol,
+                                                                                 "OnProtocol_" + key,
+                                                                                 MethodAttributes.Private | MethodAttributes.HideBySig,
+                                                                                 true);
+                    protoMethodImpl.Parameters.Add(new ParameterDefinition("msg", ParameterAttributes.None, module.ImportReference(WeaverProgram.ChannelMessageType)));
+                    protoMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ByteBufferType)));
 
                     {
                         ILProcessor processor = protoMethodImpl.Body.GetILProcessor();
                         processor.Append(processor.Create(OpCodes.Nop));
                         processor.Append(processor.Create(OpCodes.Ldarg_1));
-                        processor.Append(processor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.NetworkMessageReaderField)));
+                        processor.Append(processor.Create(OpCodes.Ldfld, module.ImportReference(WeaverProgram.ChannelMessageBufferField)));
                         processor.Append(processor.Create(OpCodes.Stloc_0));
 
                         List<int> indexs = new List<int>();
@@ -98,7 +102,7 @@ namespace Zyq.Weaver
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldc_I4, key));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldarg_0));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldftn, protoMethodImpl));
-                    registerProcessor.Append(registerProcessor.Create(OpCodes.Newobj, module.ImportReference(typeof(NetworkMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));
+                    registerProcessor.Append(registerProcessor.Create(OpCodes.Newobj, module.ImportReference(typeof(ChannelMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionRegisterHandlerMethod)));
                 }
 

@@ -8,15 +8,15 @@ namespace Zyq.Weaver
     {
         public static void Parse(ModuleDefinition module,
                                 ref TypeDefinition protocol,
-                                out Dictionary<short, MethodDefinition> send,
-                                out Dictionary<short, MethodDefinition> recv,
-                                out Dictionary<short, MethodDefinition> broadcast,
+                                out Dictionary<ushort, MethodDefinition> send,
+                                out Dictionary<ushort, MethodDefinition> recv,
+                                out Dictionary<ushort, MethodDefinition> broadcast,
                                 out List<TypeDefinition> cops,
                                 out List<TypeDefinition> syncs)
         {
-            send = new Dictionary<short, MethodDefinition>();
-            recv = new Dictionary<short, MethodDefinition>();
-            broadcast = new Dictionary<short, MethodDefinition>();
+            send = new Dictionary<ushort, MethodDefinition>();
+            recv = new Dictionary<ushort, MethodDefinition>();
+            broadcast = new Dictionary<ushort, MethodDefinition>();
             cops = new List<TypeDefinition>();
             syncs = new List<TypeDefinition>();
 
@@ -54,7 +54,7 @@ namespace Zyq.Weaver
                         CustomAttribute methodAttr = method.CustomAttributes[0];
                         if (methodAttr.ConstructorArguments.Count > 0)
                         {
-                            short msgId = (short)methodAttr.ConstructorArguments[0].Value;
+                            ushort msgId = (ushort)methodAttr.ConstructorArguments[0].Value;
                             if (methodAttr.AttributeType.FullName == WeaverProgram.SendType.FullName)
                             {
                                 send.Add(msgId, method);

@@ -25,7 +25,7 @@ namespace Zyq.Game.Base
         
         bool IsConnected { get; }
 
-        void Send(Packet packet);
+        void Send(ushort cmd, ByteBuffer buffer);
 
         void Dispatcher();
 
@@ -47,7 +47,7 @@ namespace Zyq.Game.Base
 
         public void Register(ushort cmd, ChannelMessageDelegate handler)
         {
-            if (!handlers.ContainsKey(cmd))
+            if (handlers != null && !handlers.ContainsKey(cmd))
             {
                 handlers.Add(cmd, handler);
             }
@@ -55,7 +55,7 @@ namespace Zyq.Game.Base
 
         public void Unregister(ushort cmd)
         {
-            if (handlers.ContainsKey(cmd))
+            if (handlers != null && handlers.ContainsKey(cmd))
             {
                 handlers.Remove(cmd);
             }
@@ -71,6 +71,7 @@ namespace Zyq.Game.Base
 
         public virtual void Dispose()
         {
+            ClearHandlers();
             handlers = null;
         }
 
@@ -82,6 +83,6 @@ namespace Zyq.Game.Base
 
         public abstract bool IsConnected { get; }
 
-        public abstract void Send(Packet packet);
+        public abstract void Send(ushort cmd, ByteBuffer buffer);
     }
 }

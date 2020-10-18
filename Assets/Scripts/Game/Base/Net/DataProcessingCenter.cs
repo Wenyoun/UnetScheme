@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Collections.Concurrent;
+using UnityEngine;
 
 namespace Zyq.Game.Base
 {
@@ -49,32 +50,33 @@ namespace Zyq.Game.Base
             rawBuffer = new byte[ushort.MaxValue];
         }
 
-        public bool TryRecvKcpData(ServerChannel channel, out Packet packet, IKcpConnect kcpConnect)
+        public bool TryRecvKcpData(ServerChannel channel, out Packet packet, IKcpConnect connect)
         {
             packet = new Packet();
             
             int size = channel.Recv(rawBuffer, 0, rawBuffer.Length);
+            
             if (size == 8)
             {
                 uint flag = KcpHelper.Decode32u(rawBuffer, 0);
                 uint conv = KcpHelper.Decode32u(rawBuffer, 4);
-
-                if (flag == KcpHelper.ConnectFlag && conv == channel.Conv)
+                
+                if (flag == KcpConstants.ConnectFlag && conv == channel.Conv)
                 {
                     channel.SetConnectedStatus(true);
-                    if (kcpConnect != null)
+                    if (connect != null)
                     {
-                        kcpConnect.OnKcpConnect(channel);
+                        connect.OnKcpConnect(channel);
                     }
 
                     return false;
                 }
-                else if (flag == KcpHelper.DisconnectFlag && conv == channel.Conv)
+                else if (flag == KcpConstants.DisconnectFlag && conv == channel.Conv)
                 {
                     channel.SetConnectedStatus(false);
-                    if (kcpConnect != null)
+                    if (connect != null)
                     {
-                        kcpConnect.OnKcpDisconnect(channel);
+                        connect.OnKcpDisconnect(channel);
                     }
 
                     channel.Disconnect();

@@ -2,8 +2,8 @@
 using UnityEngine;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
-using UnityEngine.Networking;
 using System.Collections.Generic;
+using Zyq.Game.Base;
 
 namespace Zyq.Weaver
 {
@@ -29,13 +29,13 @@ namespace Zyq.Weaver
         {
             Mappers.Add("System.Byte", new TypeWrapper(typeof(byte), "ReadByte", "Write"));
             Mappers.Add("System.Boolean", new TypeWrapper(typeof(bool), "ReadBoolean", "Write"));
-            Mappers.Add("System.Int16", new TypeWrapper(typeof(short), "ReadInt16", "Write"));
-            Mappers.Add("System.Int32", new TypeWrapper(typeof(int), "ReadInt32", "Write"));
-            Mappers.Add("System.Int64", new TypeWrapper(typeof(long), "ReadInt64", "Write"));
-            Mappers.Add("System.UInt16", new TypeWrapper(typeof(ushort), "ReadUInt16", "Write"));
-            Mappers.Add("System.UInt32", new TypeWrapper(typeof(uint), "ReadUInt32", "Write"));
-            Mappers.Add("System.UInt64", new TypeWrapper(typeof(ulong), "ReadUInt64", "Write"));
-            Mappers.Add("System.Single", new TypeWrapper(typeof(float), "ReadSingle", "Write"));
+            Mappers.Add("System.Int16", new TypeWrapper(typeof(short), "ReadShort", "Write"));
+            Mappers.Add("System.Int32", new TypeWrapper(typeof(int), "ReadInt", "Write"));
+            Mappers.Add("System.Int64", new TypeWrapper(typeof(long), "ReadLong", "Write"));
+            Mappers.Add("System.UInt16", new TypeWrapper(typeof(ushort), "ReadUShort", "Write"));
+            Mappers.Add("System.UInt32", new TypeWrapper(typeof(uint), "ReadUInt", "Write"));
+            Mappers.Add("System.UInt64", new TypeWrapper(typeof(ulong), "ReadULong", "Write"));
+            Mappers.Add("System.Single", new TypeWrapper(typeof(float), "ReadFloat", "Write"));
             Mappers.Add("System.Double", new TypeWrapper(typeof(double), "ReadDouble", "Write"));
             Mappers.Add("System.String", new TypeWrapper(typeof(string), "ReadString", "Write"));
             Mappers.Add("UnityEngine.Vector2", new TypeWrapper(typeof(Vector2), "ReadVector2", "Write"));
@@ -65,7 +65,7 @@ namespace Zyq.Weaver
 
             if (Mappers.TryGetValue(type, out wrapper))
             {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkReader).GetMethod(wrapper.readMethod, Type.EmptyTypes)));
+                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(ByteBuffer).GetMethod(wrapper.readMethod, Type.EmptyTypes)));
             }
 
             return null;
@@ -82,7 +82,7 @@ namespace Zyq.Weaver
 
             if (Mappers.TryGetValue(type, out wrapper))
             {
-                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(NetworkWriter).GetMethod(wrapper.writeMethod, new Type[] { wrapper.type })));
+                return processor.Create(OpCodes.Callvirt, module.ImportReference(typeof(ByteBuffer).GetMethod(wrapper.writeMethod, new Type[] { wrapper.type })));
             }
 
             return null;

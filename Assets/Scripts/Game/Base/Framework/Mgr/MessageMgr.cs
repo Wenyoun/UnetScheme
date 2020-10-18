@@ -13,8 +13,11 @@ namespace Zyq.Game.Base
 
         public void Dispose()
         {
-            m_Register.Dispose();
-            m_Register = null;
+            if (m_Register != null)
+            {
+                m_Register.Dispose();
+                m_Register = null;
+            }
         }
 
         public void Register(int id, MsgDelegate handler)

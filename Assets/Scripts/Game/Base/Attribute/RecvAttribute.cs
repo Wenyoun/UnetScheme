@@ -5,9 +5,9 @@ namespace Zyq.Game.Base
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class RecvAttribute : Attribute
     {
-        public short MsgId;
+        public ushort MsgId;
 
-        public RecvAttribute(short msgId)
+        public RecvAttribute(ushort msgId)
         {
             MsgId = msgId;
         }

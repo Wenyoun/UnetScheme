@@ -42,11 +42,11 @@ namespace Zyq.Game.Server
             return false;
         }
 
-        public void Serialize(NetworkWriter writer)
+        public void Serialize(ByteBuffer writer)
         {
         }
 
-        public void Deserialize(NetworkReader reader)
+        public void Deserialize(ByteBuffer reader)
         {
         }
     }

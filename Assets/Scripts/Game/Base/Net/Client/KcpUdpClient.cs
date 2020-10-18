@@ -19,19 +19,20 @@ namespace Zyq.Game.Base
 
         #endregion
 
-        private Socket udp;
         private KcpConn con;
-        private volatile byte status;
-        private volatile bool isDispose;
+        private Socket socket;
+        
+        private byte status;
+        private bool isDispose;
+        
         private ConcurrentQueue<Packet> sendPacketQueue;
         private ConcurrentQueue<Packet> recvPacketQueue;
 
         public KcpUdpClient()
         {
-            udp = null;
-            con = null;
             status = None;
             isDispose = false;
+            
             sendPacketQueue = new ConcurrentQueue<Packet>();
             recvPacketQueue = new ConcurrentQueue<Packet>();
         }
@@ -45,31 +46,47 @@ namespace Zyq.Game.Base
                 return;
             }
 
-            ClearQueue(sendPacketQueue);
-            ClearQueue(recvPacketQueue);
+            sendPacketQueue.Clear();
+            recvPacketQueue.Clear();
+            
             status = Connecting;
-            udp = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            ThreadPool.QueueUserWorkItem(ConnectLooper, new IPEndPoint(IPAddress.Parse(host), port));
+
+            SocketDispose();
+            
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            
+            KcpHelper.CreateThread(ConnectLooper, new IPEndPoint(IPAddress.Parse(host), port));
         }
 
         public void Send(Packet packet)
         {
+            if (isDispose)
+            {
+                return;
+            }
+            
             sendPacketQueue.Enqueue(packet);
         }
 
         public bool Recv(out Packet packet)
         {
+            if (isDispose)
+            {
+                packet = new Packet();
+                return false;
+            }
+            
             return recvPacketQueue.TryDequeue(out packet);
         }
 
         public long ConId
         {
-            get { return con.ConId; }
+            get { return !isDispose && con != null ? con.ConId : 0; }
         }
 
         public bool IsConnected
         {
-            get { return status == Success; }
+            get { return !isDispose && con != null && status == Success; }
         }
 
         public byte Status
@@ -79,25 +96,24 @@ namespace Zyq.Game.Base
 
         public void Dispose()
         {
-            if (!isDispose)
+            lock (this)
             {
+                if (isDispose)
+                {
+                    return;
+                }
+
                 isDispose = true;
-                status = None;
-
-                if (udp != null)
-                {
-                    udp.Dispose();
-                }
-
-                if (con != null)
-                {
-                    con.Dispose();
-                }
-
-                ClearQueue(sendPacketQueue);
-
-                ClearQueue(recvPacketQueue);
             }
+
+            status = None;
+            SocketDispose();
+            
+            sendPacketQueue.Clear();
+            sendPacketQueue = null;
+            
+            recvPacketQueue.Clear();
+            recvPacketQueue = null;
         }
 
         private void ConnectLooper(object obj)
@@ -106,13 +122,13 @@ namespace Zyq.Game.Base
             {
                 int time = 0;
                 int timeout = 5000;
-                udp.Connect((EndPoint) obj);
-                byte[] buffer = new byte[KcpHelper.Length];
+                socket.Connect((EndPoint) obj);
+                byte[] buffer = new byte[KcpConstants.Length];
                 while (!isDispose && status == Connecting)
                 {
-                    KcpHelper.Encode32u(buffer, 0, KcpHelper.ConnectFlag);
-                    udp.Send(buffer, 0, 4, SocketFlags.None);
-                    if (!udp.Poll(100000, SelectMode.SelectRead))
+                    KcpHelper.Encode32u(buffer, 0, KcpConstants.ConnectFlag);
+                    socket.Send(buffer, 0, 4, SocketFlags.None);
+                    if (!socket.Poll(100000, SelectMode.SelectRead))
                     {
                         time += 100;
                         if (time > timeout)
@@ -126,27 +142,27 @@ namespace Zyq.Game.Base
 
                     CheckDispose();
 
-                    int count = udp.Receive(buffer, 0, buffer.Length, SocketFlags.None);
+                    int count = socket.Receive(buffer, 0, buffer.Length, SocketFlags.None);
                     if (count == 32)
                     {
                         uint flag = KcpHelper.Decode32u(buffer, 24);
                         uint conv = KcpHelper.Decode32u(buffer, 28);
-                        if (flag == KcpHelper.ConnectFlag)
+                        if (flag == KcpConstants.ConnectFlag)
                         {
-                            con = new KcpConn(conv, udp);
+                            con = new KcpConn(conv, socket);
                             con.Input(buffer, 0, count);
                             
                             count = con.Recv(buffer, 0, buffer.Length);
                             if (count == 8)
                             {
-                                KcpHelper.Encode32u(buffer, 0, KcpHelper.ConnectFlag);
+                                KcpHelper.Encode32u(buffer, 0, KcpConstants.ConnectFlag);
                                 KcpHelper.Encode32u(buffer, 4, conv);
                                 con.Send(buffer, 0, 8);
                                 con.Flush();
 
                                 status = Success;
-                                ThreadPool.QueueUserWorkItem(UpdateKcpLooper);
-                                ThreadPool.QueueUserWorkItem(RecvUdpDataLooper);
+                                KcpHelper.CreateThread(UpdateKcpLooper);
+                                KcpHelper.CreateThread(RecvUdpDataLooper);
                                 break;
                             }
                         }
@@ -156,6 +172,7 @@ namespace Zyq.Game.Base
             catch (Exception e)
             {
                 status = Error;
+                Dispose();
                 Debug.LogError(e.ToString());
             }
         }
@@ -165,9 +182,10 @@ namespace Zyq.Game.Base
             try
             {
                 ClientDataProcessingCenter process = new ClientDataProcessingCenter();
-                while (!isDispose && status == Success)
+                while (!isDispose && con != null && status == Success)
                 {
                     CheckDispose();
+
                     process.TrySendKcpData(con, sendPacketQueue);
                     con.Update(DateTime.Now);
                     Thread.Sleep(5);
@@ -178,6 +196,10 @@ namespace Zyq.Game.Base
                 status = Error;
                 Debug.LogError(e.ToString());
             }
+            finally
+            {
+                Dispose();
+            }
         }
 
         private void RecvUdpDataLooper(object obj)
@@ -185,17 +207,17 @@ namespace Zyq.Game.Base
             try
             {
                 ClientDataProcessingCenter process = new ClientDataProcessingCenter();
-                byte[] buffer = new byte[KcpHelper.Length];
-                while (!isDispose && status == Success)
+                byte[] buffer = new byte[KcpConstants.Length];
+                while (!isDispose && con != null && status == Success)
                 {
-                    if (!udp.Poll(100000, SelectMode.SelectRead))
+                    if (!socket.Poll(100000, SelectMode.SelectRead))
                     {
                         continue;
                     }
 
                     CheckDispose();
 
-                    int count = udp.Receive(buffer, 0, buffer.Length, SocketFlags.None);
+                    int count = socket.Receive(buffer, 0, buffer.Length, SocketFlags.None);
                     if (count > 0)
                     {
                         con.Input(buffer, 0, count);
@@ -210,6 +232,10 @@ namespace Zyq.Game.Base
             {
                 status = Error;
                 Debug.LogError(e.ToString());
+            }
+            finally
+            {
+                Dispose();
             }
         }
 
@@ -226,10 +252,12 @@ namespace Zyq.Game.Base
             }
         }
 
-        private void ClearQueue(ConcurrentQueue<Packet> queue)
+        private void SocketDispose()
         {
-            while (queue.TryDequeue(out Packet packet))
+            if (socket != null)
             {
+                socket.Dispose();
+                socket = null;
             }
         }
 

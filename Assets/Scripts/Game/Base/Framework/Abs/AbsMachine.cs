@@ -1,6 +1,4 @@
-﻿using UnityEngine.Networking;
-
-namespace Zyq.Game.Base
+﻿namespace Zyq.Game.Base
 {
     public abstract class AbsMachine : ILifecycle, IUpdate, IFixedUpdate
     {
@@ -20,9 +18,6 @@ namespace Zyq.Game.Base
             TimerMgr.Dispose();
             MessageMgr.Dispose();
             UpdateMgr.Dispose();
-            TimerMgr = null;
-            UpdateMgr = null;
-            MessageMgr = null;
         }
 
         public virtual void OnUpdate(float delta)
@@ -44,9 +39,5 @@ namespace Zyq.Game.Base
                 UpdateMgr.OnFixedUpdate(delta);
             }
         }
-
-        public abstract void OnNetConnect(NetworkConnection network);
-
-        public abstract void OnNetDisconnect(NetworkConnection network);
     }
 }

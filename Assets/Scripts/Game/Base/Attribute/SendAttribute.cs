@@ -5,9 +5,9 @@ namespace Zyq.Game.Base
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class SendAttribute : Attribute
     {
-        public short MsgId;
+        public ushort MsgId;
 
-        public SendAttribute(short msgId)
+        public SendAttribute(ushort msgId)
         {
             MsgId = msgId;
         }

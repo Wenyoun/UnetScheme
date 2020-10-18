@@ -25,7 +25,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        public static void Connect(string host, int port, IClient client)
+        public static void Connect(string host, int port, IClientCallback client)
         {
             ClientChannel channel = new ClientChannel(client);
             channel.Connect(host, port);

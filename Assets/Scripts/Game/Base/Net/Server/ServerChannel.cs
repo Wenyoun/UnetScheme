@@ -1,40 +1,56 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using UnityEngine;
 
 namespace Zyq.Game.Base
 {
     public class ServerChannel : AbstractChannel
     {
-        private KcpConn con;
         private bool isClose;
+        private bool isDispose;
+
+        private KcpConn con;
         private ConcurrentQueue<Packet> recvPacketQueue;
         private ConcurrentQueue<Packet> sendPacketQueue;
 
         public ServerChannel(KcpConn con)
         {
             this.con = con;
-            this.isClose = false;
-            this.recvPacketQueue = new ConcurrentQueue<Packet>();
-            this.sendPacketQueue = new ConcurrentQueue<Packet>();
+
+            isClose = false;
+            isDispose = false;
+
+            recvPacketQueue = new ConcurrentQueue<Packet>();
+            sendPacketQueue = new ConcurrentQueue<Packet>();
         }
 
         public override long ChannelId
         {
-            get { return con.ConId; }
+            get { return !isDispose ? con.ConId : -1; }
         }
 
         public override bool IsConnected
         {
-            get { return con.IsConnected; }
+            get { return !isDispose && con.IsConnected; }
         }
 
         public override void Disconnect()
         {
+            if (isDispose)
+            {
+                return;
+            }
+
             isClose = true;
         }
 
         public override void Dispatcher()
         {
+            if (isDispose)
+            {
+                return;
+            }
+
             if (recvPacketQueue.TryDequeue(out Packet packet))
             {
                 ushort cmd = packet.Cmd;
@@ -46,80 +62,123 @@ namespace Zyq.Game.Base
             }
         }
 
-        public override void Send(Packet packet)
+        public override void Send(ushort cmd, ByteBuffer buffer)
         {
-            sendPacketQueue.Enqueue(packet);
+            if (isDispose)
+            {
+                return;
+            }
+
+            sendPacketQueue.Enqueue(new Packet(cmd, buffer));
         }
 
         public override void Dispose()
         {
+            lock (this)
+            {
+                if (isDispose)
+                {
+                    return;
+                }
+
+                isDispose = true;
+            }
+
             base.Dispose();
 
-            if (con != null)
-            {
-                con.Dispose();
-            }
+            con.Dispose();
+            con = null;
 
-            ClearQueue(sendPacketQueue);
+            sendPacketQueue.Clear();
+            sendPacketQueue = null;
 
-            ClearQueue(recvPacketQueue);
-        }
-
-        private void ClearQueue(ConcurrentQueue<Packet> queue)
-        {
-            while (queue.TryDequeue(out Packet packet))
-            {
-            }
+            recvPacketQueue.Clear();
+            recvPacketQueue = null;
         }
 
         #region internal method
 
         internal int Send(byte[] buffer, int offset, int length)
         {
+            if (isDispose)
+            {
+                return -20;
+            }
+
             return con.Send(buffer, offset, length);
         }
 
         internal int Recv(byte[] buffer, int offset, int length)
         {
+            if (isDispose)
+            {
+                return -20;
+            }
+
             return con.Recv(buffer, offset, length);
         }
 
         internal void Input(byte[] buffer, int offset, int length)
         {
+            if (isDispose)
+            {
+                return;
+            }
+
             con.Input(buffer, offset, length);
         }
 
         internal void Update(DateTime time)
         {
+            if (isDispose)
+            {
+                return;
+            }
+
             con.Update(time);
         }
 
         internal void ProcessSendPacket(ServerDataProcessingCenter process)
         {
+            if (isDispose)
+            {
+                return;
+            }
+
             process.TrySendKcpData(this, sendPacketQueue);
         }
 
-        internal void ProcessRecvPacket(ServerDataProcessingCenter process, IKcpConnect kcpConnect)
+        internal void ProcessRecvPacket(ServerDataProcessingCenter process, IKcpConnect connect)
         {
-            if (process.TryRecvKcpData(this, out Packet packet, kcpConnect))
+            if (isDispose)
+            {
+                return;
+            }
+
+            if (process.TryRecvKcpData(this, out Packet packet, connect))
             {
                 recvPacketQueue.Enqueue(packet);
             }
         }
 
+        internal void SetConnectedStatus(bool status)
+        {
+            if (isDispose)
+            {
+                return;
+            }
+
+            con.IsConnected = status;
+        }
+
         internal uint Conv
         {
-            get { return con.Conv; }
+            get { return !isDispose ? con.Conv : 0; }
         }
 
         internal bool IsClose
         {
-            get { return isClose; }
-        }
-
-        internal void SetConnectedStatus(bool status)
-        {
-            con.IsConnected = status;
+            get { return isDispose || isClose; }
         }
 
         #endregion

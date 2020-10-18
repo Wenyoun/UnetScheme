@@ -1,6 +1,6 @@
 ﻿namespace Zyq.Game.Base
 {
-    public interface IHost : IClient, IServer
+    public interface IHostCallback : IClientCallback, IServerCallback
     {
     }
 }

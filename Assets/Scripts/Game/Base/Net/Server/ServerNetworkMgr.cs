@@ -1,35 +1,23 @@
-﻿using System;
-
-namespace Zyq.Game.Base
+﻿namespace Zyq.Game.Base
 {
     public class ServerNetworkMgr
     {
         private static ServerNetwork network;
         
-            
-        public static void Init(IServer server)
+        public static void Bind(int port, IServerCallback callback)
         {
-            if (network != null)
+            if (network == null)
             {
-                throw new ArgumentException("ClientNetworkMgr already init");
-            }
-
-            network = new ServerNetwork(server);
-        }
-        
-        public static void Bind(int port)
-        {
-            if (network != null)
-            {
+                network = new ServerNetwork(callback);
                 network.Bind(port);
             }
         }
 
-        public static void Close(long channelId)
+        public static void CloseChannel(uint channelId)
         {
             if (network != null)
             {
-                network.Close(channelId);
+                network.CloseChannel(channelId);
             }
         }
 

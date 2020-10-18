@@ -66,12 +66,11 @@ namespace Zyq.Weaver
 
             Debug.Log(assemblyPath);
 
-            string networkingRuntimeDLL = Helpers.FindNetworkingRuntime();
             string unityEngineCoreModuleRuntimeDLL = UnityEditorInternal.InternalEditorUtility.GetEngineCoreModuleAssemblyPath();
             string baseModuleRuntimeDLL = Helpers.FindBaseRuntime();
             HashSet<string> dependencyPaths = Helpers.GetDependecyPaths(assemblyPath);
 
-            bool result = WeaverProgram.WeaveAssemblies(unityEngineCoreModuleRuntimeDLL, networkingRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray());
+            bool result = WeaverProgram.WeaveAssemblies(unityEngineCoreModuleRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray());
             string module = Path.GetFileName(assemblyPath);
             SessionState.SetBool(module, result);
         }

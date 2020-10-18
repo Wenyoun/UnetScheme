@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using UnityEngine;
 
 namespace Zyq.Game.Base
 {
@@ -85,7 +86,7 @@ namespace Zyq.Game.Base
 
         public void Write(bool value)
         {
-            Write(value ? 1 : 0);
+            Write((byte) (value ? 1 : 0));
         }
 
         public void Write(short value)
@@ -152,6 +153,12 @@ namespace Zyq.Game.Base
 
         public void Write(string value)
         {
+            if (string.IsNullOrEmpty(value))
+            {
+                Write((short) 0);
+                return;
+            }
+            
             if (stringBuffer == null)
             {
                 stringBuffer = new byte[MaxStringLength];
@@ -164,9 +171,42 @@ namespace Zyq.Game.Base
             }
 
             int size = ENCODING.GetBytes(value, 0, value.Length, stringBuffer, 0);
-
+            
             Write((short) size);
             Write(stringBuffer, 0, size);
+        }
+
+        public void Write(Vector2 value)
+        {
+            EnsureLength(8);
+            Write(value.x);
+            Write(value.y);
+        }
+        
+        public void Write(Vector3 value)
+        {
+            EnsureLength(12);
+            Write(value.x);
+            Write(value.y);
+            Write(value.z);
+        }
+        
+        public void Write(Vector4 value)
+        {
+            EnsureLength(16);
+            Write(value.x);
+            Write(value.y);
+            Write(value.z);
+            Write(value.w);
+        }
+        
+        public void Write(Quaternion value)
+        {
+            EnsureLength(16);
+            Write(value.x);
+            Write(value.y);
+            Write(value.z);
+            Write(value.w);
         }
 
         #endregion
@@ -187,7 +227,7 @@ namespace Zyq.Game.Base
             return rawBuffer[readIndex++];
         }
 
-        public bool ReadBool()
+        public bool ReadBoolean()
         {
             return ReadByte() > 0;
         }
@@ -266,7 +306,7 @@ namespace Zyq.Game.Base
 
             if (length == 0)
             {
-                return null;
+                return "";
             }
 
             if (length > MaxStringLength)
@@ -282,6 +322,43 @@ namespace Zyq.Game.Base
             readIndex += length;
 
             return ENCODING.GetString(data.Array, data.Offset, data.Count);
+        }
+        
+        public Vector2 ReadVector2()
+        {
+            Vector2 value = new Vector2();
+            value.x = ReadFloat();
+            value.y = ReadFloat();
+            return value;
+        }
+
+        public Vector3 ReadVector3()
+        {
+            Vector3 value = new Vector3();
+            value.x = ReadFloat();
+            value.y = ReadFloat();
+            value.z = ReadFloat();
+            return value;
+        }
+        
+        public Vector4 ReadVector4()
+        {
+            Vector4 value = new Vector4();
+            value.x = ReadFloat();
+            value.y = ReadFloat();
+            value.z = ReadFloat();
+            value.w = ReadFloat();
+            return value;
+        }
+        
+        public Quaternion ReadQuaternion()
+        {
+            Quaternion value = new Quaternion();
+            value.x = ReadFloat();
+            value.y = ReadFloat();
+            value.z = ReadFloat();
+            value.w = ReadFloat();
+            return value;
         }
 
         #endregion
@@ -317,7 +394,7 @@ namespace Zyq.Game.Base
             int readableLength = ReadableLength;
             if (length > readableLength)
             {
-                throw new EndOfStreamException("raw buffer out of range current=" + readableLength + ",length=" +
+                throw new EndOfStreamException("raw buffer out of range current readable length=" + readableLength + ",ready length=" +
                                                length);
             }
         }
@@ -335,6 +412,7 @@ namespace Zyq.Game.Base
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureCapacity(int capacity)
         {
+            capacity = writeIndex + capacity;
             if (maxCapacity < capacity)
             {
                 maxCapacity = Math.Max(capacity, maxCapacity * 2);
