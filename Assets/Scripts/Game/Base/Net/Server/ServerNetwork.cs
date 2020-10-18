@@ -8,7 +8,9 @@ namespace Zyq.Game.Base
     {
         private bool isDispose;
         private IServerCallback serverCallback;
+        
         private KcpUdpServer kcpUdpServer;
+        
         private Dictionary<long, IChannel> channels;
         private ConcurrentQueue<StatusChannel> statusChannels;
 
@@ -16,7 +18,9 @@ namespace Zyq.Game.Base
         {
             isDispose = false;
             serverCallback = callback;
+            
             kcpUdpServer = new KcpUdpServer();
+            
             channels = new Dictionary<long, IChannel>();
             statusChannels = new ConcurrentQueue<StatusChannel>();
         }

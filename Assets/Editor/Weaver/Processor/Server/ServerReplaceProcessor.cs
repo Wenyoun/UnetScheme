@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Mono.CecilX;
+﻿using Mono.CecilX;
 using Mono.CecilX.Cil;
 using Zyq.Game.Base;
+using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {

@@ -29,7 +29,7 @@ namespace Zyq.Game.Client
         {
             base.OnInit();
             m_EntityMgr = new ClientEntityMgr();
-            for (int i = 0; i < 100; ++i)
+            for (int i = 0; i < 1; ++i)
             {
                 ClientNetworkMgr.Connect("127.0.0.1", 50000, this);
             }
