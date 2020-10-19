@@ -59,6 +59,7 @@ namespace Zyq.Weaver
 
                 processor.Append(processor.Create(OpCodes.Ldsfld, module.ImportReference(WeaverProgram.ServerInsField)));
                 processor.Append(processor.Create(method.IsStatic ? OpCodes.Ldarg_0 : OpCodes.Ldarg_1));
+                processor.Append(processor.Create(OpCodes.Ldc_I4, msgId));
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                 processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ServerSendMethod)));
                 processor.Append(processor.Create(OpCodes.Nop));

@@ -6,6 +6,6 @@
         public string Password;
         public int[] Scores;
         public Login[] Logins;
-        public int[] Scores1;
+        public int Final;
     }
 }

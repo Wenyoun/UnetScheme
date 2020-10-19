@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 using UnityEngine;
 
@@ -145,19 +146,23 @@ namespace Zyq.Game.Base
                 return;
             }
 
-            process.TrySendKcpData(this, sendPacketQueue);
+            process.TryParseSendKcpData(this, sendPacketQueue);
         }
 
-        internal void ProcessRecvPacket(ServerDataProcessingCenter process, IKcpConnect connect)
+        internal void ProcessRecvPacket(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connect)
         {
             if (isDispose)
             {
                 return;
             }
 
-            if (process.TryRecvKcpData(this, out Packet packet, connect))
+            if (process.TryParseRecvKcpData(this, packets, connect))
             {
-                recvPacketQueue.Enqueue(packet);
+                for (int i = 0; i < packets.Count; ++i)
+                {
+                    recvPacketQueue.Enqueue(packets[i]);
+                }
+                packets.Clear();
             }
         }
 

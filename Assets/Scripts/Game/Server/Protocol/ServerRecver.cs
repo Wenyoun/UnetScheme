@@ -26,15 +26,36 @@ namespace Zyq.Game.Server
             int[] v16,
             LoginData v17)
         {
-            Debug.Log(v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 + ":" + v9 + ":" +
-                      v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15);
-            Debug.Log(v16.Length);
+            string k = "";
+
             for (int i = 0; i < v16.Length; ++i)
             {
-                Debug.Log(v16[i]);
+                k += v16[i] + ":";
             }
-
-            Debug.Log(v17.Username + "," + v17.Password);
+            
+            Debug.Log("Server:" + v1 + ":" + v2 + ":" + v3 + ":" + v4 + ":" + v5 + ":" + v6 + ":" + v7 + ":" + v8 +
+                      ":" + v9 + ":" +
+                      v10 + ":" + v11 + ":" + v12 + ":" + v13 + ":" + v14 + ":" + v15 + "," + v17.Username + "," +
+                      v17.Password + "," + v17.Final + "," + k);
+            
+            ServerSender.RpcTargetLoginResult(connection,
+                v1,
+                v2,
+                v3,
+                v4,
+                v5,
+                v6,
+                v7,
+                v8,
+                v9,
+                v10,
+                v11,
+                v12,
+                v13,
+                v14,
+                v15,
+                v16,
+                v17);
         }
     }
 }

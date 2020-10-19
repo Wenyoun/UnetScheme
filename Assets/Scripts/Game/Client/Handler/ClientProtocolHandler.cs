@@ -39,28 +39,58 @@ namespace Zyq.Game.Client
 
         private void SendLoginReq()
         {
-            int[] v1 = new int[] { 10,20,30};
-            LoginData v2 = new LoginData();
-            v2.Username = "username";
-            v2.Password = "password";
-            
-            ClientSender.RpcLogin(1,
-                true,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                "10",
-                Vector2.one,
-                Vector3.one,
-                Vector4.one,
-                Quaternion.identity,
-                v1,
-                v2);
+            for (int i = 0; i < 10; ++i)
+            {
+                int[] v1 = new int[100];
+                for (int j = 0; j < v1.Length; ++j)
+                {
+                    v1[j] = j + 1;
+                }
+
+                LoginData v2 = new LoginData();
+                
+                for (int j = 0; j < 1; ++j)
+                {
+                    v2.Username += "username" + i;
+                }
+
+                for (int j = 0; j < 1; ++j)
+                {
+                    v2.Password += "password" + i;
+                }
+                
+                v2.Scores = new int[100];
+                for (int j = 0; j < v2.Scores.Length; ++j)
+                {
+                    v2.Scores[j] = j + 1;
+                }
+                
+                v2.Logins = new Login[100];
+                for (int j = 0; j < v2.Logins.Length; ++j)
+                {
+                    v2.Logins[j] = (Login) (j % 3);
+                }
+
+                v2.Final = i;
+
+                ClientSender.RpcLogin(1,
+                    true,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    "10",
+                    Vector2.one,
+                    Vector3.one,
+                    Vector4.one,
+                    Quaternion.identity,
+                    v1,
+                    v2);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
@@ -182,12 +183,15 @@ namespace Zyq.Game.Base
             try
             {
                 ClientDataProcessingCenter process = new ClientDataProcessingCenter();
+
                 while (!isDispose && con != null && status == Success)
                 {
                     CheckDispose();
 
-                    process.TrySendKcpData(con, sendPacketQueue);
+                    process.TryParseSendKcpData(con, sendPacketQueue);
+
                     con.Update(DateTime.Now);
+
                     Thread.Sleep(5);
                 }
             }
@@ -206,8 +210,10 @@ namespace Zyq.Game.Base
         {
             try
             {
+                List<Packet> packets = new List<Packet>();
+                byte[] rawBuffer = new byte[KcpConstants.Length];
                 ClientDataProcessingCenter process = new ClientDataProcessingCenter();
-                byte[] buffer = new byte[KcpConstants.Length];
+                
                 while (!isDispose && con != null && status == Success)
                 {
                     if (!socket.Poll(100000, SelectMode.SelectRead))
@@ -217,13 +223,18 @@ namespace Zyq.Game.Base
 
                     CheckDispose();
 
-                    int count = socket.Receive(buffer, 0, buffer.Length, SocketFlags.None);
+                    int count = socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
                     if (count > 0)
                     {
-                        con.Input(buffer, 0, count);
-                        if (process.TryRecvKcpData(con, out Packet packet))
+                        con.Input(rawBuffer, 0, count);
+                        
+                        if (process.TryParseRecvKcpData(con, packets))
                         {
-                            recvPacketQueue.Enqueue(packet);
+                            for (int i = 0; i < packets.Count; ++i)
+                            {
+                                recvPacketQueue.Enqueue(packets[i]);
+                            }
+                            packets.Clear();
                         }
                     }
                 }

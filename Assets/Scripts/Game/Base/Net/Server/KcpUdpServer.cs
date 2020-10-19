@@ -173,15 +173,16 @@ namespace Zyq.Game.Base
         {
             try
             {
+                List<Packet> packets = new List<Packet>();
                 ServerDataProcessingCenter process = new ServerDataProcessingCenter();
-                
+
                 while (!isDispose)
                 {
                     IEnumerator<KeyValuePair<long, ServerChannel>> its = channels.GetEnumerator();
 
                     while (its.MoveNext())
                     {
-                        its.Current.Value.ProcessRecvPacket(process, connect);
+                        its.Current.Value.ProcessRecvPacket(process, packets, connect);
                     }
 
                     Thread.Sleep(1);

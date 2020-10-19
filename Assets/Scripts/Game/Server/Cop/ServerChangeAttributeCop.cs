@@ -21,10 +21,5 @@ namespace Zyq.Game.Server
                 });
             }
         }
-
-        [Recv(NetMsgId.Msg_Create_Player1)]
-        public void OnRecvArray(int v1, int[] v2, LoginData[] v4)
-        {
-        }
     }
 }
