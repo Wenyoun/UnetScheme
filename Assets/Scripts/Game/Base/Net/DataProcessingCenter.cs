@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace Zyq.Game.Base
 {
-    public class ClientDataProcessingCenter
+    internal class ClientDataProcessingCenter
     {
         private byte[] rawBuffer;
         private PacketHandler handler;
@@ -45,7 +45,7 @@ namespace Zyq.Game.Base
         }
     }
 
-    public class ServerDataProcessingCenter
+    internal class ServerDataProcessingCenter
     {
         private byte[] rawBuffer;
         private PacketHandler handler;
@@ -112,7 +112,7 @@ namespace Zyq.Game.Base
         }
     }
 
-    public class PacketHandler
+    internal class PacketHandler
     {
         private const int MsgLength = 2;
         private const int CmdLength = 2;
