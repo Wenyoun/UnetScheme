@@ -17,14 +17,19 @@ namespace Zyq.Game.Base
 
         public bool TryParseRecvKcpData(KcpConn con, List<Packet> packets)
         {
-            int size = con.Recv(rawBuffer, 0, rawBuffer.Length);
-
-            if (size > 0)
+            while (true)
             {
-                return handler.HandleRecv(rawBuffer, 0, size, packets);
+                int size = con.Recv(rawBuffer, 0, rawBuffer.Length);
+
+                if (size <= 0)
+                {
+                    break;
+                }
+
+                handler.HandleRecv(rawBuffer, 0, size, packets);
             }
 
-            return false;
+            return packets.Count > 0;
         }
 
         public void TryParseSendKcpData(KcpConn con, ConcurrentQueue<Packet> sendPacketQueue)
@@ -53,42 +58,45 @@ namespace Zyq.Game.Base
 
         public bool TryParseRecvKcpData(ServerChannel channel, List<Packet> packets, IKcpConnect connect)
         {
-            int size = channel.Recv(rawBuffer, 0, rawBuffer.Length);
-
-            if (size == 8)
+            while (true)
             {
-                uint flag = KcpHelper.Decode32u(rawBuffer, 0);
-                uint conv = KcpHelper.Decode32u(rawBuffer, 4);
+                int size = channel.Recv(rawBuffer, 0, rawBuffer.Length);
 
-                if (flag == KcpConstants.ConnectFlag && conv == channel.Conv)
+                if (size <= 0)
                 {
-                    channel.SetConnectedStatus(true);
-                    if (connect != null)
-                    {
-                        connect.OnKcpConnect(channel);
-                    }
-
-                    return false;
+                    break;
                 }
-                else if (flag == KcpConstants.DisconnectFlag && conv == channel.Conv)
+
+                if (size == 8)
                 {
-                    channel.SetConnectedStatus(false);
-                    if (connect != null)
-                    {
-                        connect.OnKcpDisconnect(channel);
-                    }
+                    uint flag = KcpHelper.Decode32u(rawBuffer, 0);
+                    uint conv = KcpHelper.Decode32u(rawBuffer, 4);
 
-                    channel.Disconnect();
-                    return false;
+                    if (flag == KcpConstants.ConnectFlag && conv == channel.Conv)
+                    {
+                        channel.SetConnectedStatus(true);
+                        if (connect != null)
+                        {
+                            connect.OnKcpConnect(channel);
+                        }
+                        continue;
+                    }
+                    else if (flag == KcpConstants.DisconnectFlag && conv == channel.Conv)
+                    {
+                        channel.SetConnectedStatus(false);
+                        if (connect != null)
+                        {
+                            connect.OnKcpDisconnect(channel);
+                        }
+                        channel.Disconnect();
+                        continue;
+                    }
                 }
+
+                handler.HandleRecv(rawBuffer, 0, size, packets);
             }
 
-            if (size > 0)
-            {
-                return handler.HandleRecv(rawBuffer, 0, size, packets);
-            }
-
-            return false;
+            return packets.Count > 0;
         }
 
         public void TryParseSendKcpData(ServerChannel channel, ConcurrentQueue<Packet> sendPacketQueue)
@@ -140,7 +148,7 @@ namespace Zyq.Game.Base
         }
 
 
-        public bool HandleRecv(byte[] buffer, int offset, int total, List<Packet> packets)
+        public void HandleRecv(byte[] buffer, int offset, int total, List<Packet> packets)
         {
             while (total > MsgCmdLength)
             {
@@ -170,8 +178,6 @@ namespace Zyq.Game.Base
 
                 packets.Add(new Packet(cmd, byteBuffer));
             }
-
-            return packets.Count > 0;
         }
     }
 }

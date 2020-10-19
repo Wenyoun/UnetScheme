@@ -39,16 +39,16 @@ namespace Zyq.Game.Client
 
         private void SendLoginReq()
         {
-            for (int i = 0; i < 10; ++i)
+            for (int i = 0; i < 100; ++i)
             {
-                int[] v1 = new int[100];
+                int[] v1 = new int[1];
                 for (int j = 0; j < v1.Length; ++j)
                 {
                     v1[j] = j + 1;
                 }
 
                 LoginData v2 = new LoginData();
-                
+
                 for (int j = 0; j < 1; ++j)
                 {
                     v2.Username += "username" + i;
@@ -58,14 +58,14 @@ namespace Zyq.Game.Client
                 {
                     v2.Password += "password" + i;
                 }
-                
-                v2.Scores = new int[100];
+
+                v2.Scores = new int[1];
                 for (int j = 0; j < v2.Scores.Length; ++j)
                 {
                     v2.Scores[j] = j + 1;
                 }
-                
-                v2.Logins = new Login[100];
+
+                v2.Logins = new Login[1];
                 for (int j = 0; j < v2.Logins.Length; ++j)
                 {
                     v2.Logins[j] = (Login) (j % 3);
