@@ -173,12 +173,12 @@ namespace Zyq.Game.Base
 
         public uint Conv
         {
-            get { return !isDispose ? conv : 0; }
+            get { return conv; }
         }
 
         public long ConId
         {
-            get { return !isDispose ? conId : 0; }
+            get { return conId; }
         }
 
         public bool IsConnected

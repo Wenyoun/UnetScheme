@@ -17,7 +17,7 @@ namespace Zyq.Game.Base
 
         public override long ChannelId
         {
-            get { return kcpUdpClient != null ? kcpUdpClient.ConId : -1; }
+            get { return kcpUdpClient.ConId; }
         }
 
         public override bool IsConnected
@@ -57,7 +57,7 @@ namespace Zyq.Game.Base
                 return;
             }
 
-            HandlerPacket();
+            HandlePacket();
             CheckConnectStatus();
         }
 
@@ -73,7 +73,7 @@ namespace Zyq.Game.Base
             kcpUdpClient.Connect(host, port);
         }
 
-        private void HandlerPacket()
+        private void HandlePacket()
         {
             try
             {

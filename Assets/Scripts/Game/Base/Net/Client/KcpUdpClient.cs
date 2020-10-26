@@ -22,10 +22,12 @@ namespace Zyq.Game.Base
 
         private KcpConn con;
         private Socket socket;
-        
+
         private byte status;
         private bool isDispose;
-        
+
+        private ClientHeartbeatProcessing heartbeat;
+
         private ConcurrentQueue<Packet> sendPacketQueue;
         private ConcurrentQueue<Packet> recvPacketQueue;
 
@@ -33,7 +35,7 @@ namespace Zyq.Game.Base
         {
             status = None;
             isDispose = false;
-            
+
             sendPacketQueue = new ConcurrentQueue<Packet>();
             recvPacketQueue = new ConcurrentQueue<Packet>();
         }
@@ -49,13 +51,13 @@ namespace Zyq.Game.Base
 
             sendPacketQueue.Clear();
             recvPacketQueue.Clear();
-            
+
             status = Connecting;
 
             SocketDispose();
-            
+
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            
+
             KcpHelper.CreateThread(ConnectLooper, new IPEndPoint(IPAddress.Parse(host), port));
         }
 
@@ -65,7 +67,7 @@ namespace Zyq.Game.Base
             {
                 return;
             }
-            
+
             sendPacketQueue.Enqueue(packet);
         }
 
@@ -76,18 +78,18 @@ namespace Zyq.Game.Base
                 packet = new Packet();
                 return false;
             }
-            
+
             return recvPacketQueue.TryDequeue(out packet);
         }
 
         public long ConId
         {
-            get { return !isDispose && con != null ? con.ConId : 0; }
+            get { return con.ConId; }
         }
 
         public bool IsConnected
         {
-            get { return !isDispose && con != null && status == Success; }
+            get { return status == Success; }
         }
 
         public byte Status
@@ -103,18 +105,14 @@ namespace Zyq.Game.Base
                 {
                     return;
                 }
-
                 isDispose = true;
             }
 
             status = None;
+            con.Dispose();
             SocketDispose();
-            
             sendPacketQueue.Clear();
-            sendPacketQueue = null;
-            
             recvPacketQueue.Clear();
-            recvPacketQueue = null;
         }
 
         private void ConnectLooper(object obj)
@@ -127,7 +125,7 @@ namespace Zyq.Game.Base
                 byte[] buffer = new byte[KcpConstants.Length];
                 while (!isDispose && status == Connecting)
                 {
-                    KcpHelper.Encode32u(buffer, 0, KcpConstants.ConnectFlag);
+                    KcpHelper.Encode32u(buffer, 0, KcpConstants.Flag_Connect);
                     socket.Send(buffer, 0, 4, SocketFlags.None);
                     if (!socket.Poll(100000, SelectMode.SelectRead))
                     {
@@ -148,20 +146,22 @@ namespace Zyq.Game.Base
                     {
                         uint flag = KcpHelper.Decode32u(buffer, 24);
                         uint conv = KcpHelper.Decode32u(buffer, 28);
-                        if (flag == KcpConstants.ConnectFlag)
+                        if (flag == KcpConstants.Flag_Connect)
                         {
                             con = new KcpConn(conv, socket);
                             con.Input(buffer, 0, count);
-                            
+
                             count = con.Recv(buffer, 0, buffer.Length);
                             if (count == 8)
                             {
-                                KcpHelper.Encode32u(buffer, 0, KcpConstants.ConnectFlag);
+                                KcpHelper.Encode32u(buffer, 0, KcpConstants.Flag_Connect);
                                 KcpHelper.Encode32u(buffer, 4, conv);
                                 con.Send(buffer, 0, 8);
                                 con.Flush();
 
                                 status = Success;
+                                heartbeat = new ClientHeartbeatProcessing();
+
                                 KcpHelper.CreateThread(UpdateKcpLooper);
                                 KcpHelper.CreateThread(RecvUdpDataLooper);
                                 break;
@@ -184,7 +184,7 @@ namespace Zyq.Game.Base
             {
                 ClientDataProcessingCenter process = new ClientDataProcessingCenter();
 
-                while (!isDispose && con != null && status == Success)
+                while (!isDispose && status == Success)
                 {
                     CheckDispose();
 
@@ -193,6 +193,8 @@ namespace Zyq.Game.Base
                     con.Update(DateTime.Now);
 
                     Thread.Sleep(5);
+
+                    heartbeat.Tick(this, con);
                 }
             }
             catch (Exception e)
@@ -213,8 +215,8 @@ namespace Zyq.Game.Base
                 List<Packet> packets = new List<Packet>();
                 byte[] rawBuffer = new byte[KcpConstants.Length];
                 ClientDataProcessingCenter process = new ClientDataProcessingCenter();
-                
-                while (!isDispose && con != null && status == Success)
+
+                while (!isDispose && status == Success)
                 {
                     if (!socket.Poll(100000, SelectMode.SelectRead))
                     {
@@ -227,13 +229,14 @@ namespace Zyq.Game.Base
                     if (count > 0)
                     {
                         con.Input(rawBuffer, 0, count);
-                        
-                        if (process.TryParseRecvKcpData(con, packets))
+
+                        if (process.TryParseRecvKcpData(con, packets, heartbeat))
                         {
                             for (int i = 0; i < packets.Count; ++i)
                             {
                                 recvPacketQueue.Enqueue(packets[i]);
                             }
+
                             packets.Clear();
                         }
                     }

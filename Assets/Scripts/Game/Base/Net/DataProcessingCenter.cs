@@ -15,7 +15,7 @@ namespace Zyq.Game.Base
             rawBuffer = new byte[ushort.MaxValue];
         }
 
-        public bool TryParseRecvKcpData(KcpConn con, List<Packet> packets)
+        public bool TryParseRecvKcpData(KcpConn con, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
         {
             while (true)
             {
@@ -24,6 +24,18 @@ namespace Zyq.Game.Base
                 if (size <= 0)
                 {
                     break;
+                }
+
+                if (size == 8)
+                {
+                    uint flag = KcpHelper.Decode32u(rawBuffer, 0);
+                    uint conv = KcpHelper.Decode32u(rawBuffer, 4);
+
+                    if (flag == KcpConstants.Flag_Heartbeat && conv == con.Conv)
+                    {
+                        heartbeat.UpdateHeartbeat();
+                        continue;
+                    }
                 }
 
                 handler.HandleRecv(rawBuffer, 0, size, packets);
@@ -56,7 +68,7 @@ namespace Zyq.Game.Base
             rawBuffer = new byte[ushort.MaxValue];
         }
 
-        public bool TryParseRecvKcpData(ServerChannel channel, List<Packet> packets, IKcpConnect connect)
+        public bool TryParseRecvKcpData(ServerChannel channel, List<Packet> packets, IKcpConnect connectCallback, ServerHeartbeatProcessing heartbeat)
         {
             while (true)
             {
@@ -72,24 +84,32 @@ namespace Zyq.Game.Base
                     uint flag = KcpHelper.Decode32u(rawBuffer, 0);
                     uint conv = KcpHelper.Decode32u(rawBuffer, 4);
 
-                    if (flag == KcpConstants.ConnectFlag && conv == channel.Conv)
+                    if (conv == channel.Conv)
                     {
-                        channel.SetConnectedStatus(true);
-                        if (connect != null)
+                        if (flag == KcpConstants.Flag_Connect)
                         {
-                            connect.OnKcpConnect(channel);
+                            channel.SetConnectedStatus(true);
+                            if (connectCallback != null)
+                            {
+                                connectCallback.OnKcpConnect(channel);
+                            }
+                            continue;
                         }
-                        continue;
-                    }
-                    else if (flag == KcpConstants.DisconnectFlag && conv == channel.Conv)
-                    {
-                        channel.SetConnectedStatus(false);
-                        if (connect != null)
+                        else if (flag == KcpConstants.Flag_Disconnect)
                         {
-                            connect.OnKcpDisconnect(channel);
+                            channel.SetConnectedStatus(false);
+                            if (connectCallback != null)
+                            {
+                                connectCallback.OnKcpDisconnect(channel);
+                            }
+                            channel.Disconnect();
+                            continue;
                         }
-                        channel.Disconnect();
-                        continue;
+                        else if (flag == KcpConstants.Flag_Heartbeat)
+                        {
+                            heartbeat.UpdateHeartbeat(channel, rawBuffer, 0, 8);
+                            continue;
+                        }
                     }
                 }
 

@@ -27,7 +27,7 @@ namespace Zyq.Game.Base
 
         public override long ChannelId
         {
-            get { return !isDispose ? con.ConId : -1; }
+            get { return con.ConId; }
         }
 
         public override bool IsConnected
@@ -88,13 +88,8 @@ namespace Zyq.Game.Base
             base.Dispose();
 
             con.Dispose();
-            con = null;
-
             sendPacketQueue.Clear();
-            sendPacketQueue = null;
-
             recvPacketQueue.Clear();
-            recvPacketQueue = null;
         }
 
         #region internal method
@@ -149,15 +144,16 @@ namespace Zyq.Game.Base
             process.TryParseSendKcpData(this, sendPacketQueue);
         }
 
-        internal void ProcessRecvPacket(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connect)
+        internal void ProcessRecvPacket(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connectCallback, ServerHeartbeatProcessing heartbeat)
         {
             if (isDispose)
             {
                 return;
             }
 
-            if (process.TryParseRecvKcpData(this, packets, connect))
+            if (process.TryParseRecvKcpData(this, packets, connectCallback, heartbeat))
             {
+                heartbeat.UpdateHeartbeat();
                 for (int i = 0; i < packets.Count; ++i)
                 {
                     recvPacketQueue.Enqueue(packets[i]);
@@ -178,7 +174,7 @@ namespace Zyq.Game.Base
 
         internal uint Conv
         {
-            get { return !isDispose ? con.Conv : 0; }
+            get { return con.Conv; }
         }
 
         internal bool IsClose

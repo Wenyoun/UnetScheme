@@ -39,7 +39,7 @@ namespace Zyq.Game.Client
 
         private void SendLoginReq()
         {
-            for (int i = 0; i < 100; ++i)
+            for (int i = 0; i < 1; ++i)
             {
                 int[] v1 = new int[1];
                 for (int j = 0; j < v1.Length; ++j)

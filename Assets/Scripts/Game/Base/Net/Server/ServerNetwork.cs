@@ -8,9 +8,9 @@ namespace Zyq.Game.Base
     {
         private bool isDispose;
         private IServerCallback serverCallback;
-        
+
         private KcpUdpServer kcpUdpServer;
-        
+
         private Dictionary<long, IChannel> channels;
         private ConcurrentQueue<StatusChannel> statusChannels;
 
@@ -18,9 +18,9 @@ namespace Zyq.Game.Base
         {
             isDispose = false;
             serverCallback = callback;
-            
+
             kcpUdpServer = new KcpUdpServer();
-            
+
             channels = new Dictionary<long, IChannel>();
             statusChannels = new ConcurrentQueue<StatusChannel>();
         }
@@ -80,7 +80,7 @@ namespace Zyq.Game.Base
                 return;
             }
 
-            statusChannels.Enqueue(new StatusChannel(1, channel));
+            statusChannels.Enqueue(new StatusChannel(Status.Add, channel));
         }
 
         private void OnKcpDisconnect(IChannel channel)
@@ -90,7 +90,7 @@ namespace Zyq.Game.Base
                 return;
             }
 
-            statusChannels.Enqueue(new StatusChannel(2, channel));
+            statusChannels.Enqueue(new StatusChannel(Status.Remove, channel));
         }
 
         private void Dispatcher()
@@ -108,7 +108,7 @@ namespace Zyq.Game.Base
             {
                 IChannel channel = status.Channel;
 
-                if (status.Status == 1)
+                if (status.Status == Status.Add)
                 {
                     if (!channels.ContainsKey(channel.ChannelId))
                     {
@@ -120,7 +120,7 @@ namespace Zyq.Game.Base
                         }
                     }
                 }
-                else
+                else if (status.Status == Status.Remove)
                 {
                     if (channels.ContainsKey(channel.ChannelId))
                     {
@@ -135,12 +135,18 @@ namespace Zyq.Game.Base
             }
         }
 
+        private enum Status
+        {
+            Add,
+            Remove
+        }
+
         private struct StatusChannel
         {
-            public int Status;
+            public Status Status;
             public IChannel Channel;
 
-            public StatusChannel(int status, IChannel channel)
+            public StatusChannel(Status status, IChannel channel)
             {
                 Status = status;
                 Channel = channel;
