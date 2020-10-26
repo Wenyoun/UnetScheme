@@ -50,28 +50,28 @@ namespace Zyq.Game.Base
 
     internal class ServerHeartbeatProcessing
     {
-        private long mills;
+        private long recvMills;
 
         public ServerHeartbeatProcessing()
         {
-            mills = TimeUtil.Get1970ToNowMilliseconds();
+            recvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
         public void UpdateHeartbeat()
         {
-            mills = TimeUtil.Get1970ToNowMilliseconds();
+            recvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
         public void UpdateHeartbeat(ServerChannel channel, byte[] rawBuffer, int ofsset, int length)
         {
-            mills = TimeUtil.Get1970ToNowMilliseconds();
+            recvMills = TimeUtil.Get1970ToNowMilliseconds();
             channel.Send(rawBuffer, ofsset, length);
         }
 
         public void Tick(ServerChannel channel)
         {
             long current = TimeUtil.Get1970ToNowMilliseconds();
-            if (current - mills > HeartbaetConstants.Timeout_Interval_Mills)
+            if (current - recvMills > HeartbaetConstants.Timeout_Interval_Mills)
             {
                 channel.Disconnect();
             }
