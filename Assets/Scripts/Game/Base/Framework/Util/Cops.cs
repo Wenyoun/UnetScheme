@@ -5,20 +5,15 @@ namespace Zyq.Game.Base
 {
     public class Cops : IDisposable
     {
-        private List<ICop> mTemp;
-        private List<ICop> mCopLts;
-        private Dictionary<Type, ICop> mCopDys;
+        private List<ICop> m_Temp;
+        private List<ICop> m_CopLts;
+        private Dictionary<Type, ICop> m_CopDys;
 
         public Cops()
         {
-            mTemp = new List<ICop>();
-            mCopLts = new List<ICop>();
-            mCopDys = new Dictionary<Type, ICop>();
-        }
-
-        public void OnInit()
-        {
-            RemoveCops();
+            m_Temp = new List<ICop>();
+            m_CopLts = new List<ICop>();
+            m_CopDys = new Dictionary<Type, ICop>();
         }
 
         public void Dispose()
@@ -26,69 +21,67 @@ namespace Zyq.Game.Base
             RemoveCops();
         }
 
-        public bool IsNotExCop<T>() where T : ICop
-        {
-            return !mCopDys.ContainsKey(typeof(T));
-        }
-
         public T AddCop<T>(ICop cop, IEntity entity) where T : ICop
         {
             Type type = cop.GetType();
-            if (!mCopDys.ContainsKey(type))
+            if (!m_CopDys.ContainsKey(type))
             {
-                mCopLts.Add(cop);
-                mCopDys.Add(type, cop);
+                m_CopLts.Add(cop);
+                m_CopDys.Add(type, cop);
                 cop.Entity = entity;
                 cop.OnInit();
             }
-            return (T)cop;
+
+            return (T) cop;
         }
 
         public T AddCop<T>(IEntity entity) where T : ICop, new()
         {
             Type type = typeof(T);
-            if (!mCopDys.ContainsKey(type))
+            if (!m_CopDys.ContainsKey(type))
             {
                 T cop = new T();
-                mCopLts.Add(cop);
-                mCopDys.Add(type, cop);
+                m_CopLts.Add(cop);
+                m_CopDys.Add(type, cop);
                 cop.Entity = entity;
                 cop.OnInit();
                 return cop;
             }
+
             return default(T);
         }
 
         public void RemoveCop<T>() where T : ICop
         {
-            ICop cop = null;
+            ICop cop;
             Type type = typeof(T);
-            if (mCopDys.TryGetValue(type, out cop))
+            if (m_CopDys.TryGetValue(type, out cop))
             {
-                mCopLts.Remove(cop);
-                mCopDys.Remove(type);
+                m_CopLts.Remove(cop);
+                m_CopDys.Remove(type);
                 cop.OnRemove();
             }
         }
 
         public void RemoveCops()
         {
-            mTemp.Clear();
-            mTemp.AddRange(mCopLts);
-            for (int i = 0; i < mTemp.Count; ++i)
+            m_Temp.Clear();
+            m_Temp.AddRange(m_CopLts);
+            for (int i = 0; i < m_Temp.Count; ++i)
             {
-                mTemp[i].OnRemove();
+                m_Temp[i].OnRemove();
             }
-            mTemp.Clear();
-            mCopLts.Clear();
-            mCopDys.Clear();
+
+            m_Temp.Clear();
+            m_CopLts.Clear();
+            m_CopDys.Clear();
         }
 
         public T GetCop<T>() where T : ICop
         {
             ICop cop = null;
-            mCopDys.TryGetValue(typeof(T), out cop);
-            return (T)cop;
+            m_CopDys.TryGetValue(typeof(T), out cop);
+            return (T) cop;
         }
     }
 }

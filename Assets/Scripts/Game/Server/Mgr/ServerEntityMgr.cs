@@ -18,9 +18,7 @@ namespace Zyq.Game.Server
         public void Dispose()
         {
             m_Entities.Dispose();
-            m_Entities = null;
             m_Connections.Clear();
-            m_Connections = null;
         }
 
         public void AddEntity(Entity entity)
@@ -48,6 +46,7 @@ namespace Zyq.Game.Server
                     {
                         m_Connections.Remove(connection.Connection);
                     }
+
                     m_Entities.RemoveEntity(eid);
                 }
             }
@@ -63,6 +62,7 @@ namespace Zyq.Game.Server
                     return entity;
                 }
             }
+
             return null;
         }
 
@@ -72,23 +72,15 @@ namespace Zyq.Game.Server
             {
                 return m_Entities.GetEntity(eid);
             }
+
             return null;
         }
 
-        public List<Entity> GetGpsEntitys(uint gid)
+        public void Dispatcher(int msgId)
         {
             if (m_Entities != null)
             {
-                return m_Entities.GetGpsEntitys(gid);
-            }
-            return null;
-        }
-
-        public void Dispatcher(int mid)
-        {
-            if (m_Entities != null)
-            {
-                m_Entities.Dispatcher(mid, 0, null);
+                m_Entities.Dispatcher(msgId, 0, null);
             }
         }
 
@@ -140,6 +132,7 @@ namespace Zyq.Game.Server
                 {
                     return m_Entities.Entitys;
                 }
+
                 return null;
             }
         }

@@ -199,6 +199,7 @@ namespace Zyq.Game.Base
         private long CptConId(EndPoint endPoint)
         {
             return endPoint.GetHashCode() * 100000L + ((IPEndPoint) endPoint).Port;
+            
         }
 
         private void CheckDispose()

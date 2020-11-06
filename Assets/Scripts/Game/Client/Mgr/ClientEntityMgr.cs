@@ -1,103 +1,65 @@
 ﻿using Zyq.Game.Base;
-using System.Collections.Generic;
 
 namespace Zyq.Game.Client
 {
-    public class ClientEntityMgr
-    {
-        private Entities m_Entities;
 
-        public ClientEntityMgr()
-        {
-            m_Entities = new Entities();
-        }
+	public class ClientEntityMgr
+	{
+		private Entities m_Entities;
 
-        public void Dispose()
-        {
-            m_Entities.Dispose();
-            m_Entities = null;
-        }
+		public ClientEntityMgr()
+		{
+			m_Entities = new Entities();
+		}
 
-        public void AddEntity(Entity entity)
-        {
-            if (m_Entities != null)
-            {
-                m_Entities.AddEntity(entity);
-            }
-        }
+		public void Dispose()
+		{
+			m_Entities.Dispose();
+		}
 
-        public void RemoveEntity(uint eid)
-        {
-            if (m_Entities != null)
-            {
-                m_Entities.RemoveEntity(eid);
-            }
-        }
+		public void AddEntity(Entity entity)
+		{
+			m_Entities.AddEntity(entity);
+		}
 
-        public Entity GetEntity(uint eid)
-        {
-            if (m_Entities != null)
-            {
-                return m_Entities.GetEntity(eid);
-            }
-            return null;
-        }
+		public void RemoveEntity(uint eid)
+		{
+			m_Entities.RemoveEntity(eid);
+		}
 
-        public List<Entity> GetGpsEntitys(uint gid)
-        {
-            if (m_Entities != null)
-            {
-                return m_Entities.GetGpsEntitys(gid);
-            }
-            return null;
-        }
+		public Entity GetEntity(uint eid)
+		{
+			return m_Entities.GetEntity(eid);
+		}
 
-        public void Dispatcher(int mid)
-        {
-            if (m_Entities != null)
-            {
-                m_Entities.Dispatcher(mid, 0, null);
-            }
-        }
+		public void Dispatcher(int msgId)
+		{
+			m_Entities.Dispatcher(msgId, 0, null);
+		}
 
-        public void Dispatcher(int mid, uint eid)
-        {
-            if (m_Entities != null)
-            {
-                m_Entities.Dispatcher(mid, eid, null);
-            }
-        }
+		public void Dispatcher(int msgId, uint entityId)
+		{
+			m_Entities.Dispatcher(msgId, entityId, null);
+		}
 
-        public void Dispatcher(int mid, IBody body)
-        {
-            if (m_Entities != null)
-            {
-                m_Entities.Dispatcher(mid, 0, body);
-            }
-        }
+		public void Dispatcher(int msgId, IBody body)
+		{
+			m_Entities.Dispatcher(msgId, 0, body);
+		}
 
-        public void Dispatcher(int mid, uint eid, IBody body)
-        {
-            if (m_Entities != null)
-            {
-                m_Entities.Dispatcher(mid, eid, body);
-            }
-        }
+		public void Dispatcher(int msgId, uint eid, IBody body)
+		{
+			m_Entities.Dispatcher(msgId, eid, body);
+		}
 
-        public void OnUpdate(float delta)
-        {
-            if (m_Entities != null)
-            {
-                m_Entities.OnUpdate(delta);
-            }
-        }
+		public void OnUpdate(float delta)
+		{
+			m_Entities.OnUpdate(delta);
+		}
 
-        public void OnFixedUpdate(float delta)
-        {
-            if (m_Entities != null)
-            {
-                m_Entities.OnFixedUpdate(delta);
-            }
-        }
-    }
+		public void OnFixedUpdate(float delta)
+		{
+			m_Entities.OnFixedUpdate(delta);
+		}
+	}
 }

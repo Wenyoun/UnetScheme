@@ -13,7 +13,7 @@ namespace Zyq.Game.Server
                 for (int i = 0; i < entitys.Count; ++i)
                 {
                     Entity entity = entitys[i];
-                    List<ISyncAttribute> attributes = entity.SyncAttributes.Attributes;
+                    List<ISyncAttribute> attributes = entity.Sync.Attributes;
                     if (attributes.Count > 0)
                     {
                         for (int j = 0; j < attributes.Count; ++j)
@@ -22,7 +22,7 @@ namespace Zyq.Game.Server
                             if (attribute.IsSerialize())
                             {
                                 ByteBuffer buffer = ByteBuffer.Allocate(1400);
-                                buffer.Write(entity.Eid);
+                                buffer.Write(entity.EntityId);
                                 buffer.Write(attribute.SyncId);
                                 attribute.Serialize(buffer);
                                 Server.Ins.Broadcast(NetMsgId.Sync_Attribute, buffer);

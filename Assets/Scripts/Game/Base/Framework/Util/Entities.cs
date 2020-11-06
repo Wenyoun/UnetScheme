@@ -5,120 +5,127 @@ namespace Zyq.Game.Base
 {
     public class Entities : IDisposable, IUpdate, IFixedUpdate
     {
-        private List<Entity> mTemp;
-        private List<Entity> mEntityLts;
-        private Dictionary<uint, Entity> mEntityDys;
-        private Dictionary<uint, List<Entity>> mEntityGps;
+        private List<uint> m_Temp;
+        private List<Entity> m_EntityLts;
+        private Dictionary<uint, Entity> m_EntityDys;
 
         public Entities()
         {
-            mTemp = new List<Entity>();
-            mEntityLts = new List<Entity>();
-            mEntityDys = new Dictionary<uint, Entity>();
-            mEntityGps = new Dictionary<uint, List<Entity>>();
+            m_Temp = new List<uint>();
+            m_EntityLts = new List<Entity>();
+            m_EntityDys = new Dictionary<uint, Entity>();
         }
 
         public void Dispose()
         {
-            mTemp.Clear();
-            mEntityLts.Clear();
-            mEntityDys.Clear();
-            mEntityGps.Clear();
+            m_Temp.Clear();
+            m_EntityLts.Clear();
+            m_EntityDys.Clear();
         }
 
         public void OnUpdate(float delta)
         {
-            Refill();
-            if (mTemp.Count > 0)
+            CheckRemoveEntity();
+            int length = m_EntityLts.Count;
+            if (length > 0)
             {
-                for (int i = 0; i < mTemp.Count; ++i)
+                for (int i = 0; i < length; ++i)
                 {
-                    mTemp[i].OnUpdate(delta);
+                    m_EntityLts[i].OnUpdate(delta);
                 }
             }
         }
 
         public void OnFixedUpdate(float delta)
         {
-            Refill();
-            if (mTemp.Count > 0)
+            int length = m_EntityLts.Count;
+            if (length > 0)
             {
-                for (int i = 0; i < mTemp.Count; ++i)
+                for (int i = 0; i < length; ++i)
                 {
-                    mTemp[i].OnFixedUpdate(delta);
+                    m_EntityLts[i].OnFixedUpdate(delta);
                 }
             }
-        }
-
-        public List<Entity> GetGpsEntitys(uint group)
-        {
-            List<Entity> entitys = null;
-            if (!mEntityGps.TryGetValue(group, out entitys))
-            {
-                entitys = new List<Entity>();
-                mEntityGps.Add(group, entitys);
-            }
-            return entitys;
         }
 
         public Entity AddEntity(Entity entity)
         {
-            if (!mEntityDys.ContainsKey(entity.Eid))
+            uint entityId = entity.EntityId;
+            if (!m_EntityDys.ContainsKey(entityId))
             {
-                mEntityLts.Add(entity);
-                mEntityDys.Add(entity.Eid, entity);
-                GetGpsEntitys(entity.Gid).Add(entity);
-                entity.OnAdd();
-                return entity;
+                m_EntityLts.Add(entity);
+                m_EntityDys.Add(entityId, entity);
+                entity.OnInit();
             }
-            return null;
+
+            return entity;
         }
 
         public Entity RemoveEntity(uint eid)
         {
-            Entity entity = null;
-            if (mEntityDys.TryGetValue(eid, out entity))
+            Entity entity;
+            if (m_EntityDys.TryGetValue(eid, out entity))
             {
-                mEntityLts.Remove(entity);
-                GetGpsEntitys(entity.Gid).Remove(entity);
-                mEntityDys.Remove(eid);
+                entity.IsRemove = true;
+                m_Temp.Add(entity.EntityId);
             }
+
             return entity;
         }
 
-        public Entity GetEntity(uint eid)
+        public Entity GetEntity(uint entityId)
         {
-            Entity entity = null;
-            mEntityDys.TryGetValue(eid, out entity);
+            Entity entity;
+            m_EntityDys.TryGetValue(entityId, out entity);
             return entity;
         }
 
-        public void Dispatcher(int id, uint eid, IBody body)
+        public void Dispatcher(int msgId, uint entityId, IBody body)
         {
-            if (eid > 0)
+            if (entityId > 0)
             {
-                Entity entity = null;
-                if (mEntityDys.TryGetValue(eid, out entity))
+                Entity entity;
+                if (m_EntityDys.TryGetValue(entityId, out entity))
                 {
-                    entity.Dispatcher(id, body);
+                    entity.Dispatcher(msgId, body);
                 }
             }
             else
             {
-                Refill();
-                for (int i = 0; i < mTemp.Count; ++i)
+                int length = m_Temp.Count;
+                if (length > 0)
                 {
-                    mTemp[i].Dispatcher(id, body);
+                    for (int i = 0; i < length; ++i)
+                    {
+                        Entity entity = m_EntityLts[i];
+                        entity.Dispatcher(msgId, body);
+                    }
                 }
             }
         }
 
-        private void Refill()
+        public List<Entity> Entitys
         {
-            mTemp.Clear();
-            mTemp.AddRange(mEntityLts);
+            get { return m_EntityLts; }
         }
 
-        public List<Entity> Entitys { get { return mEntityLts; } }
+        private void CheckRemoveEntity()
+        {
+            int length = m_Temp.Count;
+            if (length > 0)
+            {
+                for (int i = 0; i < length; ++i)
+                {
+                    uint entityId = m_Temp[i];
+                    Entity entity = GetEntity(entityId);
+                    if (entity != null && entity.IsRemove)
+                    {
+                        entity.OnRemove();
+                    }
+                }
+
+                m_Temp.Clear();
+            }
+        }
     }
 }

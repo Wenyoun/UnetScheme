@@ -2,42 +2,69 @@
 {
     public abstract class AbsMachine : ILifecycle, IUpdate, IFixedUpdate
     {
-        public TimerMgr TimerMgr { get; private set; }
-        public UpdateMgr UpdateMgr { get; private set; }
-        public MessageMgr MessageMgr { get; private set; }
+        private TimerMgr m_TimerMgr;
+        private UpdateMgr m_UpdateMgr;
+        private MessageMgr m_MessageMgr;
 
         public virtual void OnInit()
         {
-            TimerMgr = new TimerMgr();
-            UpdateMgr = new UpdateMgr();
-            MessageMgr = new MessageMgr();
+            m_TimerMgr = new TimerMgr();
+            m_UpdateMgr = new UpdateMgr();
+            m_MessageMgr = new MessageMgr();
         }
 
         public virtual void OnRemove()
         {
-            TimerMgr.Dispose();
-            MessageMgr.Dispose();
-            UpdateMgr.Dispose();
+            if (m_TimerMgr != null)
+            {
+                m_TimerMgr.Dispose();
+            }
+
+            if (m_UpdateMgr != null)
+            {
+                m_UpdateMgr.Dispose();
+            }
+
+            if (m_MessageMgr != null)
+            {
+                m_MessageMgr.Dispose();
+            }
         }
 
         public virtual void OnUpdate(float delta)
         {
-            if (TimerMgr != null)
+            if (m_TimerMgr != null)
             {
-                TimerMgr.OnUpdate(delta);
+                m_TimerMgr.OnUpdate(delta);
             }
-            if (UpdateMgr != null)
+
+            if (m_UpdateMgr != null)
             {
-                UpdateMgr.OnUpdate(delta);
+                m_UpdateMgr.OnUpdate(delta);
             }
         }
 
         public virtual void OnFixedUpdate(float delta)
         {
-            if (UpdateMgr != null)
+            if (m_UpdateMgr != null)
             {
-                UpdateMgr.OnFixedUpdate(delta);
+                m_UpdateMgr.OnFixedUpdate(delta);
             }
+        }
+
+        public TimerMgr Timer
+        {
+            get { return m_TimerMgr; }
+        }
+
+        public UpdateMgr Update
+        {
+            get { return m_UpdateMgr; }
+        }
+
+        public MessageMgr Message
+        {
+            get { return m_MessageMgr; }
         }
     }
 }

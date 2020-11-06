@@ -8,7 +8,7 @@ namespace Zyq.Game.Base
         private List<IFeture> mFetLts;
         private Dictionary<Type, IFeture> mFetDys;
 
-        public void OnInit()
+        public Fetures()
         {
             mFetLts = new List<IFeture>();
             mFetDys = new Dictionary<Type, IFeture>();
@@ -29,8 +29,9 @@ namespace Zyq.Game.Base
             {
                 mFetLts.Add(feture);
                 mFetDys.Add(type, feture);
-                return (T)feture;
+                return (T) feture;
             }
+
             return default(T);
         }
 
@@ -38,7 +39,7 @@ namespace Zyq.Game.Base
         {
             IFeture feture = default(T);
             mFetDys.TryGetValue(typeof(T), out feture);
-            return (T)feture;
+            return (T) feture;
         }
     }
 }

@@ -1,40 +1,33 @@
-﻿using System.Collections.Generic;
-
-namespace Zyq.Game.Base
+﻿namespace Zyq.Game.Base
 {
     public class ClientNetworkMgr
     {
-        private static List<IChannel> channels = new List<IChannel>();
+        private static ClientChannel channel;
 
         public static void Dispose()
         {
-            int length = channels.Count;
-            for (int i = 0; i < length; ++i)
+            if (channel != null)
             {
-                channels[i].Dispose();
+                channel.Dispose();
+                channel = null;
             }
-            channels.Clear();
         }
 
         public static void Dispatcher()
         {
-            int length = channels.Count;
-            for (int i = 0; i < length; ++i)
+            if (channel != null)
             {
-                channels[i].Dispatcher();
+                channel.Dispatcher();
             }
         }
 
         public static void Connect(string host, int port, IClientCallback client)
         {
-            ClientChannel channel = new ClientChannel(client);
-            channel.Connect(host, port);
-            channels.Add(channel);
-        }
-
-        public static void Disconnect()
-        {
-            Dispose();
+            if (channel == null)
+            {
+                channel = new ClientChannel(client);
+                channel.Connect(host, port);
+            }
         }
     }
 }

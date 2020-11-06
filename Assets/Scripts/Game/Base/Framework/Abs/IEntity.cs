@@ -2,8 +2,6 @@
 {
     public interface IEntity : ILifecycle, IUpdate, IFixedUpdate, IMessage
     {
-        void OnAdd();
-
         T AddCop<T>(T cop) where T : ICop;
 
         T AddCop<T>() where T : ICop, new();
@@ -32,14 +30,12 @@
 
         T GetFeture<T>() where T : IFeture;
 
-        uint Eid { get; }
+        uint EntityId { get; }
 
-        uint Gid { get; }
+        MsgRegister Msg { get; }
 
-        MsgRegister MsgRegister { get; }
+        TimerRegister Timer { get; }
 
-        TimerRegister TimerRegister { get; }
-
-        UpdateRegister UpdateRegister { get; }
+        UpdateRegister Update { get; }
     }
 }

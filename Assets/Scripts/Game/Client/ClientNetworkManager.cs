@@ -19,16 +19,12 @@ namespace Zyq.Game.Client
         {
             base.OnStartClient(client);
 
-            Client.Ins.OnStartClient();
-
             Debug.Log("OnStartClient");
         }
 
         public override void OnStopClient()
         {
             base.OnStopClient();
-
-            Client.Ins.OnStopClient();
 
             Debug.Log("OnStopClient");
         }

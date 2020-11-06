@@ -2,10 +2,8 @@
 {
     public class Entity : AbsEntity
     {
-        public Entity(uint eid, uint gid)
+        public Entity(uint entityId) : base(entityId)
         {
-            Eid = eid;
-            Gid = gid;
         }
     }
 }

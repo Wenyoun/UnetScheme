@@ -2,6 +2,10 @@
 {
     public interface ICop : ILifecycle
     {
-        IEntity Entity { get; set; }
+        uint CopId { get; }
+
+        IEntity Entity { set; }
+
+        T CastEntity<T>() where T : IEntity;
     }
 }

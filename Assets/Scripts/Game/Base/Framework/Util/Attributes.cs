@@ -5,44 +5,39 @@ namespace Zyq.Game.Base
 {
     public class Attributes : IDisposable
     {
-        private List<IAttribute> mAttrLts;
-        private Dictionary<Type, IAttribute> mAttrDys;
+        private List<IAttribute> m_AttrLts;
+        private Dictionary<Type, IAttribute> m_AttrDys;
 
         public Attributes()
         {
-            mAttrLts = new List<IAttribute>();
-            mAttrDys = new Dictionary<Type, IAttribute>();
-        }
-
-        public void OnInit()
-        {
-            mAttrLts.Clear();
-            mAttrDys.Clear();
+            m_AttrLts = new List<IAttribute>();
+            m_AttrDys = new Dictionary<Type, IAttribute>();
         }
 
         public void Dispose()
         {
-            mAttrLts.Clear();
-            mAttrDys.Clear();
+            m_AttrLts.Clear();
+            m_AttrDys.Clear();
         }
 
         public T AddAttribute<T>(T attribute) where T : IAttribute
         {
             Type type = attribute.GetType();
-            if (!mAttrDys.ContainsKey(type))
+            if (!m_AttrDys.ContainsKey(type))
             {
-                mAttrLts.Add(attribute);
-                mAttrDys.Add(type, attribute);
-                return (T)attribute;
+                m_AttrLts.Add(attribute);
+                m_AttrDys.Add(type, attribute);
+                return (T) attribute;
             }
+
             return default(T);
         }
 
         public T GetAttribute<T>() where T : IAttribute
         {
             IAttribute attribute = default(T);
-            mAttrDys.TryGetValue(typeof(T), out attribute);
-            return (T)attribute;
+            m_AttrDys.TryGetValue(typeof(T), out attribute);
+            return (T) attribute;
         }
     }
 }

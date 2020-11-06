@@ -2,148 +2,252 @@
 {
     public abstract class AbsEntity : IEntity
     {
-        public AbsEntity()
+        private bool m_isRemove;
+        private uint m_EntityId;
+
+        private Cops m_Cops;
+        private Configs m_Configs;
+        private Fetures m_Fetures;
+
+        private Attributes m_Attributes;
+        private SyncAttributes m_SyncAttributes;
+
+        private MsgRegister m_MsgRegister;
+        private TimerRegister m_TimerRegister;
+        private UpdateRegister m_UpdateRegister;
+
+        public AbsEntity(uint entityId)
         {
-            Cops = new Cops();
-            Fetures = new Fetures();
-            Configs = new Configs();
-            Attributes = new Attributes();
-            SyncAttributes = new SyncAttributes();
-            MsgRegister = new MsgRegister();
-            TimerRegister = new TimerRegister();
-            UpdateRegister = new UpdateRegister();
+            m_isRemove = false;
+            m_EntityId = entityId;
+
+            m_Cops = new Cops();
+            m_Configs = new Configs();
+            m_Fetures = new Fetures();
+
+            m_Attributes = new Attributes();
+            m_SyncAttributes = new SyncAttributes();
+
+            m_MsgRegister = new MsgRegister();
+            m_TimerRegister = new TimerRegister();
+            m_UpdateRegister = new UpdateRegister();
         }
 
         public T AddCop<T>(T cop) where T : ICop
         {
-            return Cops.AddCop<T>(cop, this);
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_Cops.AddCop<T>(cop, this);
         }
 
         public T AddCop<T>() where T : ICop, new()
         {
-            return Cops.AddCop<T>(this);
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_Cops.AddCop<T>(this);
         }
 
         public void RemoveCop<T>() where T : ICop
         {
-            Cops.RemoveCop<T>();
+            if (m_isRemove)
+            {
+                return;
+            }
+
+            m_Cops.RemoveCop<T>();
         }
 
         public void RemoveCops()
         {
-            Cops.RemoveCops();
+            if (m_isRemove)
+            {
+                return;
+            }
+
+            m_Cops.RemoveCops();
         }
 
         public T GetCop<T>() where T : ICop
         {
-            return Cops.GetCop<T>();
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_Cops.GetCop<T>();
         }
 
         public T AddConfig<T>(T config) where T : IConfig
         {
-            return Configs.AddConfig<T>(config);
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_Configs.AddConfig<T>(config);
         }
 
         public T GetConfig<T>() where T : IConfig
         {
-            return Configs.GetConfig<T>();
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_Configs.GetConfig<T>();
         }
 
         public T AddAttribute<T>(T attribute) where T : IAttribute
         {
-            return Attributes.AddAttribute<T>(attribute);
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_Attributes.AddAttribute<T>(attribute);
         }
 
         public T GetAttribute<T>() where T : IAttribute
         {
-            return Attributes.GetAttribute<T>();
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_Attributes.GetAttribute<T>();
         }
 
         public T AddSyncAttribute<T>(T attribute) where T : ISyncAttribute
         {
-            return SyncAttributes.AddAttribute<T>(attribute);
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_SyncAttributes.AddAttribute<T>(attribute);
         }
 
         public T GetSyncAttribute<T>() where T : ISyncAttribute
         {
-            return SyncAttributes.GetSyncAttribute<T>();
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_SyncAttributes.GetSyncAttribute<T>();
         }
 
         public T GetSyncAttribute<T>(uint syncId) where T : ISyncAttribute
         {
-            return SyncAttributes.GetSyncAttribute<T>(syncId);
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_SyncAttributes.GetSyncAttribute<T>(syncId);
         }
 
         public T AddFeture<T>(T feture) where T : IFeture
         {
-            return Fetures.AddFeture<T>(feture, this);
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_Fetures.AddFeture<T>(feture, this);
         }
 
         public T GetFeture<T>() where T : IFeture
         {
-            return Fetures.GetFeture<T>();
+            if (m_isRemove)
+            {
+                return default(T);
+            }
+
+            return m_Fetures.GetFeture<T>();
+        }
+
+        public void OnUpdate(float delta)
+        {
+            if (m_isRemove)
+            {
+                return;
+            }
+
+            m_TimerRegister.OnUpdate(delta);
+            m_UpdateRegister.OnUpdate(delta);
+        }
+
+        public void OnFixedUpdate(float delta)
+        {
+            if (m_isRemove)
+            {
+                return;
+            }
+
+            m_UpdateRegister.OnFixedUpdate(delta);
+        }
+
+        public void Dispatcher(int msgId, IBody body = null)
+        {
+            if (m_isRemove)
+            {
+                return;
+            }
+
+            m_MsgRegister.Dispatcher(msgId, body);
+        }
+
+        public bool IsRemove
+        {
+            get { return m_isRemove; }
+            internal set { m_isRemove = true; }
+        }
+
+        public uint EntityId
+        {
+            get { return m_EntityId; }
+        }
+
+        public SyncAttributes Sync
+        {
+            get { return m_SyncAttributes; }
+        }
+
+        public MsgRegister Msg
+        {
+            get { return m_MsgRegister; }
+        }
+
+        public TimerRegister Timer
+        {
+            get { return m_TimerRegister; }
+        }
+
+        public UpdateRegister Update
+        {
+            get { return m_UpdateRegister; }
         }
 
         public virtual void OnInit()
-        {
-            Cops.OnInit();
-            Fetures.OnInit();
-            Configs.OnInit();
-            Attributes.OnInit();
-            MsgRegister.OnInit();
-            TimerRegister.OnInit();
-            UpdateRegister.OnInit();
-        }
-
-        public virtual void OnAdd()
         {
         }
 
         public virtual void OnRemove()
         {
-            Cops.Dispose();
-            Fetures.Dispose();
-            Attributes.Dispose();
-            Configs.Dispose();
-            MsgRegister.Dispose();
-            TimerRegister.Dispose();
-            UpdateRegister.Dispose();
+            m_Cops.Dispose();
+            m_Fetures.Dispose();
+            m_Attributes.Dispose();
+            m_Configs.Dispose();
+            m_MsgRegister.Dispose();
+            m_TimerRegister.Dispose();
+            m_UpdateRegister.Dispose();
         }
-
-        public void OnUpdate(float delta)
-        {
-            TimerRegister.OnUpdate(delta);
-            UpdateRegister.OnUpdate(delta);
-        }
-
-        public void OnFixedUpdate(float delta)
-        {
-            UpdateRegister.OnFixedUpdate(delta);
-        }
-
-        public void Dispatcher(int id, IBody body = null)
-        {
-            MsgRegister.Dispatcher(id, body);
-        }
-
-        public uint Eid { get; set; }
-
-        public uint Gid{ get; set; }
-
-        public Fetures Fetures{get;private set;}
-
-        public Configs Configs{get;private set;}
-
-        public Cops Cops { get; private set; }
-
-        public Attributes Attributes { get; private set; }
-
-        public SyncAttributes SyncAttributes { get; private set; }
-
-        public MsgRegister MsgRegister { get; private set; }
-
-        public TimerRegister TimerRegister { get; private set; }
-
-        public UpdateRegister UpdateRegister { get; private set; }
     }
 }

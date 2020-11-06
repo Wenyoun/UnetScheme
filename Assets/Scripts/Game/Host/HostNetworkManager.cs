@@ -22,7 +22,6 @@ namespace Zyq.Game.Host
             base.OnStartServer();
 
             Server.Server.Ins.OnStartServer();
-            Client.Client.Ins.OnStartClient();
         }
 
         public override void OnStopServer()
@@ -30,7 +29,6 @@ namespace Zyq.Game.Host
             base.OnStopServer();
 
             Server.Server.Ins.OnStopServer();
-            Client.Client.Ins.OnStopClient();
         }
 
         private void Update()

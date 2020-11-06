@@ -12,44 +12,33 @@ namespace Zyq.Game.Base
         {
             m_Temp = new List<MsgDelegate>();
             m_Handlers = new Dictionary<int, List<MsgDelegate>>();
-
-            OnInit();
-        }
-
-        public void OnInit()
-        {
-            Clear();
         }
 
         public void Dispose()
-        {
-            Clear();
-        }
-
-        public void Clear()
         {
             m_Temp.Clear();
             m_Handlers.Clear();
         }
 
-        public void Register(int id, MsgDelegate handler)
+        public void Register(int msgId, MsgDelegate handler)
         {
-            List<MsgDelegate> evts = null;
-            if (!m_Handlers.TryGetValue(id, out evts))
+            List<MsgDelegate> evts;
+            if (!m_Handlers.TryGetValue(msgId, out evts))
             {
                 evts = new List<MsgDelegate>();
-                m_Handlers.Add(id, evts);
+                m_Handlers.Add(msgId, evts);
             }
+
             if (!evts.Contains(handler))
             {
                 evts.Add(handler);
             }
         }
 
-        public void Unregister(int id, MsgDelegate handler)
+        public void Unregister(int msgId, MsgDelegate handler)
         {
-            List<MsgDelegate> evts = null;
-            if (m_Handlers.TryGetValue(id, out evts))
+            List<MsgDelegate> evts;
+            if (m_Handlers.TryGetValue(msgId, out evts))
             {
                 if (evts.Contains(handler))
                 {
@@ -58,16 +47,20 @@ namespace Zyq.Game.Base
             }
         }
 
-        public void Dispatcher(int id, IBody body = null)
+        public void Dispatcher(int msgId, IBody body = null)
         {
-            List<MsgDelegate> evts = null;
-            if (m_Handlers.TryGetValue(id, out evts))
+            List<MsgDelegate> evts;
+            if (m_Handlers.TryGetValue(msgId, out evts))
             {
                 m_Temp.Clear();
                 m_Temp.AddRange(evts);
-                for (int i = 0; i < m_Temp.Count; ++i)
+                int length = m_Temp.Count;
+                if (length > 0)
                 {
-                    m_Temp[i](body);
+                    for (int i = 0; i < length; ++i)
+                    {
+                        m_Temp[i].Invoke(body);
+                    }
                 }
             }
         }

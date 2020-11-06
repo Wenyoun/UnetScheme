@@ -26,17 +26,7 @@ namespace Zyq.Game.Base
             m_TempFixedUpdates = new List<UpdateDelegate>();
         }
 
-        public void OnInit()
-        {
-            Clear();
-        }
-
         public void Dispose()
-        {
-            Clear();
-        }
-
-        public void Clear()
         {
             m_Updates.Clear();
             m_TempUpdates.Clear();

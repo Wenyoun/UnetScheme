@@ -14,11 +14,6 @@ namespace Zyq.Game.Base
             mConfigDys = new Dictionary<Type, IConfig>();
         }
 
-        public void OnInit()
-        {
-            Dispose();
-        }
-
         public void Dispose()
         {
             mConfigLts.Clear();
@@ -32,8 +27,9 @@ namespace Zyq.Game.Base
             {
                 mConfigLts.Add(config);
                 mConfigDys.Add(type, config);
-                return (T)config;
+                return (T) config;
             }
+
             return default(T);
         }
 
@@ -41,7 +37,7 @@ namespace Zyq.Game.Base
         {
             IConfig config = default(T);
             mConfigDys.TryGetValue(typeof(T), out config);
-            return (T)config;
+            return (T) config;
         }
 
         public List<IConfig> Copy()
@@ -51,6 +47,7 @@ namespace Zyq.Game.Base
             {
                 configs.Add(mConfigLts[i].Copy());
             }
+
             return configs;
         }
     }

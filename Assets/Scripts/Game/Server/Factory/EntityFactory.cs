@@ -9,7 +9,7 @@ namespace Zyq.Game.Server
 
         public static Entity CreatePlayer(Connection connection, Vector3 position)
         {
-            Entity entity = new Entity(id++, Group.Player);
+            Entity entity = new Entity(id++);
             entity.OnInit();
 
             entity.AddSyncAttribute(new BaseAttribute());
