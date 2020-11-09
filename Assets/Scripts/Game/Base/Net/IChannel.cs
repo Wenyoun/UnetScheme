@@ -22,7 +22,7 @@ namespace Zyq.Game.Base
     public interface IChannel : IDisposable
     {
         long ChannelId { get; }
-        
+
         bool IsConnected { get; }
 
         void Send(ushort cmd, ByteBuffer buffer);
@@ -30,24 +30,24 @@ namespace Zyq.Game.Base
         void Dispatcher();
 
         void Disconnect();
-        
+
         void Unregister(ushort cmd);
-        
+
         void Register(ushort cmd, ChannelMessageDelegate handler);
     }
 
-    public abstract class AbstractChannel : IChannel
+    public abstract class AbsChannel : IChannel
     {
         protected Dictionary<ushort, ChannelMessageDelegate> handlers;
 
-        public AbstractChannel()
+        public AbsChannel()
         {
             handlers = new Dictionary<ushort, ChannelMessageDelegate>();
         }
 
         public void Register(ushort cmd, ChannelMessageDelegate handler)
         {
-            if (handlers != null && !handlers.ContainsKey(cmd))
+            if (!handlers.ContainsKey(cmd))
             {
                 handlers.Add(cmd, handler);
             }
@@ -55,7 +55,7 @@ namespace Zyq.Game.Base
 
         public void Unregister(ushort cmd)
         {
-            if (handlers != null && handlers.ContainsKey(cmd))
+            if (handlers.ContainsKey(cmd))
             {
                 handlers.Remove(cmd);
             }
@@ -63,16 +63,12 @@ namespace Zyq.Game.Base
 
         public void ClearHandlers()
         {
-            if (handlers != null)
-            {
-                handlers.Clear();
-            }
+            handlers.Clear();
         }
 
         public virtual void Dispose()
         {
             ClearHandlers();
-            handlers = null;
         }
 
         public abstract void Dispatcher();

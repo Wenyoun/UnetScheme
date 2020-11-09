@@ -5,12 +5,9 @@ namespace Zyq.Game.Server
 {
     public sealed class EntityFactory
     {
-        private static uint id = 1;
-
         public static Entity CreatePlayer(Connection connection, Vector3 position)
         {
-            Entity entity = new Entity(id++);
-            entity.OnInit();
+            Entity entity = new Entity();
 
             entity.AddSyncAttribute(new BaseAttribute());
             entity.AddFeture(new ConnectionFeture(connection));

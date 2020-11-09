@@ -1,7 +1,8 @@
 ﻿using Base;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Networking;
+using Zyq.Game.Client;
+using Zyq.Game.Server;
 
 namespace System
 {
@@ -27,35 +28,22 @@ namespace System
             m_Port = Cop.Get<InputField>("4");
         }
 
-        private NetworkManager m_Network;
-
         public override void OnRegEvent()
         {
             m_CreateServer.onClick.AddListener(() =>
             {
-                if (m_Network == null)
-                {
-                    m_Network = SimpleResMgr.CreateRoot("Prefabs/Game/ServerNetworkManager").GetComponent<NetworkManager>();
-                    m_Network.StartServer();
-                }
+                GameMgr.Ins.Add<Server>();
             });
 
             m_CreateHost.onClick.AddListener(() =>
             {
-                if (m_Network == null)
-                {
-                    m_Network = SimpleResMgr.CreateRoot("Prefabs/Game/HostNetworkManager").GetComponent<NetworkManager>();
-                    m_Network.StartHost();
-                }
+                GameMgr.Ins.Add<Server>();
+                GameMgr.Ins.Add<Client>();
             });
 
             m_JoinServer.onClick.AddListener(() =>
             {
-                if (m_Network == null)
-                {
-                    m_Network = SimpleResMgr.CreateRoot("Prefabs/Game/ClientNetworkManager").GetComponent<NetworkManager>();
-                    m_Network.StartClient();
-                }
+                GameMgr.Ins.Add<Client>();
             });
         }
     }

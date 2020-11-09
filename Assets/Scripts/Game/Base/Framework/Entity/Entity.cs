@@ -2,7 +2,7 @@
 {
     public class Entity : AbsEntity
     {
-        public Entity(uint entityId) : base(entityId)
+        public Entity()
         {
         }
     }

@@ -1,100 +1,57 @@
-﻿using UnityEngine;
-using Zyq.Game.Base;
+﻿using Zyq.Game.Base;
 
 namespace Zyq.Game.Client
 {
-    public class Client : AbsMachine, IClientCallback
+    public class Client : ICompose
     {
-        public static Client Ins = new Client();
+        public static Client Ins;
 
-        #region Fields
+        private World m_World;
 
-        private Connection m_Connection;
-        private ClientEntityMgr m_EntityMgr;
+        public Client()
+        {
+            Ins = this;
+            m_World = new World();
+        }
 
-        #endregion
-
-        #region Properties
-
-        public Connection Connection => m_Connection;
-        public ClientEntityMgr EntityMgr => m_EntityMgr;
-
-        #endregion
-
-        private Client()
+        public void OnInit()
         {
         }
 
-        public override void OnInit()
+        public void OnRemove()
         {
-            base.OnInit();
-            m_EntityMgr = new ClientEntityMgr();
-            ClientNetworkMgr.Connect("127.0.0.1", 50000, this);
+            m_World.Dispose();
+            Ins = null;
         }
 
-        public override void OnRemove()
+        public void OnUpdate(float delta)
         {
-            base.OnRemove();
-            m_EntityMgr.Dispose();
-            ClientNetworkMgr.Dispose();
+            m_World.OnUpdate(delta);
+        }
+
+        public void OnFixedUpdate(float delta)
+        {
+            m_World.OnFixedUpdate(delta);
+        }
+
+        public void OnLateUpdate()
+        {
+            m_World.OnLateUpdate();
         }
 
         public void Send(ushort cmd, ByteBuffer buffer)
         {
-            if (m_Connection != null)
-            {
-                m_Connection.Send(cmd, buffer);
-            }
+            m_World.Send(cmd, buffer);
         }
 
-        public override void OnUpdate(float delta)
+        public World World
         {
-            base.OnUpdate(delta);
-
-            ClientNetworkMgr.Dispatcher();
-
-            if (m_EntityMgr != null)
-            {
-                m_EntityMgr.OnUpdate(delta);
-            }
+            get { return m_World; }
         }
 
-        public override void OnFixedUpdate(float delta)
+        public Connection Connection
         {
-            base.OnFixedUpdate(delta);
-            if (m_EntityMgr != null)
-            {
-                m_EntityMgr.OnFixedUpdate(delta);
-            }
-        }
-
-        public void OnServerConnect(IChannel channel)
-        {
-            if (m_Connection == null)
-            {
-                m_Connection = new Connection();
-            }
-
-            Debug.Log("Client OnServerConnect:" + channel.ChannelId);
-
-            m_Connection.OnConnect(channel);
-            RegisterProtocols(m_Connection);
-        }
-
-        public void OnServerDisconnect(IChannel channel)
-        {
-            Debug.Log("Client OnServerDisconnect:" + channel.ChannelId);
-            
-            if (m_Connection != null)
-            {
-                m_Connection.OnDisconnect(channel);
-            }
-        }
-
-        private void RegisterProtocols(Connection connection)
-        {
-            connection.RegisterProtocol<AutoProtocolHandler>();
-            connection.RegisterProtocol<ClientProtocolHandler>();
+            get { return m_World.Connection; }
         }
     }
 }

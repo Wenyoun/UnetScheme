@@ -8,12 +8,12 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
     public static GameMgr Ins = new GameMgr();
 
     private List<ICompose> mComposeLts;
-    private Dictionary<System.Type, ICompose> mComposeDys;
+    private Dictionary<Type, ICompose> mComposeDys;
 
     public GameMgr()
     {
         mComposeLts = new List<ICompose>();
-        mComposeDys = new Dictionary<System.Type, ICompose>();
+        mComposeDys = new Dictionary<Type, ICompose>();
     }
 
     public void Config()
@@ -31,7 +31,8 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public void OnRemove()
     {
-        for (int i = mComposeLts.Count - 1; i > 0; --i)
+        int length = mComposeLts.Count;
+        for (int i = 0; i < length; ++i)
         {
             mComposeLts[i].OnRemove();
         }
@@ -42,7 +43,8 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public void OnUpdate(float delta)
     {
-        for (int i = 0; i < mComposeLts.Count; ++i)
+        int length = mComposeLts.Count;
+        for (int i = 0; i < length; ++i)
         {
             mComposeLts[i].OnUpdate(delta);
         }
@@ -50,7 +52,8 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public void OnLateUpdate()
     {
-        for (int i = 0; i < mComposeLts.Count; ++i)
+        int length = mComposeLts.Count;
+        for (int i = 0; i < length; ++i)
         {
             mComposeLts[i].OnLateUpdate();
         }
@@ -58,7 +61,8 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public void OnFixedUpdate(float delta)
     {
-        for (int i = 0; i < mComposeLts.Count; ++i)
+        int length = mComposeLts.Count;
+        for (int i = 0; i < length; ++i)
         {
             mComposeLts[i].OnFixedUpdate(delta);
         }
@@ -66,7 +70,7 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public T Add<T>() where T : ICompose, new()
     {
-        System.Type type = typeof(T);
+        Type type = typeof(T);
         if (!mComposeDys.ContainsKey(type))
         {
             T compose = new T();
@@ -75,13 +79,14 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
             compose.OnInit();
             return compose;
         }
+
         return default(T);
     }
 
     public void Remove<T>() where T : ICompose
     {
-        System.Type type = typeof(T);
-        ICompose compose = null;
+        Type type = typeof(T);
+        ICompose compose;
         if (mComposeDys.TryGetValue(type, out compose))
         {
             mComposeLts.Remove(compose);

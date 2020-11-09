@@ -22,6 +22,7 @@ namespace Zyq.Game.Client
 
         private void OnSyncAttribute(ChannelMessage msg)
         {
+            /**
             ByteBuffer buffer = msg.Buffer;
             uint eid = buffer.ReadUInt();
             uint syncId = buffer.ReadUInt();
@@ -35,6 +36,7 @@ namespace Zyq.Game.Client
                     entity.Dispatcher(MessageConstants.Sync_Attribute);
                 }
             }
+            **/
         }
 
         private void SendLoginReq()

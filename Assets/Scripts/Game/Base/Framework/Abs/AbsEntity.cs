@@ -2,6 +2,7 @@
 {
     public abstract class AbsEntity : IEntity
     {
+        private IWorld m_World;
         private bool m_isRemove;
         private uint m_EntityId;
 
@@ -16,10 +17,10 @@
         private TimerRegister m_TimerRegister;
         private UpdateRegister m_UpdateRegister;
 
-        public AbsEntity(uint entityId)
+        public AbsEntity()
         {
             m_isRemove = false;
-            m_EntityId = entityId;
+            m_EntityId = UniGenID.GenNextEntityID();
 
             m_Cops = new Cops();
             m_Configs = new Configs();
@@ -210,6 +211,12 @@
             internal set { m_isRemove = true; }
         }
 
+        public IWorld World
+        {
+            get { return m_World; }
+            internal set { m_World = value; }
+        }
+
         public uint EntityId
         {
             get { return m_EntityId; }
@@ -220,7 +227,7 @@
             get { return m_SyncAttributes; }
         }
 
-        public MsgRegister Msg
+        public MsgRegister Message
         {
             get { return m_MsgRegister; }
         }

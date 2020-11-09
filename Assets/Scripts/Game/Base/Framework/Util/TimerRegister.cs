@@ -5,7 +5,8 @@ namespace Zyq.Game.Base
 {
     public class TimerRegister : IDisposable, IUpdate
     {
-        private static int ID = 1;
+        private static int Start_Timer_ID = 1;
+        
         private bool m_IsInitialize;
         private List<int> m_Temp;
         private List<TimerTick> m_List;
@@ -42,7 +43,7 @@ namespace Zyq.Game.Base
             if (m_IsInitialize && func != null)
             {
                 TimerTick tick = new TimerTick();
-                tick.Id = ID++;
+                tick.Id = Start_Timer_ID++;
                 tick.Time = delay;
                 tick.Interval = interval;
                 tick.Count = count < 0 ? int.MaxValue : count;
@@ -61,7 +62,7 @@ namespace Zyq.Game.Base
             if (m_IsInitialize && frame != null)
             {
                 TimerTick tick = new TimerTick();
-                tick.Id = ID++;
+                tick.Id = Start_Timer_ID++;
                 tick.Time = 0;
                 tick.Interval = 0;
                 tick.Count = 0;
@@ -78,7 +79,7 @@ namespace Zyq.Game.Base
 
         public void Unregister(int id)
         {
-            if (m_IsInitialize)
+            if (m_IsInitialize && id > 0)
             {
                 TryRemove(id);
             }

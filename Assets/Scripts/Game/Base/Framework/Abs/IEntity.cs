@@ -31,8 +31,10 @@
         T GetFeture<T>() where T : IFeture;
 
         uint EntityId { get; }
+        
+        IWorld World { get; }
 
-        MsgRegister Msg { get; }
+        MsgRegister Message { get; }
 
         TimerRegister Timer { get; }
 

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Zyq.Game.Base
 {
-    public class ServerChannel : AbstractChannel
+    public class ServerChannel : AbsChannel
     {
         private bool isClose;
         private bool isDispose;

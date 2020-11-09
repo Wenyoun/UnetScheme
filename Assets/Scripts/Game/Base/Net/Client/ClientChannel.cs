@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Zyq.Game.Base
 {
-    public class ClientChannel : AbstractChannel
+    public class ClientChannel : AbsChannel
     {
         private byte status;
         private KcpUdpClient kcpUdpClient;

@@ -8,19 +8,21 @@ namespace Zyq.Game.Base
         private IChannel channel;
         private List<IProtocolHandler> handlers;
 
-        public Connection()
+        public Connection(IChannel channel)
         {
+            this.channel = channel;
             handlers = new List<IProtocolHandler>();
         }
 
-        public void OnConnect(IChannel channel)
-        {
-            this.channel = channel;
-        }
-
-        public void OnDisconnect(IChannel channel)
+        public void Dispose()
         {
             ClearRegisterProtocols();
+            channel.Dispose();
+        }
+
+        public void Dispatcher()
+        {
+            channel.Dispatcher();
         }
 
         public void RegisterProtocol<T>() where T : IProtocolHandler, new()
@@ -31,11 +33,7 @@ namespace Zyq.Game.Base
             handlers.Add(handler);
         }
 
-        public void Dispose()
-        {
-            ClearRegisterProtocols();
-            channel.Dispose();
-        }
+
 
         public void RegisterHandler(ushort cmd, ChannelMessageDelegate handler)
         {
@@ -52,12 +50,18 @@ namespace Zyq.Game.Base
             channel.Send(cmd, buffer);
         }
 
+        public long ConnectionId
+        {
+            get { return channel.ChannelId; }
+        }
+
         private void ClearRegisterProtocols()
         {
             for (int i = 0; i < handlers.Count; ++i)
             {
                 handlers[i].Unregister();
             }
+
             handlers.Clear();
         }
     }

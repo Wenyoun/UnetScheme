@@ -5,12 +5,14 @@ namespace Zyq.Game.Base
 {
     public class Entities : IDisposable, IUpdate, IFixedUpdate
     {
+        private IWorld m_World;
         private List<uint> m_Temp;
         private List<Entity> m_EntityLts;
         private Dictionary<uint, Entity> m_EntityDys;
 
-        public Entities()
+        public Entities(IWorld world)
         {
+            m_World = world;
             m_Temp = new List<uint>();
             m_EntityLts = new List<Entity>();
             m_EntityDys = new Dictionary<uint, Entity>();
@@ -48,29 +50,32 @@ namespace Zyq.Game.Base
             }
         }
 
-        public Entity AddEntity(Entity entity)
+        public bool AddEntity(Entity entity)
         {
             uint entityId = entity.EntityId;
             if (!m_EntityDys.ContainsKey(entityId))
             {
                 m_EntityLts.Add(entity);
                 m_EntityDys.Add(entityId, entity);
+                entity.World = m_World;
                 entity.OnInit();
+                return true;
             }
 
-            return entity;
+            return false;
         }
 
-        public Entity RemoveEntity(uint eid)
+        public bool RemoveEntity(uint eid)
         {
             Entity entity;
             if (m_EntityDys.TryGetValue(eid, out entity))
             {
                 entity.IsRemove = true;
                 m_Temp.Add(entity.EntityId);
+                return true;
             }
 
-            return entity;
+            return false;
         }
 
         public Entity GetEntity(uint entityId)

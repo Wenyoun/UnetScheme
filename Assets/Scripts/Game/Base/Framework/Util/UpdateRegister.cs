@@ -31,6 +31,9 @@ namespace Zyq.Game.Base
             m_Updates.Clear();
             m_TempUpdates.Clear();
 
+            m_LateUpdates.Clear();
+            m_LateTempUpdates.Clear();
+
             m_FixedUpdates.Clear();
             m_TempFixedUpdates.Clear();
         }
@@ -42,9 +45,10 @@ namespace Zyq.Game.Base
                 m_TempUpdates.Clear();
                 m_TempUpdates.AddRange(m_Updates);
 
-                for (int i = 0; i < m_TempUpdates.Count; ++i)
+                int length = m_TempUpdates.Count;
+                for (int i = 0; i < length; ++i)
                 {
-                    m_TempUpdates[i](delta);
+                    m_TempUpdates[i].Invoke(delta);
                 }
             }
         }
@@ -56,9 +60,10 @@ namespace Zyq.Game.Base
                 m_LateTempUpdates.Clear();
                 m_LateTempUpdates.AddRange(m_LateUpdates);
 
-                for (int i = 0; i < m_LateTempUpdates.Count; ++i)
+                int length = m_LateTempUpdates.Count;
+                for (int i = 0; i < length; ++i)
                 {
-                    m_LateTempUpdates[i]();
+                    m_LateTempUpdates[i].Invoke();
                 }
             }
         }
@@ -70,9 +75,10 @@ namespace Zyq.Game.Base
                 m_TempFixedUpdates.Clear();
                 m_TempFixedUpdates.AddRange(m_FixedUpdates);
 
-                for (int i = 0; i < m_TempFixedUpdates.Count; ++i)
+                int length = m_TempFixedUpdates.Count;
+                for (int i = 0; i < length; ++i)
                 {
-                    m_TempFixedUpdates[i](delta);
+                    m_TempFixedUpdates[i].Invoke(delta);
                 }
             }
         }

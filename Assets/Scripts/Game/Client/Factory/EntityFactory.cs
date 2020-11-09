@@ -5,9 +5,9 @@ namespace Zyq.Game.Client
 {
     public sealed class EntityFactory
     {
-        public static Entity CreatePlayer(uint eid, Vector3 position)
+        public static Entity CreatePlayer(Vector3 position)
         {
-            Entity entity = new Entity(eid);
+            Entity entity = new Entity();
             entity.OnInit();
 
             entity.AddSyncAttribute(new BaseAttribute());

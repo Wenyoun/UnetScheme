@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Zyq.Game.Base
 {
     public abstract class AbsCop : ICop
     {
-        private static uint Start_Cop_Id = 1;
-
         private uint m_CopId;
         private IEntity m_Entity;
         private List<UpdateDelegate> m_Updates;
@@ -15,7 +13,7 @@ namespace Zyq.Game.Base
 
         public AbsCop()
         {
-            m_CopId = Start_Cop_Id++;
+            m_CopId = UniGenID.GenNextCopID();
             m_Updates = new List<UpdateDelegate>();
             m_FixedUpdates = new List<UpdateDelegate>();
             m_Msssages = new Dictionary<int, MsgDelegate>();
@@ -29,18 +27,13 @@ namespace Zyq.Game.Base
             while (it.MoveNext())
             {
                 KeyValuePair<int, MsgDelegate> pair = it.Current;
-                m_Entity.Msg.Unregister(pair.Key, pair.Value);
+                m_Entity.Message.Unregister(pair.Key, pair.Value);
             }
 
             int length = m_Updates.Count;
             for (int i = 0; i < length; ++i)
             {
                 m_Entity.Update.UnregisterUpdate(m_Updates[i]);
-            }
-
-            length = m_FixedUpdates.Count;
-            for (int i = 0; i < length; ++i)
-            {
                 m_Entity.Update.UnregisterFixedUpdate(m_FixedUpdates[i]);
             }
 
@@ -54,7 +47,7 @@ namespace Zyq.Game.Base
             if (!m_Msssages.ContainsKey(id))
             {
                 m_Msssages.Add(id, handler);
-                m_Entity.Msg.Register(id, handler);
+                m_Entity.Message.Register(id, handler);
             }
         }
 
@@ -63,7 +56,7 @@ namespace Zyq.Game.Base
             if (m_Msssages.TryGetValue(id, out MsgDelegate handler))
             {
                 m_Msssages.Remove(id);
-                m_Entity.Msg.Unregister(id, handler);
+                m_Entity.Message.Unregister(id, handler);
             }
         }
 
@@ -101,6 +94,21 @@ namespace Zyq.Game.Base
                 m_FixedUpdates.Remove(fixedUpdate);
                 m_Entity.Update.UnregisterFixedUpdate(fixedUpdate);
             }
+        }
+
+        public int RegisterTimer(float delay, Action func)
+        {
+            return m_Entity.Timer.Register(delay, func);
+        }
+
+        public int RegisterTimer(float delay, float interval, int count, Action func, Action finish = null)
+        {
+            return m_Entity.Timer.Register(delay, interval, count, func, finish);
+        }
+
+        public void UnregisterTimer(int id)
+        {
+            m_Entity.Timer.Unregister(id);
         }
 
         public uint CopId

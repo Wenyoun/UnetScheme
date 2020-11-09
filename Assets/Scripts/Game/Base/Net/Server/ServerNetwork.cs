@@ -35,7 +35,7 @@ namespace Zyq.Game.Base
             kcpUdpServer.Bind(port, new KcpConnect(OnKcpConnect, OnKcpDisconnect));
         }
 
-        public void CloseChannel(uint channelId)
+        public void CloseChannel(long channelId)
         {
             if (isDispose)
             {

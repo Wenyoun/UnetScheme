@@ -13,7 +13,7 @@ namespace Zyq.Game.Server
             for (int i = 1; i < 100; ++i)
             {
                 int k = i;
-                Server.Ins.Timer.Register(i, () =>
+                Entity.Timer.Register(i, () =>
                 {
                     attribute.Hp1 = k;
                     attribute.Hp11 = "yinhuyaong->" + k;
