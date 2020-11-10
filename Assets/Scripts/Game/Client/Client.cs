@@ -4,7 +4,9 @@ namespace Zyq.Game.Client
 {
     public class Client : ICompose
     {
+        #region single instance
         public static Client Ins;
+        #endregion
 
         private World m_World;
 
@@ -16,6 +18,7 @@ namespace Zyq.Game.Client
 
         public void OnInit()
         {
+            Connect("127.0.0.1", 50000);
         }
 
         public void OnRemove()
@@ -37,6 +40,11 @@ namespace Zyq.Game.Client
         public void OnLateUpdate()
         {
             m_World.OnLateUpdate();
+        }
+        
+        public void Connect(string host, int port)
+        {
+            m_World.Connect(host, port);
         }
 
         public void Send(ushort cmd, ByteBuffer buffer)

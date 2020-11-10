@@ -4,7 +4,9 @@ namespace Zyq.Game.Server
 {
     public class Server : ICompose
     {
+        #region single instance
         public static Server Ins;
+        #endregion
 
         private World m_World;
 
@@ -16,6 +18,7 @@ namespace Zyq.Game.Server
 
         public void OnInit()
         {
+            Bind(50000);
         }
 
         public void OnRemove()
@@ -29,14 +32,14 @@ namespace Zyq.Game.Server
             m_World.Bind(port);
         }
 
-        public void Send(Connection connection, ushort cmd, ByteBuffer buffer)
-        {
-            m_World.Send(connection, cmd, buffer);
-        }
-
         public void Broadcast(ushort cmd, ByteBuffer buffer)
         {
             m_World.Broadcast(cmd, buffer);
+        }
+
+        public void Send(Connection connection, ushort cmd, ByteBuffer buffer)
+        {
+            m_World.Send(connection, cmd, buffer);
         }
 
         public void OnUpdate(float delta)

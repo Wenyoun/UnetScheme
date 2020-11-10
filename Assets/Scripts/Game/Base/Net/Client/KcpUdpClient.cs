@@ -109,7 +109,7 @@ namespace Zyq.Game.Base
             }
 
             status = None;
-            con.Dispose();
+            con?.Dispose();
             SocketDispose();
             sendPacketQueue.Clear();
             recvPacketQueue.Clear();
@@ -173,7 +173,6 @@ namespace Zyq.Game.Base
             catch (Exception e)
             {
                 status = Error;
-                Dispose();
                 Debug.LogError(e.ToString());
             }
         }
@@ -201,10 +200,6 @@ namespace Zyq.Game.Base
             {
                 status = Error;
                 Debug.LogError(e.ToString());
-            }
-            finally
-            {
-                Dispose();
             }
         }
 
@@ -246,10 +241,6 @@ namespace Zyq.Game.Base
             {
                 status = Error;
                 Debug.LogError(e.ToString());
-            }
-            finally
-            {
-                Dispose();
             }
         }
 

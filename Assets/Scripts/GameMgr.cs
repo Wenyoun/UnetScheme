@@ -7,13 +7,11 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 {
     public static GameMgr Ins = new GameMgr();
 
-    private List<ICompose> mComposeLts;
-    private Dictionary<Type, ICompose> mComposeDys;
+    private List<ICompose> m_Composes;
 
     public GameMgr()
     {
-        mComposeLts = new List<ICompose>();
-        mComposeDys = new Dictionary<Type, ICompose>();
+        m_Composes = new List<ICompose>();
     }
 
     public void Config()
@@ -31,67 +29,78 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public void OnRemove()
     {
-        int length = mComposeLts.Count;
+        int length = m_Composes.Count;
         for (int i = 0; i < length; ++i)
         {
-            mComposeLts[i].OnRemove();
+            m_Composes[i].OnRemove();
         }
-        mComposeLts.Clear();
-        mComposeDys.Clear();
+        m_Composes.Clear();
         ProfilerManager.Dispose();
     }
 
     public void OnUpdate(float delta)
     {
-        int length = mComposeLts.Count;
+        int length = m_Composes.Count;
         for (int i = 0; i < length; ++i)
         {
-            mComposeLts[i].OnUpdate(delta);
+            m_Composes[i].OnUpdate(delta);
         }
     }
 
     public void OnLateUpdate()
     {
-        int length = mComposeLts.Count;
+        int length = m_Composes.Count;
         for (int i = 0; i < length; ++i)
         {
-            mComposeLts[i].OnLateUpdate();
+            m_Composes[i].OnLateUpdate();
         }
     }
 
     public void OnFixedUpdate(float delta)
     {
-        int length = mComposeLts.Count;
+        int length = m_Composes.Count;
         for (int i = 0; i < length; ++i)
         {
-            mComposeLts[i].OnFixedUpdate(delta);
+            m_Composes[i].OnFixedUpdate(delta);
         }
     }
 
     public T Add<T>() where T : ICompose, new()
     {
-        Type type = typeof(T);
-        if (!mComposeDys.ContainsKey(type))
+        ICompose compose = Find<T>();
+        if (compose == null)
         {
-            T compose = new T();
-            mComposeLts.Add(compose);
-            mComposeDys.Add(type, compose);
+            compose = new T();
+            m_Composes.Add(compose);
             compose.OnInit();
-            return compose;
         }
-
-        return default(T);
+        return (T) compose;
     }
 
     public void Remove<T>() where T : ICompose
     {
-        Type type = typeof(T);
-        ICompose compose;
-        if (mComposeDys.TryGetValue(type, out compose))
+        ICompose compose = Find<T>();
+        if (compose != null)
         {
-            mComposeLts.Remove(compose);
-            mComposeDys.Remove(type);
+            m_Composes.Remove(compose);
             compose.OnRemove();
         }
+    }
+
+    private ICompose Find<T>() where T : ICompose
+    {
+        Type t = typeof(T);
+        ICompose compose = null;
+        int length = m_Composes.Count;
+        for (int i = 0; i < length; ++i)
+        {
+            ICompose c = m_Composes[i];
+            if (c.GetType() == t)
+            {
+                compose = c;
+                break;
+            }
+        }
+        return compose;
     }
 }

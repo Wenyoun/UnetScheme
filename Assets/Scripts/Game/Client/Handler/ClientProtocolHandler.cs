@@ -6,37 +6,35 @@ namespace Zyq.Game.Client
 {
     public class ClientProtocolHandler : IProtocolHandler
     {
+        public World World { get; set; }
         public Connection Connection { get; set; }
 
         public void Register()
         {
-            Connection.RegisterHandler(NetMsgId.Sync_Attribute, OnSyncAttribute);
-
+            Connection.RegisterHandler(MsgId.Sync_Attribute, OnSyncAttribute);
             SendLoginReq();
         }
 
         public void Unregister()
         {
-            Connection.UnregisterHandler(NetMsgId.Sync_Attribute);
+            Connection.UnregisterHandler(MsgId.Sync_Attribute);
         }
 
         private void OnSyncAttribute(ChannelMessage msg)
         {
-            /**
             ByteBuffer buffer = msg.Buffer;
             uint eid = buffer.ReadUInt();
             uint syncId = buffer.ReadUInt();
-            Entity entity = Client.Ins.EntityMgr.GetEntity(eid);
+            Entity entity = World.GetEntity(eid);
             if (entity != null)
             {
-                ISyncAttribute attribute = entity.GetSyncAttribute<ISyncAttribute>(syncId);
+                ISyncAttribute attribute = entity.GetSyncAttribute(syncId);
                 if (attribute != null)
                 {
                     attribute.Deserialize(buffer);
                     entity.Dispatcher(MessageConstants.Sync_Attribute);
                 }
             }
-            **/
         }
 
         private void SendLoginReq()

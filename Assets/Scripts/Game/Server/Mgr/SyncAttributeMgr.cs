@@ -1,5 +1,6 @@
 ﻿using System;
 using Zyq.Game.Base;
+using Zyq.Game.Proto;
 using System.Collections.Generic;
 
 namespace Zyq.Game.Server
@@ -38,7 +39,7 @@ namespace Zyq.Game.Server
                                 buffer.Write(entity.EntityId);
                                 buffer.Write(attribute.SyncId);
                                 attribute.Serialize(buffer);
-                                Server.Ins.Broadcast(NetMsgId.Sync_Attribute, buffer);
+                                Server.Ins.Broadcast(MsgId.Sync_Attribute, buffer);
                             }
                         }
                     }

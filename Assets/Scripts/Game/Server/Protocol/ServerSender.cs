@@ -6,7 +6,7 @@ namespace Zyq.Game.Server
 {
     public class ServerSender
     {
-        [Send(NetMsgId.Msg_Login_Res)]
+        [Send(MsgId.Msg_Login_Res)]
         public static void RpcTargetLoginResult(Connection connection,
             byte v1,
             bool v2,

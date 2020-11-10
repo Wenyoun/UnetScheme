@@ -1,5 +1,6 @@
 ﻿using Zyq.Game.Base;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Zyq.Game.Server
 {
@@ -102,17 +103,17 @@ namespace Zyq.Game.Server
             get { return m_WorldId; }
         }
 
-        public TimerMgr WorldTimer
+        public TimerMgr Timer
         {
             get { return m_TimerMgr; }
         }
 
-        public UpdateMgr WorldUpdate
+        public UpdateMgr Update
         {
             get { return m_UpdateMgr; }
         }
 
-        public MessageMgr WorldMessage
+        public MessageMgr Message
         {
             get { return m_MessageMgr; }
         }
@@ -162,8 +163,8 @@ namespace Zyq.Game.Server
 
         public void OnClientDisconnect(IChannel channel)
         {
+            Connection connection;
             long connectionId = channel.ChannelId;
-            Connection connection = null;
             if (m_Connections.TryGetValue(connectionId, out connection))
             {
                 m_Connections.Remove(connectionId);
@@ -184,7 +185,6 @@ namespace Zyq.Game.Server
             {
                 its.Current.Value.Dispose();
             }
-
             m_Connections.Clear();
         }
     }

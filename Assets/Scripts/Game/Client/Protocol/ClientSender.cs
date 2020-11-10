@@ -6,7 +6,7 @@ namespace Zyq.Game.Client
 {
     public static class ClientSender
     {
-        [Send(NetMsgId.Msg_Login_Req)]
+        [Send(MsgId.Msg_Login_Req)]
         public static void RpcLogin(byte v1,
             bool v2,
             short v3,

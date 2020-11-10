@@ -144,14 +144,14 @@
             return m_SyncAttributes.GetSyncAttribute<T>();
         }
 
-        public T GetSyncAttribute<T>(uint syncId) where T : ISyncAttribute
+        public ISyncAttribute GetSyncAttribute(uint syncId)
         {
             if (m_isRemove)
             {
-                return default(T);
+                return null;
             }
 
-            return m_SyncAttributes.GetSyncAttribute<T>(syncId);
+            return m_SyncAttributes.GetSyncAttribute(syncId);
         }
 
         public T AddFeture<T>(T feture) where T : IFeture

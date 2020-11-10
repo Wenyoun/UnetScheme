@@ -119,6 +119,7 @@ namespace Zyq.Game.Base
             }
             else if (status == KcpUdpClient.Error)
             {
+                Debug.Log("11111111111111111111111111111111111111");
                 status = KcpUdpClient.None;
                 clientCallback.OnServerDisconnect(this);
                 Disconnect();

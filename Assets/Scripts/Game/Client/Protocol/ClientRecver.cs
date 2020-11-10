@@ -6,7 +6,7 @@ namespace Zyq.Game.Client
 {
     public static class ClientRecver
     {
-        [Recv(NetMsgId.Msg_Login_Res)]
+        [Recv(MsgId.Msg_Login_Res)]
         public static void OnLoginRsp(byte v1,
             bool v2,
             short v3,

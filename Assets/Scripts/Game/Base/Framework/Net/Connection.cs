@@ -5,64 +5,78 @@ namespace Zyq.Game.Base
 {
     public class Connection : IDisposable
     {
-        private IChannel channel;
-        private List<IProtocolHandler> handlers;
+        private IChannel m_Channel;
+        private List<IProtocolHandler> m_Handlers;
 
         public Connection(IChannel channel)
         {
-            this.channel = channel;
-            handlers = new List<IProtocolHandler>();
+            m_Channel = channel;
+            m_Handlers = new List<IProtocolHandler>();
         }
 
         public void Dispose()
         {
             ClearRegisterProtocols();
-            channel.Dispose();
+            m_Channel.Dispose();
         }
 
-        public void Dispatcher()
+        public T RegisterProtocol<T>() where T : IProtocolHandler, new()
         {
-            channel.Dispatcher();
+            if (IsNotFind<T>())
+            {
+                T handler = new T();
+                handler.Connection = this;
+                handler.Register();
+                m_Handlers.Add(handler);
+                return handler;
+            }
+            return default(T);
         }
-
-        public void RegisterProtocol<T>() where T : IProtocolHandler, new()
-        {
-            IProtocolHandler handler = new T();
-            handler.Connection = this;
-            handler.Register();
-            handlers.Add(handler);
-        }
-
-
 
         public void RegisterHandler(ushort cmd, ChannelMessageDelegate handler)
         {
-            channel.Register(cmd, handler);
+            m_Channel.Register(cmd, handler);
         }
 
         public void UnregisterHandler(ushort cmd)
         {
-            channel.Unregister(cmd);
+            m_Channel.Unregister(cmd);
         }
 
         public void Send(ushort cmd, ByteBuffer buffer)
         {
-            channel.Send(cmd, buffer);
+            m_Channel.Send(cmd, buffer);
         }
 
         public long ConnectionId
         {
-            get { return channel.ChannelId; }
+            get { return m_Channel.ChannelId; }
         }
 
         private void ClearRegisterProtocols()
         {
-            for (int i = 0; i < handlers.Count; ++i)
+            int length = m_Handlers.Count;
+            for (int i = 0; i < length; ++i)
             {
-                handlers[i].Unregister();
+                m_Handlers[i].Unregister();
             }
+            m_Handlers.Clear();
+        }
 
-            handlers.Clear();
+        private bool IsNotFind<T>() where T : IProtocolHandler
+        {
+            Type t = typeof(T);
+            bool isFind = true;
+            int length = m_Handlers.Count;
+            for (int i = 0; i < length; ++i)
+            {
+                if (t == m_Handlers[i].GetType())
+                {
+                    isFind = false;
+                    break;
+                }
+            }
+            return isFind;
         }
     }
 }

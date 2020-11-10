@@ -24,7 +24,7 @@
 
         T GetSyncAttribute<T>() where T : ISyncAttribute;
 
-        T GetSyncAttribute<T>(uint syncId) where T : ISyncAttribute;
+        ISyncAttribute GetSyncAttribute(uint syncId);
 
         T AddFeture<T>(T feture) where T : IFeture;
 

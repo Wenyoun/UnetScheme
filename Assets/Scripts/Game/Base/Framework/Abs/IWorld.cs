@@ -20,10 +20,10 @@ namespace Zyq.Game.Base
 
         void Dispatcher(int msgId, uint entityId, IBody body);
 
-        TimerMgr WorldTimer { get; }
+        TimerMgr Timer { get; }
 
-        UpdateMgr WorldUpdate { get; }
+        UpdateMgr Update { get; }
 
-        MessageMgr WorldMessage { get; }
+        MessageMgr Message { get; }
     }
 }

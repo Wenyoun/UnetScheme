@@ -1,4 +1,5 @@
-﻿using Zyq.Game.Base;
+﻿using UnityEngine;
+using Zyq.Game.Base;
 
 namespace Zyq.Game.Client
 {
@@ -10,6 +11,7 @@ namespace Zyq.Game.Client
 		private UpdateMgr m_UpdateMgr;
 		private MessageMgr m_MessageMgr;
 		private Connection m_Connection;
+		private ClientChannel m_Channel;
 
 		public World()
 		{
@@ -26,6 +28,7 @@ namespace Zyq.Game.Client
 			m_UpdateMgr.Dispose();
 			m_MessageMgr.Dispose();
 			m_Entities.Dispose();
+			m_Channel.Dispose();
 			m_Connection?.Dispose();
 		}
 
@@ -66,7 +69,7 @@ namespace Zyq.Game.Client
 
 		public void OnUpdate(float delta)
 		{
-			m_Connection?.Dispatcher();
+			m_Channel?.Dispatcher();
 			m_TimerMgr.OnUpdate(delta);
 			m_UpdateMgr.OnUpdate(delta);
 			m_Entities.OnUpdate(delta);
@@ -84,8 +87,11 @@ namespace Zyq.Game.Client
 
 		public void Connect(string host, int port)
 		{
-			ClientChannel channel = new ClientChannel(this);
-			channel.Connect(host, port);
+			if (m_Channel == null)
+			{
+				m_Channel = new ClientChannel(this);
+				m_Channel.Connect(host, port);
+			}
 		}
 
 		public void Send(ushort cmd, ByteBuffer buffer)
@@ -93,17 +99,17 @@ namespace Zyq.Game.Client
 			m_Connection?.Send(cmd, buffer);
 		}
 
-		public TimerMgr WorldTimer
+		public TimerMgr Timer
 		{
 			get { return m_TimerMgr; }
 		}
 
-		public UpdateMgr WorldUpdate
+		public UpdateMgr Update
 		{
 			get { return m_UpdateMgr; }
 		}
 
-		public MessageMgr WorldMessage
+		public MessageMgr Message
 		{
 			get { return m_MessageMgr; }
 		}
@@ -135,7 +141,7 @@ namespace Zyq.Game.Client
 		private void RegisterProtocols(Connection connection)
 		{
 			connection.RegisterProtocol<AutoProtocolHandler>();
-			connection.RegisterProtocol<ClientProtocolHandler>();
+			connection.RegisterProtocol<ClientProtocolHandler>().World = this;
 		}
 	}
 }
