@@ -1,4 +1,4 @@
-﻿namespace Zyq.Game.Base.Protocol
+﻿namespace Zyq.Game.Proto
 {
     public enum Login
     {

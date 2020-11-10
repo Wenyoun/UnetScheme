@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
-using Zyq.Game.Base.Protocol;
-using UnityEngine.Networking;
+using Zyq.Game.Proto;
 
 namespace Zyq.Game.Server
 {

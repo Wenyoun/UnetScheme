@@ -1,7 +1,8 @@
 {
     "name": "Zyq.Game.Client",
     "references": [
-        "Zyq.Game.Base"
+        "Zyq.Game.Base",
+        "Zyq.Game.Proto"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

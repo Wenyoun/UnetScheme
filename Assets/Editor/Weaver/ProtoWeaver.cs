@@ -2,11 +2,11 @@
 
 namespace Zyq.Weaver
 {
-    public class BaseWeaver
+    public class ProtoWeaver
     {
         public static bool Weave(ModuleDefinition module)
         {
-            return StructProcessor.Weave(module);
+            return ProtoProcessor.Weave(module);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
-    public class StructProcessor
+    public class ProtoProcessor
     {
         public static bool Weave(ModuleDefinition module)
         {
@@ -13,7 +13,7 @@ namespace Zyq.Weaver
             {
                 if (!type.IsEnum &&
                     type.IsValueType &&
-                    type.ToString().IndexOf("Zyq.Game.Base.Protocol") >= 0)
+                    type.Namespace == "Zyq.Game.Proto")
                 {
                     structs.Add(type);
                 }

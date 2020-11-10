@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Zyq.Game.Base
+﻿namespace Zyq.Game.Base
 {
     public static class UniGenID
     {

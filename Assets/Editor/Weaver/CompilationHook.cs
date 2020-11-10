@@ -21,7 +21,7 @@ namespace Zyq.Weaver
         {
             if (state == PlayModeStateChange.ExitingEditMode)
             {
-                CompilationHook.CheckWeaveAssemblies(WeaverProgram.Base);
+                CompilationHook.CheckWeaveAssemblies(WeaverProgram.Proto);
                 CompilationHook.CheckWeaveAssemblies(WeaverProgram.Client);
                 CompilationHook.CheckWeaveAssemblies(WeaverProgram.Server);
             }
@@ -57,7 +57,7 @@ namespace Zyq.Weaver
                 return;
             }
 
-            if (assemblyPath.IndexOf(WeaverProgram.Base) == -1 &&
+            if (assemblyPath.IndexOf(WeaverProgram.Proto) == -1 &&
                 assemblyPath.IndexOf(WeaverProgram.Client) == -1 &&
                 assemblyPath.IndexOf(WeaverProgram.Server) == -1)
             {

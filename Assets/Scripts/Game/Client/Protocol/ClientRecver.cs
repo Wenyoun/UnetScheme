@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
-using Zyq.Game.Base.Protocol;
+using Zyq.Game.Proto;
 
 namespace Zyq.Game.Client
 {
@@ -38,4 +38,5 @@ namespace Zyq.Game.Client
                       v17.Password + "," + v17.Final + "," + k);
         }
     }
+    
 }
