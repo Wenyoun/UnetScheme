@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Zyq.Game.Base;
-using Zyq.Game.Proto;
 
 namespace Zyq.Game.Client
 {
@@ -48,6 +47,7 @@ namespace Zyq.Game.Client
                 }
 
                 LoginData v2 = new LoginData();
+                v2.Final = 99;
 
                 for (int j = 0; j < 1; ++j)
                 {
@@ -70,8 +70,6 @@ namespace Zyq.Game.Client
                 {
                     v2.Logins[j] = (Login) (j % 3);
                 }
-
-                v2.Final = i;
 
                 ClientSender.RpcLogin(1,
                     true,

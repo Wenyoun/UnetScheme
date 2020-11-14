@@ -46,12 +46,32 @@ namespace Zyq.Weaver
 
         public static bool IsBaseType(TypeDefinition type)
         {
-            return type.IsEnum || Mappers.ContainsKey(type.ToString());
+            return type.IsEnum || Mappers.ContainsKey(type.FullName);
         }
 
         public static bool IsSystemBaseType(TypeDefinition type)
         {
             return type.IsEnum || (Mappers.ContainsKey(type.FullName) && type.FullName.IndexOf("System.") >= 0);
+        }
+        
+        public static string GetWriteMethodName(string type)
+        {
+            TypeWrapper wrapper = null;
+            if (Mappers.TryGetValue(type, out wrapper))
+            {
+                return wrapper.writeMethod;
+            }
+            return null;
+        }
+
+        public static string GetReadMethodName(string type)
+        {
+            TypeWrapper wrapper = null;
+            if (Mappers.TryGetValue(type, out wrapper))
+            {
+                return wrapper.readMethod;
+            }
+            return null;
         }
 
         public static Instruction CreateReadInstruction(ModuleDefinition module, ILProcessor processor, TypeDefinition type)

@@ -25,22 +25,6 @@ namespace Zyq.Weaver
             return dependencyPaths;
         }
 
-        //找到Networking模块目录
-        public static string FindNetworkingRuntime()
-        {
-            foreach (Assembly unityAsm in CompilationPipeline.GetAssemblies())
-            {
-                foreach (string unityAsmRef in unityAsm.compiledAssemblyReferences)
-                {
-                    if (unityAsmRef.EndsWith("UnityEngine.Networking.dll"))
-                    {
-                        return unityAsmRef;
-                    }
-                }
-            }
-            throw new System.Exception("Not found UnityEngine.Networking.dll");
-        }
-
         //找到Base模块目录
         public static string FindBaseRuntime()
         {

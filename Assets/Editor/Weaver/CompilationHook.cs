@@ -21,9 +21,8 @@ namespace Zyq.Weaver
         {
             if (state == PlayModeStateChange.ExitingEditMode)
             {
-                CompilationHook.CheckWeaveAssemblies(WeaverProgram.Proto);
-                CompilationHook.CheckWeaveAssemblies(WeaverProgram.Client);
-                CompilationHook.CheckWeaveAssemblies(WeaverProgram.Server);
+                CheckWeaveAssemblies(WeaverProgram.Client);
+                CheckWeaveAssemblies(WeaverProgram.Server);
             }
         }
 
@@ -57,8 +56,7 @@ namespace Zyq.Weaver
                 return;
             }
 
-            if (assemblyPath.IndexOf(WeaverProgram.Proto) == -1 &&
-                assemblyPath.IndexOf(WeaverProgram.Client) == -1 &&
+            if (assemblyPath.IndexOf(WeaverProgram.Client) == -1 &&
                 assemblyPath.IndexOf(WeaverProgram.Server) == -1)
             {
                 return;
@@ -73,6 +71,8 @@ namespace Zyq.Weaver
             bool result = WeaverProgram.WeaveAssemblies(unityEngineCoreModuleRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray());
             string module = Path.GetFileName(assemblyPath);
             SessionState.SetBool(module, result);
+            
+            UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
         }
     }
-}
+    }

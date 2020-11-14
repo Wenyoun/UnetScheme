@@ -75,11 +75,12 @@ namespace Zyq.Weaver
                                 }
                                 else if (parmType.IsValueType)
                                 {
+                                    MethodDefinition deserialize = StructMethodFactory.CreateDeserialize(module, parmType);
                                     processor.Append(processor.Create(OpCodes.Ldloca, index));
                                     processor.Append(processor.Create(OpCodes.Initobj, module.ImportReference(parmType)));
                                     processor.Append(processor.Create(OpCodes.Ldloca, index));
                                     processor.Append(processor.Create(OpCodes.Ldloc_0));
-                                    processor.Append(processor.Create(OpCodes.Call, StructMethodFactory.FindDeserialize(module, parmType)));
+                                    processor.Append(processor.Create(OpCodes.Call,module.ImportReference(deserialize)));
                                 }
                             }
                         }

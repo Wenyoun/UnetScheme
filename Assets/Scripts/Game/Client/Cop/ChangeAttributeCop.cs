@@ -1,5 +1,4 @@
 ﻿using Zyq.Game.Base;
-using Zyq.Game.Proto;
 
 namespace Zyq.Game.Client
 {

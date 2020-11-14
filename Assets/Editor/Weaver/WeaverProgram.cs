@@ -9,7 +9,6 @@ namespace Zyq.Weaver
     {
         #region User Module
         public const string Base = "Zyq.Game.Base.dll";
-        public const string Proto = "Zyq.Game.Proto.dll";
         public const string Server = "Zyq.Game.Server.dll";
         public const string Client = "Zyq.Game.Client.dll";
         #endregion
@@ -141,26 +140,22 @@ namespace Zyq.Weaver
 
         private static bool WeaveModule(ModuleDefinition module, string baseModuleRuntimeDLL)
         {
-            if (module.Name.EndsWith(Proto))
-            {
-                BaseAssembly = AssemblyDefinition.ReadAssembly(baseModuleRuntimeDLL);
-                SetupBaseModuleTypes();
-                return ProtoWeaver.Weave(module);
-            }
-            else if (module.Name.EndsWith(Client))
+            if (module.Name.EndsWith(Client))
             {
                 BaseAssembly = AssemblyDefinition.ReadAssembly(baseModuleRuntimeDLL);
                 SetupBaseModuleTypes();
                 SetupClientModuleTypes();
                 return ClientWeaver.Weave(module);
             }
-            else if (module.Name.EndsWith(Server))
+            
+            if (module.Name.EndsWith(Server))
             {
                 BaseAssembly = AssemblyDefinition.ReadAssembly(baseModuleRuntimeDLL);
                 SetupBaseModuleTypes();
                 SetupServerModuleTypes();
                 return ServerWeaver.Weave(module);
             }
+            
             return false;
         }
         

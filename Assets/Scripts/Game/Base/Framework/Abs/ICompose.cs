@@ -27,11 +27,6 @@
         bool IsUpdate { get; set; }
     }
 
-    public interface ICanFixedUpdate
-    {
-        bool IsFixedUpdate { get; set; }
-    }
-
     public interface ICompose : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
     {
     }

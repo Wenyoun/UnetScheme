@@ -1,6 +1,5 @@
 ﻿using System;
 using Zyq.Game.Base;
-using Zyq.Game.Proto;
 using System.Collections.Generic;
 
 namespace Zyq.Game.Server
