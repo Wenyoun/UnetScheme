@@ -2,7 +2,7 @@
 {
     public interface IProtocolHandler
     {
-        Connection Connection { get; set; }
+        Connection Connection { set; }
 
         void Register();
 

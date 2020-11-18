@@ -19,6 +19,7 @@ namespace Zyq.Game.Client
         public void OnInit()
         {
             Connect("127.0.0.1", 50000);
+            m_World.OnInit();
         }
 
         public void OnRemove()

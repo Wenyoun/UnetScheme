@@ -18,6 +18,7 @@ namespace Zyq.Game.Server
 
         public void OnInit()
         {
+            m_World.OnInit();
             Bind(50000);
         }
 

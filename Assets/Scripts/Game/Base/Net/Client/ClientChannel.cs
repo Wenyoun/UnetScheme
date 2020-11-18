@@ -85,7 +85,7 @@ namespace Zyq.Game.Base
                         ByteBuffer byteBuffer = packet.Buffer;
                         if (handlers.TryGetValue(packet.Cmd, out ChannelMessageDelegate handler))
                         {
-                            handler(new ChannelMessage(cmd, byteBuffer, this));
+                            handler.Invoke(new ChannelMessage(cmd, byteBuffer));
                         }
                     }
                 }

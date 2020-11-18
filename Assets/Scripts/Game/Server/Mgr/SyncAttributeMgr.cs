@@ -1,31 +1,18 @@
-﻿using System;
-using Zyq.Game.Base;
+﻿using Zyq.Game.Base;
 using System.Collections.Generic;
 
 namespace Zyq.Game.Server
 {
-    public class SyncAttributeMgr : IUpdate, IDisposable
+    public static class SyncAttributeMgr
     {
-        private World m_World;
-
-        public SyncAttributeMgr(World world)
+        public static void OnUpdate(World world, List<Entity> entities, float delta)
         {
-            m_World = world;
-        }
-
-        public void Dispose()
-        {
-            m_World = null;
-        }
-
-        public void OnUpdate(float delta)
-        {
-            List<Entity> entitys = m_World.Entitys;
-            if (entitys != null)
+            if (entities != null)
             {
-                for (int i = 0; i < entitys.Count; ++i)
+                int length = entities.Count;
+                for (int i = 0; i < length; ++i)
                 {
-                    Entity entity = entitys[i];
+                    Entity entity = entities[i];
                     List<ISyncAttribute> attributes = entity.Sync.Attributes;
                     if (attributes.Count > 0)
                     {
@@ -38,7 +25,7 @@ namespace Zyq.Game.Server
                                 buffer.Write(entity.EntityId);
                                 buffer.Write(attribute.SyncId);
                                 attribute.Serialize(buffer);
-                                Server.Ins.Broadcast(MsgId.Sync_Attribute, buffer);
+                                world.Broadcast(MsgID.Sync_Attribute, buffer);
                             }
                         }
                     }

@@ -66,17 +66,17 @@ namespace Zyq.Game.Base
         private bool IsNotFind<T>() where T : IProtocolHandler
         {
             Type t = typeof(T);
-            bool isFind = true;
+            bool isNotFind = true;
             int length = m_Handlers.Count;
             for (int i = 0; i < length; ++i)
             {
                 if (t == m_Handlers[i].GetType())
                 {
-                    isFind = false;
+                    isNotFind = false;
                     break;
                 }
             }
-            return isFind;
+            return isNotFind;
         }
     }
 }

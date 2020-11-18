@@ -2,28 +2,34 @@
 
 namespace Zyq.Game.Base
 {
-    public interface IWorld : IDisposable, IUpdate, ILateUpdate, IFixedUpdate
-    {
-        int WorldId { get; }
+	public interface IWorld : IDisposable, IUpdate, ILateUpdate, IFixedUpdate
+	{
+		int WorldId { get; }
 
-        void AddEntity(Entity entity);
+		void OnInit();
 
-        void RemoveEntity(uint entityId);
+		void AddWorldLogic<T>() where T : IWorldLogic, new();
 
-        Entity GetEntity(uint entityId);
+		void RemoveWorldLogic<T>() where T : IWorldLogic, new();
 
-        void Dispatcher(int msgId);
+		void AddEntity(Entity entity);
 
-        void Dispatcher(int msgId, IBody body);
+		void RemoveEntity(uint entityId);
 
-        void Dispatcher(int msgId, uint entityId);
+		Entity GetEntity(uint entityId);
 
-        void Dispatcher(int msgId, uint entityId, IBody body);
+		void Dispatcher(int msgId);
 
-        TimerMgr Timer { get; }
+		void Dispatcher(int msgId, IBody body);
 
-        UpdateMgr Update { get; }
+		void Dispatcher(int msgId, uint entityId);
 
-        MessageMgr Message { get; }
-    }
+		void Dispatcher(int msgId, uint entityId, IBody body);
+
+		TimerMgr Timer { get; }
+
+		UpdateMgr Update { get; }
+
+		MessageMgr Message { get; }
+	}
 }

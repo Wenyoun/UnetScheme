@@ -49,7 +49,7 @@ public static class ProtoCopy
 				{
 					LoadFiles(root, dir);
 				}
-				else
+				else if(File.Exists(dir))
 				{
 					if (dir.EndsWith(".cs"))
 					{

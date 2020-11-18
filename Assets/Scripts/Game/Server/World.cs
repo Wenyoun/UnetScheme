@@ -1,121 +1,36 @@
 ﻿using Zyq.Game.Base;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Zyq.Game.Server
 {
-    public class World : IWorld, IServerCallback
+    public class World : AbsWorld, IServerCallback
     {
-        private int m_WorldId;
-        private Entities m_Entities;
-        private TimerMgr m_TimerMgr;
-        private UpdateMgr m_UpdateMgr;
-        private MessageMgr m_MessageMgr;
         private ServerNetwork m_Network;
-        private SyncAttributeMgr m_SyncAttributeMgr;
         private Dictionary<long, Connection> m_Connections;
 
-        public World()
+        public World() : base(1)
         {
-            m_WorldId = 1;
-            m_Entities = new Entities(this);
-            m_TimerMgr = new TimerMgr();
-            m_UpdateMgr = new UpdateMgr();
-            m_MessageMgr = new MessageMgr();
             m_Network = new ServerNetwork(this);
-            m_SyncAttributeMgr = new SyncAttributeMgr(this);
             m_Connections = new Dictionary<long, Connection>();
         }
 
-        public void Dispose()
+        public override void OnInit()
         {
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
             ClearConnections();
             m_Network.Dispose();
-            m_TimerMgr.Dispose();
-            m_UpdateMgr.Dispose();
-            m_MessageMgr.Dispose();
-            m_SyncAttributeMgr.Dispose();
-            m_Entities.Dispose();
             m_Connections.Clear();
         }
 
-        public void AddEntity(Entity entity)
-        {
-            m_Entities.AddEntity(entity);
-        }
-
-        public void RemoveEntity(uint eid)
-        {
-            m_Entities.RemoveEntity(eid);
-        }
-
-        public Entity GetEntity(uint entityId)
-        {
-            return m_Entities.GetEntity(entityId);
-        }
-
-        public void Dispatcher(int msgId)
-        {
-            m_Entities.Dispatcher(msgId, 0, null);
-        }
-
-        public void Dispatcher(int mid, uint eid)
-        {
-            m_Entities.Dispatcher(mid, eid, null);
-        }
-
-        public void Dispatcher(int mid, IBody body)
-        {
-            m_Entities.Dispatcher(mid, 0, body);
-        }
-
-        public void Dispatcher(int mid, uint eid, IBody body)
-        {
-            m_Entities.Dispatcher(mid, eid, body);
-        }
-
-        public void OnUpdate(float delta)
+        public override void OnUpdate(float delta)
         {
             m_Network.OnUpdate();
-            m_TimerMgr.OnUpdate(delta);
-            m_UpdateMgr.OnUpdate(delta);
-            m_Entities.OnUpdate(delta);
-            m_SyncAttributeMgr.OnUpdate(delta);
-        }
-
-        public void OnFixedUpdate(float delta)
-        {
-            m_Entities.OnFixedUpdate(delta);
-        }
-
-        public void OnLateUpdate()
-        {
-            m_UpdateMgr.OnLateUpdate();
-        }
-
-        public List<Entity> Entitys
-        {
-            get { return m_Entities.Entitys; }
-        }
-
-        public int WorldId
-        {
-            get { return m_WorldId; }
-        }
-
-        public TimerMgr Timer
-        {
-            get { return m_TimerMgr; }
-        }
-
-        public UpdateMgr Update
-        {
-            get { return m_UpdateMgr; }
-        }
-
-        public MessageMgr Message
-        {
-            get { return m_MessageMgr; }
+            base.OnUpdate(delta);
+            SyncAttributeMgr.OnUpdate(this, m_Entities.Entitys, delta);
         }
 
         public void Bind(int port)
@@ -185,6 +100,7 @@ namespace Zyq.Game.Server
             {
                 its.Current.Value.Dispose();
             }
+
             m_Connections.Clear();
         }
     }

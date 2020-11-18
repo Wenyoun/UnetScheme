@@ -15,8 +15,6 @@ namespace Zyq.Game.Server
                 Entity.Timer.Register(i, () =>
                 {
                     attribute.Hp1 = k;
-                    attribute.Hp11 = "yinhuyaong->" + k;
-                    attribute.Hp12 = new Vector3(k, k, k);
                 });
             }
         }

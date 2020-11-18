@@ -9,13 +9,11 @@ namespace Zyq.Game.Base
     {
         public int Cmd;
         public ByteBuffer Buffer;
-        public IChannel Channel;
 
-        public ChannelMessage(int cmd, ByteBuffer buffer, IChannel channel)
+        public ChannelMessage(int cmd, ByteBuffer buffer)
         {
             Cmd = cmd;
             Buffer = buffer;
-            Channel = channel;
         }
     }
 

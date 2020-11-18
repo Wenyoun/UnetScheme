@@ -10,13 +10,12 @@ namespace Zyq.Game.Client
 
         public void Register()
         {
-            Connection.RegisterHandler(MsgId.Sync_Attribute, OnSyncAttribute);
-            SendLoginReq();
+            Connection.RegisterHandler(MsgID.Sync_Attribute, OnSyncAttribute);
         }
 
         public void Unregister()
         {
-            Connection.UnregisterHandler(MsgId.Sync_Attribute);
+            Connection.UnregisterHandler(MsgID.Sync_Attribute);
         }
 
         private void OnSyncAttribute(ChannelMessage msg)
@@ -33,61 +32,6 @@ namespace Zyq.Game.Client
                     attribute.Deserialize(buffer);
                     entity.Dispatcher(MessageConstants.Sync_Attribute);
                 }
-            }
-        }
-
-        private void SendLoginReq()
-        {
-            for (int i = 0; i < 1; ++i)
-            {
-                int[] v1 = new int[1];
-                for (int j = 0; j < v1.Length; ++j)
-                {
-                    v1[j] = j + 1;
-                }
-
-                LoginData v2 = new LoginData();
-                v2.Final = 99;
-
-                for (int j = 0; j < 1; ++j)
-                {
-                    v2.Username += "username" + i;
-                }
-
-                for (int j = 0; j < 1; ++j)
-                {
-                    v2.Password += "password" + i;
-                }
-
-                v2.Scores = new int[1];
-                for (int j = 0; j < v2.Scores.Length; ++j)
-                {
-                    v2.Scores[j] = j + 1;
-                }
-
-                v2.Logins = new Login[1];
-                for (int j = 0; j < v2.Logins.Length; ++j)
-                {
-                    v2.Logins[j] = (Login) (j % 3);
-                }
-
-                ClientSender.RpcLogin(1,
-                    true,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8,
-                    9,
-                    "10",
-                    Vector2.one,
-                    Vector3.one,
-                    Vector4.one,
-                    Quaternion.identity,
-                    v1,
-                    v2);
             }
         }
     }
