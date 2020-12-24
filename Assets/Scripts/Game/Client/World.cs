@@ -12,14 +12,13 @@ namespace Zyq.Game.Client
 			m_Channel = new ClientChannel(this);
 		}
 
-		public override void OnInit()
+		protected override void Init()
 		{
-			AddWorldLogic<ConnectLogic>();
+			LogicManager.AddLogic<ConnectLogic>();
 		}
 
-		public override void Dispose()
+		protected override void Clear()
 		{
-			base.Dispose();
 			m_Channel.Dispose();
 			m_Connection?.Dispose();
 		}
@@ -50,14 +49,14 @@ namespace Zyq.Game.Client
 			{
 				m_Connection = new Connection(channel);
 				RegisterProtocols(m_Connection);
-				Message.Dispatcher(MessageConstants.Connect_Success);
+				Messager.Dispatcher(MessageConstants.Connect_Success);
 			}
 		}
 
 		public void OnServerDisconnect(IChannel channel)
 		{
 			m_Connection?.Dispose();
-			Message.Dispatcher(MessageConstants.Connect_Error);
+			Messager.Dispatcher(MessageConstants.Connect_Error);
 		}
 
 		private void RegisterProtocols(Connection connection)

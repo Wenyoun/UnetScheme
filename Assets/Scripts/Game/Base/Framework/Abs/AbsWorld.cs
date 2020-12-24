@@ -2,44 +2,36 @@
 {
 	public abstract class AbsWorld : IWorld
 	{
-		protected int m_WorldId;
-		protected Entities m_Entities;
-		protected TimerMgr m_TimerMgr;
-		protected UpdateMgr m_UpdateMgr;
-		protected MessageMgr m_MessageMgr;
-		protected WorldLogicMgr m_WorldLogicMgr;
+		private int m_Wid;
+		private Entities m_Entities;
+		private TimerRegister m_Timer;
+		private UpdaterRegister m_Updater;
+		private MessagerRegister m_Messager;
+		private WorldLogicManager m_LogicManager;
 
-		public AbsWorld(int worldId)
+		public AbsWorld(int wid)
 		{
-			m_WorldId = worldId;
-			m_TimerMgr = new TimerMgr();
-			m_UpdateMgr = new UpdateMgr();
-			m_MessageMgr = new MessageMgr();
-			m_WorldLogicMgr = new WorldLogicMgr(this);
+			m_Wid = wid;
+			m_Timer = new TimerRegister();
+			m_Updater = new UpdaterRegister();
+			m_Messager = new MessagerRegister();
+			m_LogicManager = new WorldLogicManager(this);
 			m_Entities = new Entities(this);
 		}
 
-		public virtual void OnInit()
+		public void OnInit()
 		{
+			Init();
 		}
 
-		public virtual void Dispose()
+		public void Dispose()
 		{
-			m_WorldLogicMgr.Dispose();
-			m_TimerMgr.Dispose();
-			m_UpdateMgr.Dispose();
-			m_MessageMgr.Dispose();
+			Clear();
+			m_Timer.Dispose();
+			m_Updater.Dispose();
+			m_Messager.Dispose();
 			m_Entities.Dispose();
-		}
-
-		public void AddWorldLogic<T>() where T : IWorldLogic, new()
-		{
-			m_WorldLogicMgr.AddLogic<T>();
-		}
-
-		public void RemoveWorldLogic<T>() where T : IWorldLogic, new()
-		{
-			m_WorldLogicMgr.RemoveLogic<T>();
+			m_LogicManager.Dispose();
 		}
 
 		public void AddEntity(Entity entity)
@@ -57,61 +49,61 @@
 			return m_Entities.GetEntity(eid);
 		}
 
-		public void Dispatcher(int msgId)
+		public void Dispatcher(int msgId, IBody body = null)
 		{
-			m_Entities.Dispatcher(msgId, 0, null);
-		}
-
-		public void Dispatcher(int msgId, uint entityId)
-		{
-			m_Entities.Dispatcher(msgId, entityId, null);
-		}
-
-		public void Dispatcher(int msgId, IBody body)
-		{
-			m_Entities.Dispatcher(msgId, 0, body);
-		}
-
-		public void Dispatcher(int msgId, uint eid, IBody body)
-		{
-			m_Entities.Dispatcher(msgId, eid, body);
+			m_Messager.Dispatcher(msgId, body);
 		}
 
 		public virtual void OnUpdate(float delta)
 		{
-			m_TimerMgr.OnUpdate(delta);
-			m_UpdateMgr.OnUpdate(delta);
+			m_Timer.OnUpdate(delta);
+			m_Updater.OnUpdate(delta);
+			m_Messager.OnUpdate(delta);
 			m_Entities.OnUpdate(delta);
 		}
 
 		public virtual void OnFixedUpdate(float delta)
 		{
+			m_Updater.OnFixedUpdate(delta);
 			m_Entities.OnFixedUpdate(delta);
 		}
 
 		public virtual void OnLateUpdate()
 		{
-			m_UpdateMgr.OnLateUpdate();
 		}
 
-		public int WorldId
+		public int Wid
 		{
-			get { return m_WorldId; }
+			get { return m_Wid; }
 		}
 
-		public TimerMgr Timer
+		public Entities Entities
 		{
-			get { return m_TimerMgr; }
+			get { return m_Entities; }
 		}
 
-		public UpdateMgr Update
+		public TimerRegister Timer
 		{
-			get { return m_UpdateMgr; }
+			get { return m_Timer; }
 		}
 
-		public MessageMgr Message
+		public UpdaterRegister Updater
 		{
-			get { return m_MessageMgr; }
+			get { return m_Updater; }
 		}
+
+		public MessagerRegister Messager
+		{
+			get { return m_Messager; }
+		}
+
+		public WorldLogicManager LogicManager
+		{
+			get { return m_LogicManager; }
+		}
+
+		protected abstract void Init();
+
+		protected abstract void Clear();
 	}
 }

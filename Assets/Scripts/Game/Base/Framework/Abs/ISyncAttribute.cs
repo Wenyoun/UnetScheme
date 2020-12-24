@@ -1,12 +1,10 @@
-﻿using UnityEngine.Networking;
-
-namespace Zyq.Game.Base
+﻿namespace Zyq.Game.Base
 {
     public interface ISyncAttribute
     {
-        uint SyncId { get; }
+        long GetSyncId();
         
-        bool IsSerialize();
+        bool IsDirty();
 
         void Serialize(ByteBuffer writer);
 

@@ -58,7 +58,7 @@ namespace Zyq.Game.Base
             int length = m_Handlers.Count;
             for (int i = 0; i < length; ++i)
             {
-                m_Handlers[i].Unregister();
+                m_Handlers[i].UnRegister();
             }
             m_Handlers.Clear();
         }

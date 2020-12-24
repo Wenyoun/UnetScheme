@@ -12,7 +12,7 @@ namespace Zyq.Game.Server
         {
         }
 
-        public void Unregister()
+        public void UnRegister()
         {
         }
     }

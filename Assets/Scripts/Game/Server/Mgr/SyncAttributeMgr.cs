@@ -19,11 +19,11 @@ namespace Zyq.Game.Server
                         for (int j = 0; j < attributes.Count; ++j)
                         {
                             ISyncAttribute attribute = attributes[j];
-                            if (attribute.IsSerialize())
+                            if (attribute.IsDirty())
                             {
                                 ByteBuffer buffer = ByteBuffer.Allocate(1400);
                                 buffer.Write(entity.EntityId);
-                                buffer.Write(attribute.SyncId);
+                                buffer.Write(attribute.GetSyncId());
                                 attribute.Serialize(buffer);
                                 world.Broadcast(MsgID.Sync_Attribute, buffer);
                             }

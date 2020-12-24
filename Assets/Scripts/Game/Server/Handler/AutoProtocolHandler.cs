@@ -7,6 +7,6 @@ namespace Zyq.Game.Server
     {
         public Connection Connection { get; set; }
         public void Register() { }
-        public void Unregister() { }
+        public void UnRegister() { }
     }
 }

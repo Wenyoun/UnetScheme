@@ -5,7 +5,9 @@ namespace Zyq.Game.Client
     public class Client : ICompose
     {
         #region single instance
+
         public static Client Ins;
+
         #endregion
 
         private World m_World;
@@ -42,7 +44,7 @@ namespace Zyq.Game.Client
         {
             m_World.OnLateUpdate();
         }
-        
+
         public void Connect(string host, int port)
         {
             m_World.Connect(host, port);

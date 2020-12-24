@@ -6,17 +6,17 @@ namespace Zyq.Game.Client
     {
         private World m_World;
 
-        public void OnInit(IWorld world)
+        public void Init(IWorld world)
         {
             m_World = (World) world;
-            m_World.Message.Register(MessageConstants.Connect_Success, OnConnectSuccess);
-            m_World.Message.Register(MessageConstants.Connect_Error, OnConnectError);
+            m_World.Messager.Register(MessageConstants.Connect_Success, OnConnectSuccess);
+            m_World.Messager.Register(MessageConstants.Connect_Error, OnConnectError);
         }
 
-        public void OnRemove()
+        public void Clear()
         {
-            m_World.Message.Unregister(MessageConstants.Connect_Success, OnConnectSuccess);
-            m_World.Message.Unregister(MessageConstants.Connect_Error, OnConnectError);
+            m_World.Messager.UnRegister(MessageConstants.Connect_Success, OnConnectSuccess);
+            m_World.Messager.UnRegister(MessageConstants.Connect_Error, OnConnectError);
             m_World = null;
         }
 

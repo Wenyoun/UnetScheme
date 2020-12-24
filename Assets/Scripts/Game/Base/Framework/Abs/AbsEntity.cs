@@ -13,9 +13,8 @@
         private Attributes m_Attributes;
         private SyncAttributes m_SyncAttributes;
 
-        private MsgRegister m_MsgRegister;
-        private TimerRegister m_TimerRegister;
-        private UpdateRegister m_UpdateRegister;
+        private TimerRegister m_Timer;
+        private UpdaterRegister m_Updater;
 
         public AbsEntity()
         {
@@ -29,9 +28,8 @@
             m_Attributes = new Attributes();
             m_SyncAttributes = new SyncAttributes();
 
-            m_MsgRegister = new MsgRegister();
-            m_TimerRegister = new TimerRegister();
-            m_UpdateRegister = new UpdateRegister();
+            m_Timer = new TimerRegister();
+            m_Updater = new UpdaterRegister();
         }
 
         public T AddCop<T>(T cop) where T : ICop
@@ -40,7 +38,6 @@
             {
                 return default(T);
             }
-
             return m_Cops.AddCop<T>(cop, this);
         }
 
@@ -50,7 +47,6 @@
             {
                 return default(T);
             }
-
             return m_Cops.AddCop<T>(this);
         }
 
@@ -60,7 +56,6 @@
             {
                 return;
             }
-
             m_Cops.RemoveCop<T>();
         }
 
@@ -70,7 +65,6 @@
             {
                 return;
             }
-
             m_Cops.RemoveCops();
         }
 
@@ -80,7 +74,6 @@
             {
                 return default(T);
             }
-
             return m_Cops.GetCop<T>();
         }
 
@@ -90,7 +83,6 @@
             {
                 return default(T);
             }
-
             return m_Configs.AddConfig<T>(config);
         }
 
@@ -100,7 +92,6 @@
             {
                 return default(T);
             }
-
             return m_Configs.GetConfig<T>();
         }
 
@@ -110,7 +101,6 @@
             {
                 return default(T);
             }
-
             return m_Attributes.AddAttribute<T>(attribute);
         }
 
@@ -120,7 +110,6 @@
             {
                 return default(T);
             }
-
             return m_Attributes.GetAttribute<T>();
         }
 
@@ -130,7 +119,6 @@
             {
                 return default(T);
             }
-
             return m_SyncAttributes.AddAttribute<T>(attribute);
         }
 
@@ -140,7 +128,6 @@
             {
                 return default(T);
             }
-
             return m_SyncAttributes.GetSyncAttribute<T>();
         }
 
@@ -150,7 +137,6 @@
             {
                 return null;
             }
-
             return m_SyncAttributes.GetSyncAttribute(syncId);
         }
 
@@ -160,7 +146,6 @@
             {
                 return default(T);
             }
-
             return m_Fetures.AddFeture<T>(feture, this);
         }
 
@@ -170,7 +155,6 @@
             {
                 return default(T);
             }
-
             return m_Fetures.GetFeture<T>();
         }
 
@@ -180,9 +164,8 @@
             {
                 return;
             }
-
-            m_TimerRegister.OnUpdate(delta);
-            m_UpdateRegister.OnUpdate(delta);
+            m_Timer.OnUpdate(delta);
+            m_Updater.OnUpdate(delta);
         }
 
         public void OnFixedUpdate(float delta)
@@ -191,18 +174,7 @@
             {
                 return;
             }
-
-            m_UpdateRegister.OnFixedUpdate(delta);
-        }
-
-        public void Dispatcher(int msgId, IBody body = null)
-        {
-            if (m_isRemove)
-            {
-                return;
-            }
-
-            m_MsgRegister.Dispatcher(msgId, body);
+            m_Updater.OnFixedUpdate(delta);
         }
 
         public bool IsRemove
@@ -227,34 +199,38 @@
             get { return m_SyncAttributes; }
         }
 
-        public MsgRegister Message
-        {
-            get { return m_MsgRegister; }
-        }
-
         public TimerRegister Timer
         {
-            get { return m_TimerRegister; }
+            get { return m_Timer; }
         }
 
-        public UpdateRegister Update
+        public UpdaterRegister Updater
         {
-            get { return m_UpdateRegister; }
+            get { return m_Updater; }
         }
 
-        public virtual void OnInit()
+        public void OnInit()
         {
+            Init();
         }
 
-        public virtual void OnRemove()
+        public void OnRemove()
         {
+            Clear();
             m_Cops.Dispose();
             m_Fetures.Dispose();
             m_Attributes.Dispose();
             m_Configs.Dispose();
-            m_MsgRegister.Dispose();
-            m_TimerRegister.Dispose();
-            m_UpdateRegister.Dispose();
+            m_Timer.Dispose();
+            m_Updater.Dispose();
+        }
+
+        protected virtual void Init()
+        {
+        }
+
+        protected virtual void Clear()
+        {
         }
     }
 }

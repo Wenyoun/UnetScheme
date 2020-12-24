@@ -4,13 +4,9 @@ namespace Zyq.Game.Base
 {
 	public interface IWorld : IDisposable, IUpdate, ILateUpdate, IFixedUpdate
 	{
-		int WorldId { get; }
+		int Wid { get; }
 
 		void OnInit();
-
-		void AddWorldLogic<T>() where T : IWorldLogic, new();
-
-		void RemoveWorldLogic<T>() where T : IWorldLogic, new();
 
 		void AddEntity(Entity entity);
 
@@ -18,18 +14,16 @@ namespace Zyq.Game.Base
 
 		Entity GetEntity(uint entityId);
 
-		void Dispatcher(int msgId);
-
 		void Dispatcher(int msgId, IBody body);
 
-		void Dispatcher(int msgId, uint entityId);
+		Entities Entities { get; }
 
-		void Dispatcher(int msgId, uint entityId, IBody body);
+		TimerRegister Timer { get; }
 
-		TimerMgr Timer { get; }
+		UpdaterRegister Updater { get; }
 
-		UpdateMgr Update { get; }
+		MessagerRegister Messager { get; }
 
-		MessageMgr Message { get; }
+		WorldLogicManager LogicManager { get; }
 	}
 }

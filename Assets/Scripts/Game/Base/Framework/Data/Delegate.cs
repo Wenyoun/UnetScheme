@@ -4,5 +4,7 @@
 
     public delegate void UpdateDelegate(float delta);
 
+    public delegate void FixedUpdateDelegate(float delta);
+
     public delegate void LateUpdateDelegate();
 }

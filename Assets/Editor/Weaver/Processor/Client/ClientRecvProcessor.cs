@@ -100,7 +100,7 @@ namespace Zyq.Weaver
 
             {
                 //public void Unregister();
-                MethodDefinition unregisterMethod = ResolveHelper.ResolveMethod(protocol, "Unregister");
+                MethodDefinition unregisterMethod = ResolveHelper.ResolveMethod(protocol, "UnRegister");
                 unregisterMethod.Body.Variables.Clear();
                 unregisterMethod.Body.Instructions.Clear();
 

@@ -13,7 +13,7 @@ namespace Zyq.Game.Client
             Connection.RegisterHandler(MsgID.Sync_Attribute, OnSyncAttribute);
         }
 
-        public void Unregister()
+        public void UnRegister()
         {
             Connection.UnregisterHandler(MsgID.Sync_Attribute);
         }
@@ -30,7 +30,6 @@ namespace Zyq.Game.Client
                 if (attribute != null)
                 {
                     attribute.Deserialize(buffer);
-                    entity.Dispatcher(MessageConstants.Sync_Attribute);
                 }
             }
         }

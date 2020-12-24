@@ -6,13 +6,13 @@ namespace Zyq.Game.Base
     public class SyncAttributes : IDisposable
     {
         private List<ISyncAttribute> m_AttrLts;
-        private Dictionary<uint, ISyncAttribute> m_AttrIdDys;
+        private Dictionary<long, ISyncAttribute> m_AttrIdDys;
         private Dictionary<Type, ISyncAttribute> m_AttrTypeDys;
 
         public SyncAttributes()
         {
             m_AttrLts = new List<ISyncAttribute>();
-            m_AttrIdDys = new Dictionary<uint, ISyncAttribute>();
+            m_AttrIdDys = new Dictionary<long, ISyncAttribute>();
             m_AttrTypeDys = new Dictionary<Type, ISyncAttribute>();
         }
 
@@ -32,10 +32,11 @@ namespace Zyq.Game.Base
 
         public T AddAttribute<T>(T attribute) where T : ISyncAttribute
         {
-            if (!m_AttrIdDys.ContainsKey(attribute.SyncId))
+            long syncId = attribute.GetSyncId();
+            if (!m_AttrIdDys.ContainsKey(syncId))
             {
                 m_AttrLts.Add(attribute);
-                m_AttrIdDys.Add(attribute.SyncId, attribute);
+                m_AttrIdDys.Add(syncId, attribute);
                 m_AttrTypeDys.Add(typeof(T), attribute);
                 return (T) attribute;
             }

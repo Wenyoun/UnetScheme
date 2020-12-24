@@ -30,8 +30,8 @@ namespace Zyq.Weaver
 
                 FieldDefinition dirty = FieldFactory.CreateField(module, type, "m_Dirty", FieldAttributes.Private, module.ImportReference(typeof(long)));
 
-                //public bool IsSeialize();
-                ModifyIsSerializeMethod(module, type, dirty);
+                //public bool IsDirty();
+                ModifyIsDirtyMethod(module, type, dirty);
 
                 //get set method
                 for (int i = 0; i < fields.Count; ++i)
@@ -104,9 +104,9 @@ namespace Zyq.Weaver
             }
         }
 
-        private static void ModifyIsSerializeMethod(ModuleDefinition module, TypeDefinition type, FieldDefinition dirty)
+        private static void ModifyIsDirtyMethod(ModuleDefinition module, TypeDefinition type, FieldDefinition dirty)
         {
-            MethodDefinition method = ResolveHelper.ResolveMethod(type, "IsSerialize");
+            MethodDefinition method = ResolveHelper.ResolveMethod(type, "IsDirty");
             method.Body.Variables.Clear();
             method.Body.Instructions.Clear();
 

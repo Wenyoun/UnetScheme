@@ -6,130 +6,99 @@ namespace Zyq.Game.Base
     public class Entities : IDisposable, IUpdate, IFixedUpdate
     {
         private IWorld m_World;
-        private List<uint> m_Temp;
-        private List<Entity> m_EntityLts;
-        private Dictionary<uint, Entity> m_EntityDys;
+        private List<uint> m_Removes;
+        private List<Entity> m_EntityList;
+        private Dictionary<uint, Entity> m_EntityDict;
 
         public Entities(IWorld world)
         {
             m_World = world;
-            m_Temp = new List<uint>();
-            m_EntityLts = new List<Entity>();
-            m_EntityDys = new Dictionary<uint, Entity>();
+            m_Removes = new List<uint>();
+            m_EntityList = new List<Entity>();
+            m_EntityDict = new Dictionary<uint, Entity>();
         }
 
         public void Dispose()
         {
-            m_Temp.Clear();
-            m_EntityLts.Clear();
-            m_EntityDys.Clear();
+            m_Removes.Clear();
+            m_EntityList.Clear();
+            m_EntityDict.Clear();
         }
 
         public void OnUpdate(float delta)
         {
             CheckRemoveEntity();
-            int length = m_EntityLts.Count;
-            if (length > 0)
+            int length = m_EntityList.Count;
+            for (int i = 0; i < length; ++i)
             {
-                for (int i = 0; i < length; ++i)
-                {
-                    m_EntityLts[i].OnUpdate(delta);
-                }
+                m_EntityList[i].OnUpdate(delta);
             }
         }
 
         public void OnFixedUpdate(float delta)
         {
-            int length = m_EntityLts.Count;
-            if (length > 0)
+            int length = m_EntityList.Count;
+            for (int i = 0; i < length; ++i)
             {
-                for (int i = 0; i < length; ++i)
-                {
-                    m_EntityLts[i].OnFixedUpdate(delta);
-                }
+                m_EntityList[i].OnFixedUpdate(delta);
             }
         }
 
         public bool AddEntity(Entity entity)
         {
             uint entityId = entity.EntityId;
-            if (!m_EntityDys.ContainsKey(entityId))
+            if (!m_EntityDict.ContainsKey(entityId))
             {
-                m_EntityLts.Add(entity);
-                m_EntityDys.Add(entityId, entity);
+                m_EntityList.Add(entity);
+                m_EntityDict.Add(entityId, entity);
                 entity.World = m_World;
                 entity.OnInit();
                 return true;
             }
-
             return false;
         }
 
-        public bool RemoveEntity(uint eid)
+        public bool RemoveEntity(uint entityId)
         {
-            Entity entity;
-            if (m_EntityDys.TryGetValue(eid, out entity))
+            Entity entity = GetEntity(entityId);
+            if (entity != null)
             {
                 entity.IsRemove = true;
-                m_Temp.Add(entity.EntityId);
+                m_Removes.Add(entityId);
                 return true;
             }
-
             return false;
         }
 
         public Entity GetEntity(uint entityId)
         {
             Entity entity;
-            m_EntityDys.TryGetValue(entityId, out entity);
+            m_EntityDict.TryGetValue(entityId, out entity);
             return entity;
-        }
-
-        public void Dispatcher(int msgId, uint entityId, IBody body)
-        {
-            if (entityId > 0)
-            {
-                Entity entity;
-                if (m_EntityDys.TryGetValue(entityId, out entity))
-                {
-                    entity.Dispatcher(msgId, body);
-                }
-            }
-            else
-            {
-                int length = m_Temp.Count;
-                if (length > 0)
-                {
-                    for (int i = 0; i < length; ++i)
-                    {
-                        Entity entity = m_EntityLts[i];
-                        entity.Dispatcher(msgId, body);
-                    }
-                }
-            }
         }
 
         public List<Entity> Entitys
         {
-            get { return m_EntityLts; }
+            get { return m_EntityList; }
         }
 
         private void CheckRemoveEntity()
         {
-            int length = m_Temp.Count;
+            int length = m_Removes.Count;
             if (length > 0)
             {
                 for (int i = 0; i < length; ++i)
                 {
-                    uint entityId = m_Temp[i];
-                    Entity entity = GetEntity(entityId);
-                    if (entity != null && entity.IsRemove)
+                    uint eid = m_Removes[i];
+                    Entity entity = GetEntity(eid);
+                    if (entity != null)
                     {
+                        m_EntityDict.Remove(eid);
+                        m_EntityList.Remove(entity);
                         entity.OnRemove();
                     }
                 }
-
-                m_Temp.Clear();
+                m_Removes.Clear();
             }
         }
     }

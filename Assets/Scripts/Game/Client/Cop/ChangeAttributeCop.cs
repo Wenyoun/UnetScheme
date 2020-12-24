@@ -4,10 +4,10 @@ namespace Zyq.Game.Client
 {
     public class ChangeAttributeCop : AbsCop
     {
-        public override void OnInit()
+        protected override void Init()
         {
             BaseAttribute attribute = Entity.GetSyncAttribute<BaseAttribute>();
-            RegisterMessage(MessageConstants.Sync_Attribute, (IBody body) =>
+            Entity.World.Messager.Register(MessageConstants.Sync_Attribute, (IBody body) =>
             {
                 //UnityEngine.Debug.Log(attribute.Hp1 + "." + attribute.Hp11 + "," + attribute.Hp12);
             });

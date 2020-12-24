@@ -1,6 +1,6 @@
 ﻿namespace Zyq.Game.Base
 {
-    public interface IEntity : ILifecycle, IUpdate, IFixedUpdate, IMessage
+    public interface IEntity : ILifecycle, IUpdate, IFixedUpdate
     {
         T AddCop<T>(T cop) where T : ICop;
 
@@ -31,13 +31,11 @@
         T GetFeture<T>() where T : IFeture;
 
         uint EntityId { get; }
-        
-        IWorld World { get; }
 
-        MsgRegister Message { get; }
+        IWorld World { get; }
 
         TimerRegister Timer { get; }
 
-        UpdateRegister Update { get; }
+        UpdaterRegister Updater { get; }
     }
 }

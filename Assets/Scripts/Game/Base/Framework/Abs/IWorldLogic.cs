@@ -6,8 +6,8 @@ namespace Zyq.Game.Base
 {
     public interface IWorldLogic
     {
-        void OnInit(IWorld world);
+        void Init(IWorld world);
 
-        void OnRemove();
+        void Clear();
     }
 }

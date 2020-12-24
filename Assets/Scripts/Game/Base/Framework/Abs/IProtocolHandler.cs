@@ -6,6 +6,6 @@
 
         void Register();
 
-        void Unregister();
+        void UnRegister();
     }
 }

@@ -3,26 +3,26 @@ using System.Collections.Generic;
 
 namespace Zyq.Game.Base
 {
-    public sealed class WorldLogicMgr : IDisposable
+    public sealed class WorldLogicManager : IDisposable
     {
         private IWorld m_World;
-        private List<IWorldLogic> m_WorldLogics;
+        private List<IWorldLogic> m_Logics;
 
-        public WorldLogicMgr(IWorld world)
+        public WorldLogicManager(IWorld world)
         {
             m_World = world;
-            m_WorldLogics = new List<IWorldLogic>();
+            m_Logics = new List<IWorldLogic>();
         }
 
         public void Dispose()
         {
-            int length = m_WorldLogics.Count;
+            int length = m_Logics.Count;
             for (int i = 0; i < length; ++i)
             {
-                m_WorldLogics[i].OnRemove();
+                m_Logics[i].Clear();
             }
 
-            m_WorldLogics.Clear();
+            m_Logics.Clear();
         }
 
         public void AddLogic<T>() where T : IWorldLogic, new()
@@ -30,8 +30,8 @@ namespace Zyq.Game.Base
             if (Find<T>() == null)
             {
                 IWorldLogic worldLogic = new T();
-                m_WorldLogics.Add(worldLogic);
-                worldLogic.OnInit(m_World);
+                m_Logics.Add(worldLogic);
+                worldLogic.Init(m_World);
             }
         }
 
@@ -40,8 +40,8 @@ namespace Zyq.Game.Base
             IWorldLogic worldLogic = Find<T>();
             if (worldLogic != null)
             {
-                m_WorldLogics.Remove(worldLogic);
-                worldLogic.OnRemove();
+                m_Logics.Remove(worldLogic);
+                worldLogic.Clear();
             }
         }
 
@@ -50,10 +50,10 @@ namespace Zyq.Game.Base
             Type type = typeof(T);
             IWorldLogic worldLogic = null;
 
-            int length = m_WorldLogics.Count;
+            int length = m_Logics.Count;
             for (int i = 0; i < length; ++i)
             {
-                IWorldLogic wlogic = m_WorldLogics[i];
+                IWorldLogic wlogic = m_Logics[i];
                 if (type == wlogic.GetType())
                 {
                     worldLogic = wlogic;

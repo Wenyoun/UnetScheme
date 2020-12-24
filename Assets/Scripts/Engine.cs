@@ -24,7 +24,7 @@ public class Engine : MonoBehaviour
 
     private void FixedUpdate()
     {
-        GameMgr.Ins.OnFixedUpdate(Time.deltaTime);
+        GameMgr.Ins.OnFixedUpdate(Time.fixedDeltaTime);
     }
 
     private void OnDestroy()

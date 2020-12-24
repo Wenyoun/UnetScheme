@@ -27,7 +27,6 @@ namespace Zyq.Game.Base
         private bool isDispose;
 
         private ClientHeartbeatProcessing heartbeat;
-
         private ConcurrentQueue<Packet> sendPacketQueue;
         private ConcurrentQueue<Packet> recvPacketQueue;
 
@@ -36,6 +35,7 @@ namespace Zyq.Game.Base
             status = None;
             isDispose = false;
 
+            heartbeat = new ClientHeartbeatProcessing();
             sendPacketQueue = new ConcurrentQueue<Packet>();
             recvPacketQueue = new ConcurrentQueue<Packet>();
         }
@@ -105,6 +105,7 @@ namespace Zyq.Game.Base
                 {
                     return;
                 }
+
                 isDispose = true;
             }
 
@@ -160,7 +161,6 @@ namespace Zyq.Game.Base
                                 con.Flush();
 
                                 status = Success;
-                                heartbeat = new ClientHeartbeatProcessing();
 
                                 KcpHelper.CreateThread(UpdateKcpLooper);
                                 KcpHelper.CreateThread(RecvUdpDataLooper);
@@ -227,12 +227,16 @@ namespace Zyq.Game.Base
 
                         if (process.TryParseRecvKcpData(con, packets, heartbeat))
                         {
-                            for (int i = 0; i < packets.Count; ++i)
+                            int length = packets.Count;
+                            if (length > 0)
                             {
-                                recvPacketQueue.Enqueue(packets[i]);
-                            }
+                                for (int i = 0; i < length; ++i)
+                                {
+                                    recvPacketQueue.Enqueue(packets[i]);
+                                }
 
-                            packets.Clear();
+                                packets.Clear();
+                            }
                         }
                     }
                 }

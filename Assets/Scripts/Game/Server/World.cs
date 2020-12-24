@@ -14,13 +14,12 @@ namespace Zyq.Game.Server
             m_Connections = new Dictionary<long, Connection>();
         }
 
-        public override void OnInit()
+        protected override void Init()
         {
         }
 
-        public override void Dispose()
+        protected override void Clear()
         {
-            base.Dispose();
             ClearConnections();
             m_Network.Dispose();
             m_Connections.Clear();
@@ -30,7 +29,7 @@ namespace Zyq.Game.Server
         {
             m_Network.OnUpdate();
             base.OnUpdate(delta);
-            SyncAttributeMgr.OnUpdate(this, m_Entities.Entitys, delta);
+            SyncAttributeMgr.OnUpdate(this, Entities.Entitys, delta);
         }
 
         public void Bind(int port)

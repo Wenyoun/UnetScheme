@@ -9,6 +9,6 @@ namespace Zyq.Game.Client
 
         public void Register() { }
 
-        public void Unregister() { }
+        public void UnRegister() { }
     }
 }
