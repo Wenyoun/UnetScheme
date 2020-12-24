@@ -8,8 +8,6 @@
 
         void RemoveCop<T>() where T : ICop;
 
-        void RemoveCops();
-
         T GetCop<T>() where T : ICop;
 
         T AddConfig<T>(T config) where T : IConfig;

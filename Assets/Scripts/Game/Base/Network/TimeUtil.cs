@@ -2,7 +2,7 @@
 
 namespace Zyq.Game.Base
 {
-    internal class TimeUtil
+    internal static class TimeUtil
     {
         /* 获取 utc 1970-1-1到现在的秒数 */
         public static long Get1970ToNowSeconds()
@@ -17,4 +17,3 @@ namespace Zyq.Game.Base
         }
     }
 }
-

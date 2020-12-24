@@ -18,8 +18,6 @@ namespace Zyq.Game.Base
         {
             mFetLts.Clear();
             mFetDys.Clear();
-            mFetLts = null;
-            mFetDys = null;
         }
 
         public T AddFeture<T>(T feture, IEntity entity) where T : IFeture
@@ -29,7 +27,7 @@ namespace Zyq.Game.Base
             {
                 mFetLts.Add(feture);
                 mFetDys.Add(type, feture);
-                return (T) feture;
+                return feture;
             }
 
             return default(T);

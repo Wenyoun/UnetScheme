@@ -59,15 +59,6 @@
             m_Cops.RemoveCop<T>();
         }
 
-        public void RemoveCops()
-        {
-            if (m_isRemove)
-            {
-                return;
-            }
-            m_Cops.RemoveCops();
-        }
-
         public T GetCop<T>() where T : ICop
         {
             if (m_isRemove)

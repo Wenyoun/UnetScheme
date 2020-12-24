@@ -5,20 +5,24 @@ namespace Zyq.Game.Base
 {
     public class Cops : IDisposable
     {
-        private List<ICop> m_Temp;
         private List<ICop> m_CopLts;
         private Dictionary<Type, ICop> m_CopDys;
 
         public Cops()
         {
-            m_Temp = new List<ICop>();
             m_CopLts = new List<ICop>();
             m_CopDys = new Dictionary<Type, ICop>();
         }
 
         public void Dispose()
         {
-            RemoveCops();
+            int length = m_CopLts.Count;
+            for (int i = 0; i < length; ++i)
+            {
+                m_CopLts[i].OnRemove();
+            }
+            m_CopLts.Clear();
+            m_CopDys.Clear();
         }
 
         public T AddCop<T>(ICop cop, IEntity entity) where T : ICop
@@ -61,20 +65,6 @@ namespace Zyq.Game.Base
                 m_CopDys.Remove(type);
                 cop.OnRemove();
             }
-        }
-
-        public void RemoveCops()
-        {
-            m_Temp.Clear();
-            m_Temp.AddRange(m_CopLts);
-            for (int i = 0; i < m_Temp.Count; ++i)
-            {
-                m_Temp[i].OnRemove();
-            }
-
-            m_Temp.Clear();
-            m_CopLts.Clear();
-            m_CopDys.Clear();
         }
 
         public T GetCop<T>() where T : ICop
