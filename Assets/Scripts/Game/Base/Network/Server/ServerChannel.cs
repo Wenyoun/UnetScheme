@@ -124,7 +124,7 @@ namespace Zyq.Game.Base
             con.Input(buffer, offset, length);
         }
 
-        internal void Update(DateTime time)
+        internal void Update(long time)
         {
             if (isDispose)
             {

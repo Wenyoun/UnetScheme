@@ -1,6 +1,4 @@
-﻿using UnityEngine.Networking;
-
-namespace Zyq.Game.Base
+﻿namespace Zyq.Game.Base
 {
     public class ConnectionFeture : IFeture
     {
@@ -37,11 +35,11 @@ namespace Zyq.Game.Base
             }
         }
 
-        public void UnregisterHandler(ushort id)
+        public void UnRegisterHandler(ushort id)
         {
             if (m_Connection != null)
             {
-                m_Connection.UnregisterHandler(id);
+                m_Connection.UnRegisterHandler(id);
             }
         }
     }

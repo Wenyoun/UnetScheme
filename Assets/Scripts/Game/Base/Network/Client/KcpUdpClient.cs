@@ -11,13 +11,11 @@ namespace Zyq.Game.Base
     public class KcpUdpClient : IDisposable
     {
         #region 连接状态
-
         public const byte None = 0;
         public const byte Error = 1;
         public const byte Timeout = 2;
         public const byte Success = 3;
         public const byte Connecting = 4;
-
         #endregion
 
         private KcpConn con;
@@ -51,13 +49,10 @@ namespace Zyq.Game.Base
 
             sendPacketQueue.Clear();
             recvPacketQueue.Clear();
-
             status = Connecting;
-
             SocketDispose();
 
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
             KcpHelper.CreateThread(ConnectLooper, new IPEndPoint(IPAddress.Parse(host), port));
         }
 
@@ -84,7 +79,7 @@ namespace Zyq.Game.Base
 
         public long ConId
         {
-            get { return con.ConId; }
+            get { return con != null ? con.ConId : -1; }
         }
 
         public bool IsConnected
@@ -110,7 +105,7 @@ namespace Zyq.Game.Base
             }
 
             status = None;
-            con?.Dispose();
+            KcpConDispose();
             SocketDispose();
             sendPacketQueue.Clear();
             recvPacketQueue.Clear();
@@ -123,7 +118,8 @@ namespace Zyq.Game.Base
                 int time = 0;
                 int timeout = 5000;
                 socket.Connect((EndPoint) obj);
-                byte[] buffer = new byte[KcpConstants.Length];
+                byte[] buffer = new byte[KcpConstants.Packet_Length];
+                
                 while (!isDispose && status == Connecting)
                 {
                     KcpHelper.Encode32u(buffer, 0, KcpConstants.Flag_Connect);
@@ -136,13 +132,16 @@ namespace Zyq.Game.Base
                             status = Timeout;
                             break;
                         }
-
                         continue;
                     }
 
-                    CheckDispose();
+                    if (status != Connecting || isDispose)
+                    {
+                        break;
+                    }
 
                     int count = socket.Receive(buffer, 0, buffer.Length, SocketFlags.None);
+                    
                     if (count == 32)
                     {
                         uint flag = KcpHelper.Decode32u(buffer, 24);
@@ -151,8 +150,8 @@ namespace Zyq.Game.Base
                         {
                             con = new KcpConn(conv, socket);
                             con.Input(buffer, 0, count);
-
                             count = con.Recv(buffer, 0, buffer.Length);
+                            
                             if (count == 8)
                             {
                                 KcpHelper.Encode32u(buffer, 0, KcpConstants.Flag_Connect);
@@ -185,15 +184,23 @@ namespace Zyq.Game.Base
 
                 while (!isDispose && status == Success)
                 {
-                    CheckDispose();
+                    if (status == Error || isDispose)
+                    {
+                        break;
+                    }
 
                     process.TryParseSendKcpData(con, sendPacketQueue);
 
-                    con.Update(DateTime.Now);
+                    long time = TimeUtil.Get1970ToNowMilliseconds();
+                    con.Update(time);
+                    heartbeat.Tick(this, con, time);
+
+                    if (isDispose || status != Success)
+                    {
+                        break;
+                    }
 
                     Thread.Sleep(5);
-
-                    heartbeat.Tick(this, con);
                 }
             }
             catch (Exception e)
@@ -208,7 +215,7 @@ namespace Zyq.Game.Base
             try
             {
                 List<Packet> packets = new List<Packet>();
-                byte[] rawBuffer = new byte[KcpConstants.Length];
+                byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
                 ClientDataProcessingCenter process = new ClientDataProcessingCenter();
 
                 while (!isDispose && status == Success)
@@ -218,7 +225,10 @@ namespace Zyq.Game.Base
                         continue;
                     }
 
-                    CheckDispose();
+                    if (isDispose || status != Success)
+                    {
+                        break;
+                    }
 
                     int count = socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
                     if (count > 0)
@@ -234,7 +244,6 @@ namespace Zyq.Game.Base
                                 {
                                     recvPacketQueue.Enqueue(packets[i]);
                                 }
-
                                 packets.Clear();
                             }
                         }
@@ -258,6 +267,15 @@ namespace Zyq.Game.Base
             if (isDispose)
             {
                 throw new KcpClientException("KcpUdpClient client already dispose");
+            }
+        }
+
+        private void KcpConDispose()
+        {
+            if (con != null)
+            {
+                con.Dispose();
+                con = null;
             }
         }
 

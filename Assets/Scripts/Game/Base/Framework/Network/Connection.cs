@@ -38,9 +38,9 @@ namespace Zyq.Game.Base
             m_Channel.Register(cmd, handler);
         }
 
-        public void UnregisterHandler(ushort cmd)
+        public void UnRegisterHandler(ushort cmd)
         {
-            m_Channel.Unregister(cmd);
+            m_Channel.UnRegister(cmd);
         }
 
         public void Send(ushort cmd, ByteBuffer buffer)

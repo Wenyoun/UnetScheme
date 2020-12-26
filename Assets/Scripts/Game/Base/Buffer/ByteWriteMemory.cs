@@ -23,16 +23,11 @@ namespace Zyq.Game.Base
 
         public ByteWriteMemory(byte[] buffer, int offset, int count)
         {
-            if (offset < 0 || 
-                offset >= buffer.Length || 
-                count <= 0 || 
-                count > buffer.Length ||
-                buffer.Length - offset < count)
+            if (offset < 0 || offset >= buffer.Length || count <= 0 || count > buffer.Length || buffer.Length - offset < count)
             {
-                throw new IndexOutOfRangeException("ByteWriteMemory exception buffer.length=" + buffer.Length +
-                                                   ",offset=" + offset + ",count=" + count);
+                throw new IndexOutOfRangeException("ByteWriteMemory exception buffer.length=" + buffer.Length + ",offset=" + offset + ",count=" + count);
             }
-            
+
             m_Count = count;
             m_Offset = offset;
             m_Buffer = buffer;
@@ -106,22 +101,16 @@ namespace Zyq.Game.Base
 
         public void Write(float value)
         {
-            UIntFloat convert = new UIntFloat
-            {
-                floatValue = value
-            };
+            UIntFloat convert = new UIntFloat {floatValue = value};
             Write(convert.uintValue);
         }
 
         public void Write(double value)
         {
-            ULongDouble convert = new ULongDouble
-            {
-                doubleValue = value
-            };
+            ULongDouble convert = new ULongDouble {doubleValue = value};
             Write(convert.ulongValue);
         }
-        
+
         private void CheckCount(int count)
         {
             if (m_Count < count || m_Count <= 0)

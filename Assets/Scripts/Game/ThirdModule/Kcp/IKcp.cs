@@ -40,6 +40,6 @@ namespace Net.KcpImpl
 
     public interface IKcpUpdate
     {
-        void Update(in DateTime time);
+        void Update(long time);
     }
 }

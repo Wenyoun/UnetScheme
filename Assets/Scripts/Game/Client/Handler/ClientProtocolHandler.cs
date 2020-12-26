@@ -15,7 +15,7 @@ namespace Zyq.Game.Client
 
         public void UnRegister()
         {
-            Connection.UnregisterHandler(MsgID.Sync_Attribute);
+            Connection.UnRegisterHandler(MsgID.Sync_Attribute);
         }
 
         private void OnSyncAttribute(ChannelMessage msg)

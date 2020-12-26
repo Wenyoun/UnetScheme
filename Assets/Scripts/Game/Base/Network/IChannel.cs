@@ -29,7 +29,7 @@ namespace Zyq.Game.Base
 
         void Disconnect();
 
-        void Unregister(ushort cmd);
+        void UnRegister(ushort cmd);
 
         void Register(ushort cmd, ChannelMessageDelegate handler);
     }
@@ -51,7 +51,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        public void Unregister(ushort cmd)
+        public void UnRegister(ushort cmd)
         {
             if (handlers.ContainsKey(cmd))
             {

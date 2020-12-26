@@ -17,7 +17,7 @@ namespace Zyq.Game.Base
 
         public override long ChannelId
         {
-            get { return kcpUdpClient.ConId; }
+            get { return kcpUdpClient != null ? kcpUdpClient.ConId : -1; }
         }
 
         public override bool IsConnected

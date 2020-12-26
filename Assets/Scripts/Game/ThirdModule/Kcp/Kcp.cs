@@ -1369,7 +1369,7 @@ namespace Net.KcpImpl
         /// ikcp_check when to call it again (without ikcp_input/_send calling).
         /// </summary>
         /// <param name="time">DateTime.UtcNow</param>
-        public void Update(in DateTime time)
+        public void Update(long time)
         {
             if (CheckDispose())
             {
@@ -1377,7 +1377,7 @@ namespace Net.KcpImpl
                 return;
             }
 
-            current = time.ConvertTime();
+            current = (uint) time;
 
             if (updated == 0)
             {

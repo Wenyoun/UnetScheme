@@ -5,7 +5,7 @@ namespace Zyq.Game.Base
 {
     internal class KcpConstants
     {
-        public const int Length = 1500;
+        public const int Packet_Length = 1500;
         public const uint Flag_Connect = 0xfffffff0;
         public const uint Flag_Heartbeat = 0xfffffff1;
         public const uint Flag_Disconnect = 0xffffffff;

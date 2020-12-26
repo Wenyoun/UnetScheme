@@ -11,7 +11,6 @@ namespace Zyq.Game.Base
     public class KcpConn : IKcpCallback, IRentable, IDisposable
     {
         #region pool
-
         private class MemoryPool : IMemoryOwner<byte>
         {
             private Memory<byte> memory;
@@ -31,7 +30,6 @@ namespace Zyq.Game.Base
                 memory = null;
             }
         }
-
         #endregion
 
         private Kcp kcp;
@@ -43,7 +41,6 @@ namespace Zyq.Game.Base
 
         private bool isDispose;
         private bool isConnected;
-
         private byte[] outputBuffer;
 
         public KcpConn(uint conv, Socket socket) : this(conv, conv, socket, null)
@@ -61,8 +58,7 @@ namespace Zyq.Game.Base
             isDispose = false;
             isConnected = false;
 
-            outputBuffer = new byte[KcpConstants.Length];
-
+            outputBuffer = new byte[KcpConstants.Packet_Length];
             kcp = new Kcp(conv, this, this);
             kcp.NoDelay(1, 10, 2, 1);
         }
@@ -136,7 +132,6 @@ namespace Zyq.Game.Base
         }
 
         #region internal
-
         internal void Flush()
         {
             if (isDispose)
@@ -147,14 +142,14 @@ namespace Zyq.Game.Base
             kcp.Flush();
         }
 
-        internal void Update(DateTime now)
+        internal void Update(long time)
         {
             if (isDispose)
             {
                 return;
             }
 
-            kcp.Update(now);
+            kcp.Update(time);
         }
 
         internal void Input(byte[] buffer, int offset, int length)
@@ -166,7 +161,6 @@ namespace Zyq.Game.Base
 
             kcp.Input(new Span<byte>(buffer, offset, length));
         }
-
         #endregion
 
         #region properties

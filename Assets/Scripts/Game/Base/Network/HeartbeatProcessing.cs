@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Zyq.Game.Base
+﻿namespace Zyq.Game.Base
 {
     internal class HeartbaetConstants
     {
@@ -27,9 +25,9 @@ namespace Zyq.Game.Base
             recvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
-        public void Tick(KcpUdpClient client, KcpConn con)
+        public void Tick(KcpUdpClient client, KcpConn con, long time)
         {
-            long current = TimeUtil.Get1970ToNowMilliseconds();
+            long current = time;
 
             if (current - recvMills >= HeartbaetConstants.Timeout_Interval_Mills)
             {
