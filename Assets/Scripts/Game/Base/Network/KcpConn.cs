@@ -189,8 +189,11 @@ namespace Zyq.Game.Base
             ByteWriteMemory write = new ByteWriteMemory(buffer);
             write.Write(KcpConstants.Flag_Disconnect);
             write.Write(conv);
-            Send(buffer, 0, 8);
-            Flush();
+            for (int i = 0; i < 3; ++i)
+            {
+                Send(buffer, 0, 8);
+                Flush();
+            }
         }
     }
 }

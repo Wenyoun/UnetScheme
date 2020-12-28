@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Concurrent;
-using UnityEngine;
 
 namespace Zyq.Game.Base
 {
@@ -16,6 +14,8 @@ namespace Zyq.Game.Base
         private ConcurrentQueue<Packet> recvPacketQueue;
         private ConcurrentQueue<Packet> sendPacketQueue;
 
+        private ServerHeartbeatProcessing heartbeat;
+
         public ServerChannel(KcpConn con)
         {
             this.con = con;
@@ -27,6 +27,8 @@ namespace Zyq.Game.Base
 
             recvPacketQueue = new ConcurrentQueue<Packet>();
             sendPacketQueue = new ConcurrentQueue<Packet>();
+
+            heartbeat = new ServerHeartbeatProcessing();
         }
 
         public override long ChannelId
@@ -160,12 +162,14 @@ namespace Zyq.Game.Base
             process.TryParseSendKcpData(this, sendPacketQueue);
         }
 
-        internal void ProcessRecvPacket(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connectCallback, ServerHeartbeatProcessing heartbeat)
+        internal void ProcessRecvPacket(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connectCallback)
         {
             if (isDispose)
             {
                 return;
             }
+
+            heartbeat.Tick(this);
 
             if (process.TryParseRecvKcpData(this, packets, connectCallback, heartbeat))
             {

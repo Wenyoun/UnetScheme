@@ -136,7 +136,7 @@ namespace Zyq.Game.Base
         {
             try
             {
-                List<long> removeChannels = new List<long>();
+                List<long> removes = new List<long>();
                 ServerDataProcessingCenter process = new ServerDataProcessingCenter();
 
                 while (!isDispose)
@@ -149,7 +149,7 @@ namespace Zyq.Game.Base
                         ServerChannel channel = its.Current.Value;
                         if (channel.IsClose)
                         {
-                            removeChannels.Add(channel.ChannelId);
+                            removes.Add(channel.ChannelId);
                         }
                         else
                         {
@@ -158,19 +158,19 @@ namespace Zyq.Game.Base
                         }
                     }
 
-                    int length = removeChannels.Count;
+                    int length = removes.Count;
                     if (length > 0)
                     {
                         for (int i = 0; i < length; ++i)
                         {
-                            long channelId = removeChannels[i];
+                            long channelId = removes[i];
                             if (channels.TryRemove(channelId, out ServerChannel channel))
                             {
                                 connectCallback?.OnKcpDisconnect(channel);
                                 channel.Dispose();
                             }
                         }
-                        removeChannels.Clear();
+                        removes.Clear();
                     }
 
                     Thread.Sleep(1);
@@ -188,7 +188,6 @@ namespace Zyq.Game.Base
             {
                 List<Packet> packets = new List<Packet>();
                 ServerDataProcessingCenter process = new ServerDataProcessingCenter();
-                ServerHeartbeatProcessing heartbeat = new ServerHeartbeatProcessing();
 
                 while (!isDispose)
                 {
@@ -199,8 +198,7 @@ namespace Zyq.Game.Base
                         ServerChannel channel = its.Current.Value;
                         if (!channel.IsClose)
                         {
-                            channel.ProcessRecvPacket(process, packets, connectCallback, heartbeat);
-                            heartbeat.Tick(channel);
+                            channel.ProcessRecvPacket(process, packets, connectCallback);
                         }
                     }
 
