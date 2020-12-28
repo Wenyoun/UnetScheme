@@ -19,7 +19,7 @@ namespace Zyq.Game.Base
 
     public interface IChannel : IDisposable
     {
-        long ChannelId { get; }
+        int ChannelId { get; }
 
         bool IsConnected { get; }
 
@@ -38,7 +38,7 @@ namespace Zyq.Game.Base
     {
         protected Dictionary<ushort, ChannelMessageDelegate> handlers;
 
-        public AbsChannel()
+        protected AbsChannel()
         {
             handlers = new Dictionary<ushort, ChannelMessageDelegate>();
         }
@@ -59,7 +59,7 @@ namespace Zyq.Game.Base
             }
         }
 
-        public void ClearHandlers()
+        protected void ClearHandlers()
         {
             handlers.Clear();
         }
@@ -73,7 +73,7 @@ namespace Zyq.Game.Base
 
         public abstract void Disconnect();
 
-        public abstract long ChannelId { get; }
+        public abstract int ChannelId { get; }
 
         public abstract bool IsConnected { get; }
 

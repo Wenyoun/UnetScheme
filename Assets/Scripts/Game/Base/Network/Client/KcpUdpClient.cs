@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Net.KcpImpl;
 using UnityEngine;
 
 namespace Zyq.Game.Base
@@ -77,7 +78,7 @@ namespace Zyq.Game.Base
             return recvPacketQueue.TryDequeue(out packet);
         }
 
-        public long ConId
+        public int ConId
         {
             get { return con != null ? con.ConId : -1; }
         }
@@ -104,6 +105,11 @@ namespace Zyq.Game.Base
                 isDispose = true;
             }
 
+            if (con != null)
+            {
+                con.SendDisconnect();
+            }
+
             status = None;
             KcpConDispose();
             SocketDispose();
@@ -118,12 +124,12 @@ namespace Zyq.Game.Base
                 int time = 0;
                 int timeout = 5000;
                 socket.Connect((EndPoint) obj);
-                byte[] buffer = new byte[KcpConstants.Packet_Length];
-                
+                byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
+
                 while (!isDispose && status == Connecting)
                 {
-                    KcpHelper.Encode32u(buffer, 0, KcpConstants.Flag_Connect);
-                    socket.Send(buffer, 0, 4, SocketFlags.None);
+                    KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
+                    socket.Send(rawBuffer, 0, 4, SocketFlags.None);
                     if (!socket.Poll(100000, SelectMode.SelectRead))
                     {
                         time += 100;
@@ -140,23 +146,24 @@ namespace Zyq.Game.Base
                         break;
                     }
 
-                    int count = socket.Receive(buffer, 0, buffer.Length, SocketFlags.None);
-                    
-                    if (count == 32)
+                    int count = socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
+
+                    if (count == 36)
                     {
-                        uint flag = KcpHelper.Decode32u(buffer, 24);
-                        uint conv = KcpHelper.Decode32u(buffer, 28);
-                        if (flag == KcpConstants.Flag_Connect)
+                        uint conv1 = KcpHelper.Decode32u(rawBuffer, 4);
+                        uint flag = KcpHelper.Decode32u(rawBuffer, 28);
+                        uint conv2 = KcpHelper.Decode32u(rawBuffer, 32);
+                        if (conv1 == conv2 && flag == KcpConstants.Flag_Connect)
                         {
-                            con = new KcpConn(conv, socket);
-                            con.Input(buffer, 0, count);
-                            count = con.Recv(buffer, 0, buffer.Length);
-                            
+                            con = new KcpConn(conv1, socket);
+                            con.Input(rawBuffer, 4, count - 4);
+                            count = con.Recv(rawBuffer, 0, rawBuffer.Length);
+
                             if (count == 8)
                             {
-                                KcpHelper.Encode32u(buffer, 0, KcpConstants.Flag_Connect);
-                                KcpHelper.Encode32u(buffer, 4, conv);
-                                con.Send(buffer, 0, 8);
+                                KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
+                                KcpHelper.Encode32u(rawBuffer, 4, conv1);
+                                con.Send(rawBuffer, 0, 8);
                                 con.Flush();
 
                                 status = Success;
@@ -231,11 +238,11 @@ namespace Zyq.Game.Base
                     }
 
                     int count = socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
-                    if (count > 0)
+                    if (count > Kcp.IKCP_OVERHEAD)
                     {
-                        con.Input(rawBuffer, 0, count);
+                        con.Input(rawBuffer, 4, count - 4);
 
-                        if (process.TryParseRecvKcpData(con, packets, heartbeat))
+                        if (process.TryParseRecvKcpData(this, con, packets, heartbeat))
                         {
                             int length = packets.Count;
                             if (length > 0)

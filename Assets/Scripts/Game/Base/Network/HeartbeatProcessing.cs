@@ -2,8 +2,8 @@
 {
     internal class HeartbaetConstants
     {
-        public const int Send_Interval_Mills = 10000;
-        public const int Timeout_Interval_Mills = 30000;
+        public const int Send_Interval_Mills = 5000;
+        public const int Timeout_Interval_Mills = 15000;
     }
 
     internal class ClientHeartbeatProcessing
@@ -57,12 +57,12 @@
 
         public void UpdateHeartbeat()
         {
-            recvMills = TimeUtil.Get1970ToNowMilliseconds();
+            //recvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
         public void UpdateHeartbeat(ServerChannel channel, byte[] rawBuffer, int ofsset, int length)
         {
-            recvMills = TimeUtil.Get1970ToNowMilliseconds();
+            //recvMills = TimeUtil.Get1970ToNowMilliseconds();
             channel.Send(rawBuffer, ofsset, length);
         }
 

@@ -19,7 +19,7 @@ namespace Zyq.Game.Base
             int length = m_Logics.Count;
             for (int i = 0; i < length; ++i)
             {
-                m_Logics[i].Clear();
+                m_Logics[i].OnRemove();
             }
 
             m_Logics.Clear();
@@ -31,7 +31,7 @@ namespace Zyq.Game.Base
             {
                 IWorldLogic worldLogic = new T();
                 m_Logics.Add(worldLogic);
-                worldLogic.Init(m_World);
+                worldLogic.OnInit(m_World);
             }
         }
 
@@ -41,7 +41,7 @@ namespace Zyq.Game.Base
             if (worldLogic != null)
             {
                 m_Logics.Remove(worldLogic);
-                worldLogic.Clear();
+                worldLogic.OnRemove();
             }
         }
 

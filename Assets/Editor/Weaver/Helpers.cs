@@ -35,7 +35,7 @@ namespace Zyq.Weaver
                     return unityAsm.outputPath;
                 }
             }
-            throw new System.Exception("Not found UnityEngine.Networking.dll");
+            throw new System.Exception("Not found Zyq.Game.Base.dll");
         }
 
         public static string FindUnityEngineDLLDirectoryName()

@@ -1,23 +1,20 @@
-﻿using Zyq.Game.Base;
+﻿using UnityEngine;
+using Zyq.Game.Base;
 
 namespace Zyq.Game.Client
 {
-    public class ConnectLogic : IWorldLogic
+    public class ConnectLogic : AbsWorldLogic
     {
-        private World m_World;
-
-        public void Init(IWorld world)
+        protected override void Init()
         {
-            m_World = (World) world;
-            m_World.Messager.Register(MessageConstants.Connect_Success, OnConnectSuccess);
-            m_World.Messager.Register(MessageConstants.Connect_Error, OnConnectError);
+            World.Messager.Register(MessageConstants.Connect_Success, OnConnectSuccess);
+            World.Messager.Register(MessageConstants.Connect_Error, OnConnectError);
         }
 
-        public void Clear()
+        protected override void Clear()
         {
-            m_World.Messager.UnRegister(MessageConstants.Connect_Success, OnConnectSuccess);
-            m_World.Messager.UnRegister(MessageConstants.Connect_Error, OnConnectError);
-            m_World = null;
+            World.Messager.UnRegister(MessageConstants.Connect_Success, OnConnectSuccess);
+            World.Messager.UnRegister(MessageConstants.Connect_Error, OnConnectError);
         }
 
         private void OnConnectSuccess(IBody body)

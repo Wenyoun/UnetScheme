@@ -25,7 +25,7 @@ namespace Zyq.Game.Base
             sendPacketQueue = new ConcurrentQueue<Packet>();
         }
 
-        public override long ChannelId
+        public override int ChannelId
         {
             get { return con.ConId; }
         }
@@ -87,7 +87,9 @@ namespace Zyq.Game.Base
 
             base.Dispose();
 
+            con.SendDisconnect();
             con.Dispose();
+
             sendPacketQueue.Clear();
             recvPacketQueue.Clear();
         }
@@ -132,6 +134,16 @@ namespace Zyq.Game.Base
             }
 
             con.Update(time);
+        }
+
+        internal void Flush()
+        {
+            if (isDispose)
+            {
+                return;
+            }
+
+            con.Flush();
         }
 
         internal void ProcessSendPacket(ServerDataProcessingCenter process)

@@ -1,17 +1,18 @@
 ﻿using Zyq.Game.Base;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Zyq.Game.Server
 {
     public class World : AbsWorld, IServerCallback
     {
         private ServerNetwork m_Network;
-        private Dictionary<long, Connection> m_Connections;
+        private Dictionary<int, Connection> m_Connections;
 
         public World() : base(1)
         {
             m_Network = new ServerNetwork(this);
-            m_Connections = new Dictionary<long, Connection>();
+            m_Connections = new Dictionary<int, Connection>();
         }
 
         protected override void Init()
@@ -37,7 +38,7 @@ namespace Zyq.Game.Server
             m_Network.Bind(port);
         }
 
-        public void CloseConnection(long connectionId)
+        public void CloseConnection(int connectionId)
         {
             if (m_Connections.TryGetValue(connectionId, out Connection connection))
             {
@@ -57,7 +58,7 @@ namespace Zyq.Game.Server
 
         public void Broadcast(ushort cmd, ByteBuffer buffer)
         {
-            Dictionary<long, Connection>.Enumerator its = m_Connections.GetEnumerator();
+            Dictionary<int, Connection>.Enumerator its = m_Connections.GetEnumerator();
             while (its.MoveNext())
             {
                 its.Current.Value.Send(cmd, buffer);
@@ -66,7 +67,9 @@ namespace Zyq.Game.Server
 
         public void OnClientConnect(IChannel channel)
         {
-            long connectionId = channel.ChannelId;
+            Debug.Log("Server: Client连上服务器");
+            
+            int connectionId = channel.ChannelId;
             if (!m_Connections.ContainsKey(connectionId))
             {
                 Connection connection = new Connection(channel);
@@ -77,8 +80,10 @@ namespace Zyq.Game.Server
 
         public void OnClientDisconnect(IChannel channel)
         {
+            Debug.Log("Server: Client断开服务器");
+            
             Connection connection;
-            long connectionId = channel.ChannelId;
+            int connectionId = channel.ChannelId;
             if (m_Connections.TryGetValue(connectionId, out connection))
             {
                 m_Connections.Remove(connectionId);
@@ -94,7 +99,7 @@ namespace Zyq.Game.Server
 
         private void ClearConnections()
         {
-            Dictionary<long, Connection>.Enumerator its = m_Connections.GetEnumerator();
+            Dictionary<int, Connection>.Enumerator its = m_Connections.GetEnumerator();
             while (its.MoveNext())
             {
                 its.Current.Value.Dispose();

@@ -179,7 +179,7 @@ namespace Zyq.Weaver
                     }
 
                     {
-                        string unregisterHandlerName = "OnUnregister" + type.Name + "Handler";
+                        string unregisterHandlerName = "OnUnRegister" + type.Name + "Handler";
                         bool isExistsUnregisterMethod = ResolveHelper.HasMethod(type, unregisterHandlerName);
                         MethodDefinition unregisterMethod = MethodFactory.CreateMethod(module,
                                                                                        type,

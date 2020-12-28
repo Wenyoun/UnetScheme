@@ -183,11 +183,11 @@ namespace Zyq.Weaver
             ConnectionType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.Connection");
             ConnectionSendMethod = ResolveHelper.ResolveMethod(ConnectionType, "Send");
             ConnectionRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "RegisterHandler");
-            ConnectionUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "UnregisterHandler");
+            ConnectionUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "UnRegisterHandler");
 
             ConnectionFetureType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ConnectionFeture");
             ConnectionFetureRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "RegisterHandler");
-            ConnectionFetureUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "UnregisterHandler");
+            ConnectionFetureUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "UnRegisterHandler");
         }
 
         private static void SetupClientModuleTypes()

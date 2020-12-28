@@ -15,7 +15,7 @@ namespace Zyq.Game.Base
             rawBuffer = new byte[ushort.MaxValue];
         }
 
-        public bool TryParseRecvKcpData(KcpConn con, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
+        public bool TryParseRecvKcpData(KcpUdpClient client, KcpConn con, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
         {
             while (true)
             {
@@ -31,10 +31,19 @@ namespace Zyq.Game.Base
                     uint flag = KcpHelper.Decode32u(rawBuffer, 0);
                     uint conv = KcpHelper.Decode32u(rawBuffer, 4);
 
-                    if (flag == KcpConstants.Flag_Heartbeat && conv == con.Conv)
+                    if (conv == con.Conv)
                     {
-                        heartbeat.UpdateHeartbeat();
-                        continue;
+                        if (flag == KcpConstants.Flag_Heartbeat)
+                        {
+                            heartbeat.UpdateHeartbeat();
+                            continue;
+                        }
+
+                        if (flag == KcpConstants.Flag_Disconnect)
+                        {
+                            client.Dispose();
+                            continue;
+                        }
                     }
                 }
 
@@ -95,7 +104,8 @@ namespace Zyq.Game.Base
                             }
                             continue;
                         }
-                        else if (flag == KcpConstants.Flag_Disconnect)
+
+                        if (flag == KcpConstants.Flag_Disconnect)
                         {
                             channel.SetConnectedStatus(false);
                             if (connectCallback != null)
@@ -105,7 +115,8 @@ namespace Zyq.Game.Base
                             channel.Disconnect();
                             continue;
                         }
-                        else if (flag == KcpConstants.Flag_Heartbeat)
+
+                        if (flag == KcpConstants.Flag_Heartbeat)
                         {
                             heartbeat.UpdateHeartbeat(channel, rawBuffer, 0, 8);
                             continue;

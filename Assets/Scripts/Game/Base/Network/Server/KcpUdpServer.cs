@@ -71,6 +71,7 @@ namespace Zyq.Game.Base
                 uint startConvId = 10000;
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
                 EndPoint remote = new IPEndPoint(IPAddress.Any, 0);
+                Dictionary<long, int> endDict = new Dictionary<long, int>();
 
                 while (!isDispose)
                 {
@@ -82,30 +83,41 @@ namespace Zyq.Game.Base
                     CheckDispose();
 
                     int count = socket.ReceiveFrom(rawBuffer, SocketFlags.None, ref remote);
-                    long conId = CptConId(remote);
 
-                    ServerChannel channel;
-                    if (!channels.TryGetValue(conId, out channel))
+                    if (count == 4)
                     {
-                        if (count == 4)
+                        uint flag = KcpHelper.Decode32u(rawBuffer, 0);
+                        if (flag == KcpConstants.Flag_Connect)
                         {
-                            uint flag = KcpHelper.Decode32u(rawBuffer, 0);
-                            if (flag == KcpConstants.Flag_Connect)
+                            int tryCount = 0;
+                            long endId = CptConId(remote);
+                            if (!endDict.TryGetValue(endId, out tryCount))
                             {
                                 uint conv = startConvId++;
-                                channel = new ServerChannel(new KcpConn(conId, conv, socket, remote.Create(remote.Serialize())));
+                                ServerChannel channel = new ServerChannel(new KcpConn(conv, socket, remote.Create(remote.Serialize())));
                                 if (channels.TryAdd(channel.ChannelId, channel))
                                 {
+                                    endDict.Add(endId, 1);
                                     KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
                                     KcpHelper.Encode32u(rawBuffer, 4, conv);
                                     channel.Send(rawBuffer, 0, 8);
+                                    channel.Flush();
                                 }
+                            }
+                            else
+                            {
+                                endDict[endId] = ++tryCount;
                             }
                         }
                     }
-                    else if (count >= Kcp.IKCP_OVERHEAD)
+                    else if (count > Kcp.IKCP_OVERHEAD)
                     {
-                        channel.Input(rawBuffer, 0, count);
+                        uint conv = KcpHelper.Decode32u(rawBuffer, 0);
+                        ServerChannel channel;
+                        if (channels.TryGetValue(conv, out channel))
+                        {
+                            channel.Input(rawBuffer, 4, count - 4);
+                        }
                     }
                 }
             }

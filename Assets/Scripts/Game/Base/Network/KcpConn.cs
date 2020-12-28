@@ -37,23 +37,23 @@ namespace Zyq.Game.Base
         private EndPoint point;
 
         private uint conv;
-        private long conId;
+        private int conId;
 
         private bool isDispose;
         private bool isConnected;
         private byte[] outputBuffer;
 
-        public KcpConn(uint conv, Socket socket) : this(conv, conv, socket, null)
+        public KcpConn(uint conv, Socket socket) : this(conv, socket, null)
         {
         }
 
-        public KcpConn(long conId, uint conv, Socket socket, EndPoint point)
+        public KcpConn(uint conv, Socket socket, EndPoint point)
         {
             this.socket = socket;
             this.point = point;
 
             this.conv = conv;
-            this.conId = conId;
+            this.conId = (int) conv;
 
             isDispose = false;
             isConnected = false;
@@ -76,16 +76,16 @@ namespace Zyq.Game.Base
             }
 
             Memory<byte> memory = owner.Memory;
-
-            memory.Span.Slice(0, length).CopyTo(new Span<byte>(outputBuffer, 0, outputBuffer.Length));
+            KcpHelper.Encode32u(outputBuffer, 0, conv);
+            memory.Span.Slice(0, length).CopyTo(new Span<byte>(outputBuffer, 4, outputBuffer.Length - 4));
 
             if (point == null)
             {
-                socket.Send(outputBuffer, length, SocketFlags.None);
+                socket.Send(outputBuffer, length + 4, SocketFlags.None);
             }
             else
             {
-                socket.SendTo(outputBuffer, length, SocketFlags.None, point);
+                socket.SendTo(outputBuffer, length + 4, SocketFlags.None, point);
             }
         }
 
@@ -164,13 +164,12 @@ namespace Zyq.Game.Base
         #endregion
 
         #region properties
-
         public uint Conv
         {
             get { return conv; }
         }
 
-        public long ConId
+        public int ConId
         {
             get { return conId; }
         }
@@ -188,7 +187,21 @@ namespace Zyq.Game.Base
                 isConnected = value;
             }
         }
-
         #endregion
+
+        public void SendDisconnect()
+        {
+            if (isDispose)
+            {
+                return;
+            }
+
+            byte[] buffer = new byte[8];
+            ByteWriteMemory write = new ByteWriteMemory(buffer);
+            write.Write(KcpConstants.Flag_Disconnect);
+            write.Write(conv);
+            Send(buffer, 0, 8);
+            Flush();
+        }
     }
 }
