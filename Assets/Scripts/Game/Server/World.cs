@@ -21,7 +21,6 @@ namespace Zyq.Game.Server
 
         protected override void Clear()
         {
-            ClearConnections();
             m_Network.Dispose();
             m_Connections.Clear();
         }
@@ -95,16 +94,6 @@ namespace Zyq.Game.Server
         {
             connection.RegisterProtocol<AutoProtocolHandler>();
             connection.RegisterProtocol<ServerProtocolHandler>();
-        }
-
-        private void ClearConnections()
-        {
-            Dictionary<long, Connection>.Enumerator its = m_Connections.GetEnumerator();
-            while (its.MoveNext())
-            {
-                its.Current.Value.Dispose();
-            }
-            m_Connections.Clear();
         }
     }
 }
