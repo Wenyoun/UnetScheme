@@ -57,12 +57,12 @@
 
         public void UpdateHeartbeat()
         {
-            //recvMills = TimeUtil.Get1970ToNowMilliseconds();
+            recvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
         public void UpdateHeartbeat(ServerChannel channel, byte[] rawBuffer, int ofsset, int length)
         {
-            //recvMills = TimeUtil.Get1970ToNowMilliseconds();
+            recvMills = TimeUtil.Get1970ToNowMilliseconds();
             channel.Send(rawBuffer, ofsset, length);
         }
 

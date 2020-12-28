@@ -109,7 +109,7 @@ namespace Zyq.Game.Base
                         }
                         else
                         {
-                            Debug.Log("未创建连接，接收到无效包");
+                            Debug.Log("未创建连接，接收到无效包，len=" + count);
                         }
                     }
                     else if (count > Kcp.IKCP_OVERHEAD)
@@ -122,7 +122,7 @@ namespace Zyq.Game.Base
                     }
                     else
                     {
-                        Debug.Log("已创建连接，接收到无效包");
+                        Debug.Log("已创建连接，接收到无效包，len=" + count);
                     }
                 }
             }
