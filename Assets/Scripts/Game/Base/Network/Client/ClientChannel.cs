@@ -15,7 +15,7 @@ namespace Zyq.Game.Base
             status = KcpUdpClient.None;
         }
 
-        public override int ChannelId
+        public override long ChannelId
         {
             get { return kcpUdpClient != null ? kcpUdpClient.ConId : -1; }
         }

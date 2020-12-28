@@ -7,12 +7,12 @@ namespace Zyq.Game.Server
     public class World : AbsWorld, IServerCallback
     {
         private ServerNetwork m_Network;
-        private Dictionary<int, Connection> m_Connections;
+        private Dictionary<long, Connection> m_Connections;
 
         public World() : base(1)
         {
             m_Network = new ServerNetwork(this);
-            m_Connections = new Dictionary<int, Connection>();
+            m_Connections = new Dictionary<long, Connection>();
         }
 
         protected override void Init()
@@ -58,7 +58,7 @@ namespace Zyq.Game.Server
 
         public void Broadcast(ushort cmd, ByteBuffer buffer)
         {
-            Dictionary<int, Connection>.Enumerator its = m_Connections.GetEnumerator();
+            Dictionary<long, Connection>.Enumerator its = m_Connections.GetEnumerator();
             while (its.MoveNext())
             {
                 its.Current.Value.Send(cmd, buffer);
@@ -68,8 +68,8 @@ namespace Zyq.Game.Server
         public void OnClientConnect(IChannel channel)
         {
             Debug.Log("Server: Client连上服务器");
-            
-            int connectionId = channel.ChannelId;
+
+            long connectionId = channel.ChannelId;
             if (!m_Connections.ContainsKey(connectionId))
             {
                 Connection connection = new Connection(channel);
@@ -81,9 +81,9 @@ namespace Zyq.Game.Server
         public void OnClientDisconnect(IChannel channel)
         {
             Debug.Log("Server: Client断开服务器");
-            
+
             Connection connection;
-            int connectionId = channel.ChannelId;
+            long connectionId = channel.ChannelId;
             if (m_Connections.TryGetValue(connectionId, out connection))
             {
                 m_Connections.Remove(connectionId);
@@ -99,12 +99,11 @@ namespace Zyq.Game.Server
 
         private void ClearConnections()
         {
-            Dictionary<int, Connection>.Enumerator its = m_Connections.GetEnumerator();
+            Dictionary<long, Connection>.Enumerator its = m_Connections.GetEnumerator();
             while (its.MoveNext())
             {
                 its.Current.Value.Dispose();
             }
-
             m_Connections.Clear();
         }
     }

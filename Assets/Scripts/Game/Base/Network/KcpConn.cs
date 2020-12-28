@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Buffers;
-using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using Net.KcpImpl;
-using UnityEngine;
 
 namespace Zyq.Game.Base
 {
     public class KcpConn : IKcpCallback, IRentable, IDisposable
     {
+        public const int HEAD_SIZE = 8;
+        
         #region pool
         private class MemoryPool : IMemoryOwner<byte>
         {
@@ -37,23 +37,23 @@ namespace Zyq.Game.Base
         private EndPoint point;
 
         private uint conv;
-        private int conId;
+        private long conId;
 
         private bool isDispose;
         private bool isConnected;
         private byte[] outputBuffer;
 
-        public KcpConn(uint conv, Socket socket) : this(conv, socket, null)
+        public KcpConn(long conId, uint conv, Socket socket) : this(conId, conv, socket, null)
         {
         }
 
-        public KcpConn(uint conv, Socket socket, EndPoint point)
+        public KcpConn(long conId, uint conv, Socket socket, EndPoint point)
         {
             this.socket = socket;
             this.point = point;
 
             this.conv = conv;
-            this.conId = (int) conv;
+            this.conId = conId;
 
             isDispose = false;
             isConnected = false;
@@ -76,16 +76,16 @@ namespace Zyq.Game.Base
             }
 
             Memory<byte> memory = owner.Memory;
-            KcpHelper.Encode32u(outputBuffer, 0, conv);
-            memory.Span.Slice(0, length).CopyTo(new Span<byte>(outputBuffer, 4, outputBuffer.Length - 4));
+            KcpHelper.Encode64(outputBuffer, 0, conId);
+            memory.Span.Slice(0, length).CopyTo(new Span<byte>(outputBuffer, HEAD_SIZE, outputBuffer.Length - HEAD_SIZE));
 
             if (point == null)
             {
-                socket.Send(outputBuffer, length + 4, SocketFlags.None);
+                socket.Send(outputBuffer, length + HEAD_SIZE, SocketFlags.None);
             }
             else
             {
-                socket.SendTo(outputBuffer, length + 4, SocketFlags.None, point);
+                socket.SendTo(outputBuffer, length + HEAD_SIZE, SocketFlags.None, point);
             }
         }
 
@@ -95,7 +95,6 @@ namespace Zyq.Game.Base
             {
                 return -10;
             }
-
             return kcp.Send(new Span<byte>(buffer, offset, length));
         }
 
@@ -105,9 +104,7 @@ namespace Zyq.Game.Base
             {
                 return -10;
             }
-
             return kcp.Recv(new Span<byte>(buffer, offset, length));
-
         }
 
         public void Dispose()
@@ -169,7 +166,7 @@ namespace Zyq.Game.Base
             get { return conv; }
         }
 
-        public int ConId
+        public long ConId
         {
             get { return conId; }
         }
@@ -177,15 +174,7 @@ namespace Zyq.Game.Base
         public bool IsConnected
         {
             get { return !isDispose && isConnected; }
-            internal set
-            {
-                if (isDispose)
-                {
-                    return;
-                }
-
-                isConnected = value;
-            }
+            internal set { isConnected = value; }
         }
         #endregion
 

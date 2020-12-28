@@ -78,7 +78,7 @@ namespace Zyq.Game.Base
             return recvPacketQueue.TryDequeue(out packet);
         }
 
-        public int ConId
+        public long ConId
         {
             get { return con != null ? con.ConId : -1; }
         }
@@ -148,21 +148,22 @@ namespace Zyq.Game.Base
 
                     int count = socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
 
-                    if (count == 36)
+                    if (count == 40)
                     {
-                        uint conv1 = KcpHelper.Decode32u(rawBuffer, 4);
-                        uint flag = KcpHelper.Decode32u(rawBuffer, 28);
-                        uint conv2 = KcpHelper.Decode32u(rawBuffer, 32);
-                        if (conv1 == conv2 && flag == KcpConstants.Flag_Connect)
+                        long conId = KcpHelper.Decode64(rawBuffer, 0);
+                        uint flag = KcpHelper.Decode32u(rawBuffer, 32);
+                        uint conv = KcpHelper.Decode32u(rawBuffer, 36);
+                        
+                        if (flag == KcpConstants.Flag_Connect)
                         {
-                            con = new KcpConn(conv1, socket);
-                            con.Input(rawBuffer, 4, count - 4);
+                            con = new KcpConn(conId, conv, socket);
+                            con.Input(rawBuffer, KcpConn.HEAD_SIZE, count - KcpConn.HEAD_SIZE);
                             count = con.Recv(rawBuffer, 0, rawBuffer.Length);
 
                             if (count == 8)
                             {
                                 KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
-                                KcpHelper.Encode32u(rawBuffer, 4, conv1);
+                                KcpHelper.Encode32u(rawBuffer, 4, conv);
                                 con.Send(rawBuffer, 0, 8);
                                 con.Flush();
 

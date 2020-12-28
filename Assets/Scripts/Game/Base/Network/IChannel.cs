@@ -19,7 +19,7 @@ namespace Zyq.Game.Base
 
     public interface IChannel : IDisposable
     {
-        int ChannelId { get; }
+        long ChannelId { get; }
 
         bool IsConnected { get; }
 
@@ -73,7 +73,7 @@ namespace Zyq.Game.Base
 
         public abstract void Disconnect();
 
-        public abstract int ChannelId { get; }
+        public abstract long ChannelId { get; }
 
         public abstract bool IsConnected { get; }
 

@@ -11,7 +11,7 @@ namespace Zyq.Game.Base
 
         private KcpUdpServer kcpUdpServer;
 
-        private Dictionary<int, IChannel> channels;
+        private Dictionary<long, IChannel> channels;
         private ConcurrentQueue<StatusChannel> statusChannels;
 
         public ServerNetwork(IServerCallback callback)
@@ -21,7 +21,7 @@ namespace Zyq.Game.Base
 
             kcpUdpServer = new KcpUdpServer();
 
-            channels = new Dictionary<int, IChannel>();
+            channels = new Dictionary<long, IChannel>();
             statusChannels = new ConcurrentQueue<StatusChannel>();
         }
 
@@ -95,7 +95,7 @@ namespace Zyq.Game.Base
 
         private void Dispatcher()
         {
-            Dictionary<int, IChannel>.Enumerator its = channels.GetEnumerator();
+            Dictionary<long, IChannel>.Enumerator its = channels.GetEnumerator();
             while (its.MoveNext())
             {
                 its.Current.Value.Dispatcher();

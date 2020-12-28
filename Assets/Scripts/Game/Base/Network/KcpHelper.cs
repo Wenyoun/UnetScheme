@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Net;
 using System.Threading;
 
 namespace Zyq.Game.Base
@@ -28,6 +29,32 @@ namespace Zyq.Game.Base
             result |= (uint) (p[1 + offset] << 8);
             result |= (uint) (p[2 + offset] << 16);
             result |= (uint) (p[3 + offset] << 24);
+            return result;
+        }
+
+        internal static void Encode64(byte[] p, int offset, long w)
+        {
+            p[0 + offset] = (byte) (w >> 0);
+            p[1 + offset] = (byte) (w >> 8);
+            p[2 + offset] = (byte) (w >> 16);
+            p[3 + offset] = (byte) (w >> 24);
+            p[4 + offset] = (byte) (w >> 32);
+            p[5 + offset] = (byte) (w >> 40);
+            p[6 + offset] = (byte) (w >> 48);
+            p[7 + offset] = (byte) (w >> 56);
+        }
+
+        internal static long Decode64(byte[] p, int offset)
+        {
+            long result = 0;
+            result |= p[0 + offset] << 0;
+            result |= p[1 + offset] << 8;
+            result |= p[2 + offset] << 16;
+            result |= p[3 + offset] << 24;
+            result |= (long) p[4 + offset] << 32;
+            result |= (long) p[5 + offset] << 40;
+            result |= (long) p[6 + offset] << 48;
+            result |= (long) p[7 + offset] << 58;
             return result;
         }
 

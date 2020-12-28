@@ -9,6 +9,8 @@ namespace Zyq.Game.Base
     {
         private bool isClose;
         private bool isDispose;
+        private uint conv;
+        private long conId;
 
         private KcpConn con;
         private ConcurrentQueue<Packet> recvPacketQueue;
@@ -17,6 +19,8 @@ namespace Zyq.Game.Base
         public ServerChannel(KcpConn con)
         {
             this.con = con;
+            conv = con.Conv;
+            this.conId = con.ConId;
 
             isClose = false;
             isDispose = false;
@@ -25,9 +29,9 @@ namespace Zyq.Game.Base
             sendPacketQueue = new ConcurrentQueue<Packet>();
         }
 
-        public override int ChannelId
+        public override long ChannelId
         {
-            get { return con.ConId; }
+            get { return conId; }
         }
 
         public override bool IsConnected
@@ -186,7 +190,7 @@ namespace Zyq.Game.Base
 
         internal uint Conv
         {
-            get { return con.Conv; }
+            get { return conv; }
         }
 
         internal bool IsClose

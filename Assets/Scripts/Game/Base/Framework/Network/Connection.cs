@@ -48,7 +48,7 @@ namespace Zyq.Game.Base
             m_Channel.Send(cmd, buffer);
         }
 
-        public int ConnectionId
+        public long ConnectionId
         {
             get { return m_Channel.ChannelId; }
         }
