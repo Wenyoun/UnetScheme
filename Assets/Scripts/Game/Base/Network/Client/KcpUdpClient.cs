@@ -241,7 +241,7 @@ namespace Zyq.Game.Base
                     int count = socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
                     if (count > Kcp.IKCP_OVERHEAD)
                     {
-                        con.Input(rawBuffer, 4, count - 4);
+                        con.Input(rawBuffer, KcpConn.HEAD_SIZE, count - KcpConn.HEAD_SIZE);
 
                         if (process.TryParseRecvKcpData(this, con, packets, heartbeat))
                         {
