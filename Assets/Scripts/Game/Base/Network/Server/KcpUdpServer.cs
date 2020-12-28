@@ -97,7 +97,7 @@ namespace Zyq.Game.Base
                                 uint conv = startConvId++;
                                 EndPoint point = remote.Create(remote.Serialize());
                                 channel = new ServerChannel(new KcpConn(conId, conv, socket, point));
-                                
+
                                 if (channels.TryAdd(conId, channel))
                                 {
                                     KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
@@ -107,6 +107,10 @@ namespace Zyq.Game.Base
                                 }
                             }
                         }
+                        else
+                        {
+                            Debug.Log("未创建连接，接收到无效包");
+                        }
                     }
                     else if (count > Kcp.IKCP_OVERHEAD)
                     {
@@ -115,6 +119,10 @@ namespace Zyq.Game.Base
                         {
                             channel.Input(rawBuffer, KcpConn.HEAD_SIZE, count - KcpConn.HEAD_SIZE);
                         }
+                    }
+                    else
+                    {
+                        Debug.Log("已创建连接，接收到无效包");
                     }
                 }
             }
