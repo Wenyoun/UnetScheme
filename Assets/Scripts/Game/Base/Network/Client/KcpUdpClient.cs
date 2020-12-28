@@ -201,7 +201,7 @@ namespace Zyq.Game.Base
 
                     long time = TimeUtil.Get1970ToNowMilliseconds();
                     con.Update(time);
-                    heartbeat.Tick(this, con, time);
+                    heartbeat.OnUpdate(this, con, time);
 
                     if (isDispose || status != Success)
                     {

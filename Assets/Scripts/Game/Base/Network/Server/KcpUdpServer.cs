@@ -141,20 +141,18 @@ namespace Zyq.Game.Base
 
                 while (!isDispose)
                 {
-                    long time = TimeUtil.Get1970ToNowMilliseconds();
                     IEnumerator<KeyValuePair<long, ServerChannel>> its = channels.GetEnumerator();
 
                     while (its.MoveNext())
                     {
                         ServerChannel channel = its.Current.Value;
-                        if (channel.IsClose)
+                        if (!channel.IsClose)
                         {
-                            removes.Add(channel.ChannelId);
+                            channel.ProcessSendPacket(process);
                         }
                         else
                         {
-                            channel.Update(time);
-                            channel.ProcessSendPacket(process);
+                            removes.Add(channel.ChannelId);
                         }
                     }
 

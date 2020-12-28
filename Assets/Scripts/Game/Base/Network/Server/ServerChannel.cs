@@ -11,10 +11,9 @@ namespace Zyq.Game.Base
         private long conId;
 
         private KcpConn con;
+        private ServerHeartbeatProcessing heartbeat;
         private ConcurrentQueue<Packet> recvPacketQueue;
         private ConcurrentQueue<Packet> sendPacketQueue;
-
-        private ServerHeartbeatProcessing heartbeat;
 
         public ServerChannel(KcpConn con)
         {
@@ -25,10 +24,9 @@ namespace Zyq.Game.Base
             isClose = false;
             isDispose = false;
 
+            heartbeat = new ServerHeartbeatProcessing();
             recvPacketQueue = new ConcurrentQueue<Packet>();
             sendPacketQueue = new ConcurrentQueue<Packet>();
-
-            heartbeat = new ServerHeartbeatProcessing();
         }
 
         public override long ChannelId
@@ -101,7 +99,6 @@ namespace Zyq.Game.Base
         }
 
         #region internal method
-
         internal int Send(byte[] buffer, int offset, int length)
         {
             if (isDispose)
@@ -132,16 +129,6 @@ namespace Zyq.Game.Base
             con.Input(buffer, offset, length);
         }
 
-        internal void Update(long time)
-        {
-            if (isDispose)
-            {
-                return;
-            }
-
-            con.Update(time);
-        }
-
         internal void Flush()
         {
             if (isDispose)
@@ -160,6 +147,8 @@ namespace Zyq.Game.Base
             }
 
             process.TryParseSendKcpData(this, sendPacketQueue);
+
+            con.Update(TimeUtil.Get1970ToNowMilliseconds());
         }
 
         internal void ProcessRecvPacket(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connectCallback)
@@ -168,8 +157,6 @@ namespace Zyq.Game.Base
             {
                 return;
             }
-
-            heartbeat.Tick(this);
 
             if (process.TryParseRecvKcpData(this, packets, connectCallback, heartbeat))
             {
@@ -180,6 +167,8 @@ namespace Zyq.Game.Base
                 }
                 packets.Clear();
             }
+
+            heartbeat.OnUpdate(this);
         }
 
         internal void SetConnectedStatus(bool status)
@@ -201,7 +190,6 @@ namespace Zyq.Game.Base
         {
             get { return isDispose || isClose; }
         }
-
         #endregion
     }
 }

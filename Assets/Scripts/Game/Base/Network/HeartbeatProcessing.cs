@@ -25,7 +25,7 @@
             recvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
-        public void Tick(KcpUdpClient client, KcpConn con, long time)
+        public void OnUpdate(KcpUdpClient client, KcpConn con, long time)
         {
             long current = time;
 
@@ -66,7 +66,7 @@
             channel.Send(rawBuffer, ofsset, length);
         }
 
-        public void Tick(ServerChannel channel)
+        public void OnUpdate(ServerChannel channel)
         {
             long current = TimeUtil.Get1970ToNowMilliseconds();
             if (current - recvMills > HeartbaetConstants.Timeout_Interval_Mills)
