@@ -1,7 +1,7 @@
 {
-    "name": "Zyq.Game.Server",
+    "name": "Nice.Game.Base",
     "references": [
-        "Zyq.Game.Base"
+        "Net.KcpImpl"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

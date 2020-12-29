@@ -1,7 +1,7 @@
 {
     "name": "Zyq.Editor.Proto",
     "references": [
-        "Zyq.Game.Base"
+        "Nice.Game.Base"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

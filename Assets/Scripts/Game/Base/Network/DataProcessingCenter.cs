@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     internal class ClientDataProcessingCenter
     {

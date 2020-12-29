@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     public struct ByteReadMemory
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class SendAttribute : Attribute

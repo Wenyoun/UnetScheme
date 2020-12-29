@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using Zyq.Game.Base;
+using Nice.Game.Base;
 
-namespace Zyq.Game.Server
+namespace Nice.Game.Server
 {
     public class ServerObjectFeture : ObjectFeture
     {

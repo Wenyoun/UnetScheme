@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     [StructLayout(LayoutKind.Explicit)]
     internal struct UIntFloat

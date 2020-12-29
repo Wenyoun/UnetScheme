@@ -7,7 +7,7 @@ using System.Threading;
 using Net.KcpImpl;
 using UnityEngine;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     public class KcpUdpClient : IDisposable
     {

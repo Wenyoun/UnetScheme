@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
 	public interface IWorld : IDisposable, IUpdate, ILateUpdate, IFixedUpdate
 	{

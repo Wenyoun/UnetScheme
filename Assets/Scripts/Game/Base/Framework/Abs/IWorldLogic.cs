@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     public interface IWorldLogic
     {

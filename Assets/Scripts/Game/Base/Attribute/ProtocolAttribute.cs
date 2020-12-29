@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class ProtocolAttribute : Attribute { }

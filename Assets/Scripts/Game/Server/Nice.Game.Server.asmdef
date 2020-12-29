@@ -1,7 +1,7 @@
 {
-    "name": "Zyq.Game.Client",
+    "name": "Nice.Game.Server",
     "references": [
-        "Zyq.Game.Base"
+        "Nice.Game.Base"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     public abstract class ObjectFeture : IFeture
     {

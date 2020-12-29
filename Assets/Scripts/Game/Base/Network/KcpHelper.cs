@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     internal class KcpConstants
     {

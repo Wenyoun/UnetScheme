@@ -1,4 +1,4 @@
-﻿namespace Zyq.Game.Base
+﻿namespace Nice.Game.Base
 {
     public interface ILifecycle
     {

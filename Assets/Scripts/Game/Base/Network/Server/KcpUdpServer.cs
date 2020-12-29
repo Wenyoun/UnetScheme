@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using Net.KcpImpl;
 using UnityEngine;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     public interface IKcpConnect
     {

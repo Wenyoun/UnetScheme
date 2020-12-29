@@ -1,6 +1,6 @@
-﻿using Zyq.Game.Base;
+﻿using Nice.Game.Base;
 
-namespace Zyq.Game.Client
+namespace Nice.Game.Client
 {
     public class ChangeAttributeCop : AbsCop
     {

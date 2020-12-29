@@ -30,12 +30,12 @@ namespace Zyq.Weaver
         {
             foreach (Assembly unityAsm in CompilationPipeline.GetAssemblies())
             {
-                if (unityAsm.outputPath.EndsWith("Zyq.Game.Base.dll"))
+                if (unityAsm.outputPath.EndsWith("Nice.Game.Base.dll"))
                 {
                     return unityAsm.outputPath;
                 }
             }
-            throw new System.Exception("Not found Zyq.Game.Base.dll");
+            throw new System.Exception("Not found Nice.Game.Base.dll");
         }
 
         public static string FindUnityEngineDLLDirectoryName()

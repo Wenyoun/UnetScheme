@@ -1,7 +1,7 @@
-﻿using Zyq.Game.Base;
+﻿using Nice.Game.Base;
 using System.Collections.Generic;
 
-namespace Zyq.Game.Server
+namespace Nice.Game.Server
 {
     public static class SyncAttributeMgr
     {

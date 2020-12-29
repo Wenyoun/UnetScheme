@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     public class ClientChannel : AbsChannel
     {

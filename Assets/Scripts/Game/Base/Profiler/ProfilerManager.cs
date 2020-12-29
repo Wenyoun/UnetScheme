@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor.Rendering;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     public class ProfilerManager
     {

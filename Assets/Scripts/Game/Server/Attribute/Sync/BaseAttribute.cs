@@ -1,7 +1,7 @@
 //警告，警告，自动生成，不要修改，不要修改
-namespace Zyq.Game.Server
+namespace Nice.Game.Server
 {
-    using Zyq.Game.Base;
+    using Nice.Game.Base;
     
     [SyncClass]
     public class BaseAttribute : ISyncAttribute

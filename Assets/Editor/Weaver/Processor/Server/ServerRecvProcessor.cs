@@ -1,5 +1,5 @@
 ﻿using System;
-using Zyq.Game.Base;
+using Nice.Game.Base;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
 using Mono.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿namespace Zyq.Game.Client
+﻿namespace Nice.Game.Client
 {
     public sealed class MessageConstants
     {

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using Zyq.Game.Base;
+using Nice.Game.Base;
 
-namespace Zyq.Game.Client
+namespace Nice.Game.Client
 {
     public sealed class EntityFactory
     {

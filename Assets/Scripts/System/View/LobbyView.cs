@@ -1,8 +1,8 @@
 ﻿using Base;
 using UnityEngine;
 using UnityEngine.UI;
-using Zyq.Game.Client;
-using Zyq.Game.Server;
+using Nice.Game.Client;
+using Nice.Game.Server;
 
 namespace System
 {

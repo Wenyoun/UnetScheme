@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-namespace Zyq.Game.Client
+namespace Nice.Game.Client
 {
     public sealed class ResMgr
     {

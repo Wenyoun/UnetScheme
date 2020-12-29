@@ -31,8 +31,8 @@ public static class ProtoCopy
 		{
 			string filename = files[i];
 			string name = Path.GetFileName(filename);
-			CopyFile(filename, PathClientProto + "/" + name, "Zyq.Game.Client");
-			CopyFile(filename, PathServerProto + "/" + name, "Zyq.Game.Server");
+			CopyFile(filename, PathClientProto + "/" + name, "Nice.Game.Client");
+			CopyFile(filename, PathServerProto + "/" + name, "Nice.Game.Server");
 		}
 
 		AssetDatabase.Refresh();

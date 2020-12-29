@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     internal static class TimeUtil
     {

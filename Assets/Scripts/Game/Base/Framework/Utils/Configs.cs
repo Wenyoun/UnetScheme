@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     public class Configs : IDisposable
     {

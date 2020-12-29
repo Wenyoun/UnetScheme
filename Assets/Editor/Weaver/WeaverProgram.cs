@@ -8,9 +8,9 @@ namespace Zyq.Weaver
     public static class WeaverProgram
     {
         #region User Module
-        public const string Base = "Zyq.Game.Base.dll";
-        public const string Server = "Zyq.Game.Server.dll";
-        public const string Client = "Zyq.Game.Client.dll";
+        public const string Base = "Nice.Game.Base.dll";
+        public const string Server = "Nice.Game.Server.dll";
+        public const string Client = "Nice.Game.Client.dll";
         #endregion
 
         #region AssemblyDefinition
@@ -35,37 +35,37 @@ namespace Zyq.Weaver
         public static MethodReference ByteBufferAllocateMethod;
         #endregion
 
-        #region Zyq.Game.Base.IEntity
+        #region Nice.Game.Base.IEntity
         public static TypeReference IEntityType;
         public static MethodReference IEntityGetFetureMethod;
         #endregion
 
-        #region Zyq.Game.Base.AbsCop
+        #region Nice.Game.Base.AbsCop
         public static TypeReference AbsCopType;
         public static MethodReference AbsCopOnRemoveMethod;
         public static MethodReference AbsCopGetEntityMethod;
         #endregion
 
-        #region Zyq.Game.Base.Connection
+        #region Nice.Game.Base.Connection
         public static TypeReference ConnectionType;
         public static MethodReference ConnectionSendMethod;
         public static MethodReference ConnectionRegisterHandlerMethod;
         public static MethodReference ConnectionUnregisterHandlerMethod;
         #endregion
         
-        #region Zyq.Game.Base.ConnectionFeture
+        #region Nice.Game.Base.ConnectionFeture
         public static TypeReference ConnectionFetureType;
         public static MethodReference ConnectionFetureRegisterHandlerMethod;
         public static MethodReference ConnectionFetureUnregisterHandlerMethod;
         #endregion
 
-        #region Zyq.Game.Client.Client
+        #region Nice.Game.Client.Client
         public static TypeReference ClientType;
         public static FieldReference ClientInsField;
         public static MethodReference ClientSendMethod;
         #endregion
 
-        #region Zyq.Game.Server.Server
+        #region Nice.Game.Server.Server
         public static TypeReference ServerType;
         public static FieldReference ServerInsField;
         public static MethodReference ServerSendMethod;
@@ -161,45 +161,45 @@ namespace Zyq.Weaver
         
         private static void SetupBaseModuleTypes()
         {
-            ChannelMessageType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ChannelMessage");
+            ChannelMessageType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ChannelMessage");
             ChannelMessageBufferField = ResolveHelper.ResolveField(ChannelMessageType, "Buffer");
-            ByteBufferType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ByteBuffer");
+            ByteBufferType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ByteBuffer");
             ByteBufferAllocateMethod = ResolveHelper.ResolveMethod(ByteBufferType, "Allocate");
                 
-            SendType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.SendAttribute");
-            RecvType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.RecvAttribute");
-            ProtocolType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ProtocolAttribute");
-            BroadcastType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.BroadcastAttribute");
-            SyncClassType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.SyncClassAttribute");
-            SyncFieldType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.SyncFieldAttribute");
+            SendType = BaseAssembly.MainModule.GetType("Nice.Game.Base.SendAttribute");
+            RecvType = BaseAssembly.MainModule.GetType("Nice.Game.Base.RecvAttribute");
+            ProtocolType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ProtocolAttribute");
+            BroadcastType = BaseAssembly.MainModule.GetType("Nice.Game.Base.BroadcastAttribute");
+            SyncClassType = BaseAssembly.MainModule.GetType("Nice.Game.Base.SyncClassAttribute");
+            SyncFieldType = BaseAssembly.MainModule.GetType("Nice.Game.Base.SyncFieldAttribute");
 
-            IEntityType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.IEntity");
+            IEntityType = BaseAssembly.MainModule.GetType("Nice.Game.Base.IEntity");
             IEntityGetFetureMethod = ResolveHelper.ResolveMethod(IEntityType, "GetFeture");
 
-            AbsCopType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.AbsCop");
+            AbsCopType = BaseAssembly.MainModule.GetType("Nice.Game.Base.AbsCop");
             AbsCopOnRemoveMethod = ResolveHelper.ResolveMethod(AbsCopType, "OnRemove");
             AbsCopGetEntityMethod = ResolveHelper.ResolveMethod(AbsCopType, "get_Entity");
 
-            ConnectionType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.Connection");
+            ConnectionType = BaseAssembly.MainModule.GetType("Nice.Game.Base.Connection");
             ConnectionSendMethod = ResolveHelper.ResolveMethod(ConnectionType, "Send");
             ConnectionRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "RegisterHandler");
             ConnectionUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "UnRegisterHandler");
 
-            ConnectionFetureType = BaseAssembly.MainModule.GetType("Zyq.Game.Base.ConnectionFeture");
+            ConnectionFetureType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ConnectionFeture");
             ConnectionFetureRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "RegisterHandler");
             ConnectionFetureUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "UnRegisterHandler");
         }
 
         private static void SetupClientModuleTypes()
         {
-            ClientType = CurrentAssembly.MainModule.GetType("Zyq.Game.Client.Client");
+            ClientType = CurrentAssembly.MainModule.GetType("Nice.Game.Client.Client");
             ClientInsField = ResolveHelper.ResolveField(ClientType, "Ins");
             ClientSendMethod = ResolveHelper.ResolveMethod(ClientType, "Send");
         }
 
         private static void SetupServerModuleTypes()
         {
-            ServerType = CurrentAssembly.MainModule.GetType("Zyq.Game.Server.Server");
+            ServerType = CurrentAssembly.MainModule.GetType("Nice.Game.Server.Server");
             ServerInsField = ResolveHelper.ResolveField(ServerType, "Ins");
             ServerSendMethod = ResolveHelper.ResolveMethod(ServerType, "Send");
             ServerBroadcastMethod = ResolveHelper.ResolveMethod(ServerType, "Broadcast");

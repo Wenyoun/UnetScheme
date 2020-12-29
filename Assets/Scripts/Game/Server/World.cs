@@ -1,8 +1,8 @@
-﻿using Zyq.Game.Base;
+﻿using Nice.Game.Base;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Zyq.Game.Server
+namespace Nice.Game.Server
 {
     public class World : AbsWorld, IServerCallback
     {

@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using Net.KcpImpl;
 
-namespace Zyq.Game.Base
+namespace Nice.Game.Base
 {
     public class KcpConn : IKcpCallback, IRentable, IDisposable
     {

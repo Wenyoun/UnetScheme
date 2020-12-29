@@ -3,7 +3,7 @@ using UnityEngine;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
 using System.Collections.Generic;
-using Zyq.Game.Base;
+using Nice.Game.Base;
 
 namespace Zyq.Weaver
 {

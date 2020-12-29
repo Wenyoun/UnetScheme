@@ -1,4 +1,4 @@
-using Zyq.Game.Base;
+using Nice.Game.Base;
 using System.Collections.Generic;
 
 namespace Base

@@ -13,7 +13,7 @@ namespace Zyq.Weaver
             {
                 if (!type.IsEnum &&
                     type.IsValueType &&
-                    type.Namespace == "Zyq.Game.Proto")
+                    type.Namespace == "Nice.Game.Proto")
                 {
                     structs.Add(type);
                 }

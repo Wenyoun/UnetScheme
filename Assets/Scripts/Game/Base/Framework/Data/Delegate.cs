@@ -1,4 +1,4 @@
-﻿namespace Zyq.Game.Base
+﻿namespace Nice.Game.Base
 {
     public delegate void MsgDelegate(IBody body);
 

@@ -1,6 +1,6 @@
-﻿using Zyq.Game.Base;
+﻿using Nice.Game.Base;
 
-namespace Zyq.Game.Server
+namespace Nice.Game.Server
 {
     [Protocol]
     public class AutoProtocolHandler : IProtocolHandler
