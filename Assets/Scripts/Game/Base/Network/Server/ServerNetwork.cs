@@ -6,130 +6,131 @@ namespace Zyq.Game.Base
 {
     public class ServerNetwork : IDisposable
     {
-        private bool isDispose;
-        private IServerCallback serverCallback;
-
-        private KcpUdpServer kcpUdpServer;
-
-        private Dictionary<long, IChannel> channels;
-        private ConcurrentQueue<StatusChannel> statusChannels;
+        private bool m_Dispose;
+        private IServerCallback m_Callback;
+        private KcpUdpServer m_KcpUdpServer;
+        private Dictionary<long, IChannel> m_Channels;
+        private ConcurrentQueue<StatusChannel> m_StatusChannels;
 
         public ServerNetwork(IServerCallback callback)
         {
-            isDispose = false;
-            serverCallback = callback;
+            m_Dispose = false;
+            m_Callback = callback;
+            m_KcpUdpServer = new KcpUdpServer();
+            m_Channels = new Dictionary<long, IChannel>();
+            m_StatusChannels = new ConcurrentQueue<StatusChannel>();
+        }
 
-            kcpUdpServer = new KcpUdpServer();
+        public void Dispose()
+        {
+            if (m_Dispose)
+            {
+                return;
+            }
 
-            channels = new Dictionary<long, IChannel>();
-            statusChannels = new ConcurrentQueue<StatusChannel>();
+            m_Dispose = true;
+            m_Channels.Clear();
+            m_KcpUdpServer.Dispose();
+
+            while (m_StatusChannels.TryDequeue(out StatusChannel channel))
+            {
+            }
         }
 
         public void Bind(int port)
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
-            kcpUdpServer.Bind(port, new KcpConnect(OnKcpConnect, OnKcpDisconnect));
+            m_KcpUdpServer.Bind(port, new KcpConnect(OnKcpConnect, OnKcpDisconnect));
         }
 
         public void CloseChannel(int channelId)
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
-            if (channels.TryGetValue(channelId, out IChannel channel))
+            if (m_Channels.TryGetValue(channelId, out IChannel channel))
             {
-                channels.Remove(channelId);
+                m_Channels.Remove(channelId);
                 channel.Disconnect();
             }
         }
 
         public void OnUpdate()
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
             CheckStatusChannels();
-
-            Dispatcher();
-        }
-
-        public void Dispose()
-        {
-            if (isDispose)
-            {
-                return;
-            }
-
-            isDispose = true;
-            channels.Clear();
-            kcpUdpServer.Dispose();
+            HandlePackets();
         }
 
         private void OnKcpConnect(IChannel channel)
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
-            statusChannels.Enqueue(new StatusChannel(Status.Add, channel));
+            m_StatusChannels.Enqueue(new StatusChannel(Status.Add, channel));
         }
 
         private void OnKcpDisconnect(IChannel channel)
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
-            statusChannels.Enqueue(new StatusChannel(Status.Remove, channel));
+            m_StatusChannels.Enqueue(new StatusChannel(Status.Remove, channel));
         }
 
-        private void Dispatcher()
+        private void HandlePackets()
         {
-            Dictionary<long, IChannel>.Enumerator its = channels.GetEnumerator();
-            while (its.MoveNext())
+            using (Dictionary<long, IChannel>.Enumerator its = m_Channels.GetEnumerator())
             {
-                its.Current.Value.Dispatcher();
+                while (its.MoveNext())
+                {
+                    its.Current.Value.Dispatcher();
+                }
             }
         }
 
         private void CheckStatusChannels()
         {
-            while (statusChannels.TryDequeue(out StatusChannel status))
+            while (m_StatusChannels.TryDequeue(out StatusChannel status))
             {
                 IChannel channel = status.Channel;
 
                 if (status.Status == Status.Add)
                 {
-                    if (!channels.ContainsKey(channel.ChannelId))
+                    if (!m_Channels.ContainsKey(channel.ChannelId))
                     {
-                        channels.Add(channel.ChannelId, channel);
+                        m_Channels.Add(channel.ChannelId, channel);
 
-                        if (serverCallback != null)
+                        if (m_Callback != null)
                         {
-                            serverCallback.OnClientConnect(channel);
+                            m_Callback.OnClientConnect(channel);
                         }
                     }
                 }
                 else if (status.Status == Status.Remove)
                 {
-                    if (channels.ContainsKey(channel.ChannelId))
+                    if (m_Channels.ContainsKey(channel.ChannelId))
                     {
-                        if (serverCallback != null)
+                        if (m_Callback != null)
                         {
-                            serverCallback.OnClientDisconnect(channel);
+                            m_Callback.OnClientDisconnect(channel);
                         }
 
-                        channels.Remove(channel.ChannelId);
+                        m_Channels.Remove(channel.ChannelId);
                     }
                 }
             }
@@ -155,29 +156,23 @@ namespace Zyq.Game.Base
 
         private class KcpConnect : IKcpConnect
         {
-            private Action<IChannel> connect;
-            private Action<IChannel> disconnect;
+            private Action<IChannel> m_Connect;
+            private Action<IChannel> m_Disconnect;
 
             public KcpConnect(Action<IChannel> connect, Action<IChannel> disconnect)
             {
-                this.connect = connect;
-                this.disconnect = disconnect;
+                m_Connect = connect;
+                m_Disconnect = disconnect;
             }
 
             public void OnKcpConnect(IChannel channel)
             {
-                if (connect != null)
-                {
-                    connect(channel);
-                }
+                m_Connect?.Invoke(channel);
             }
 
             public void OnKcpDisconnect(IChannel channel)
             {
-                if (disconnect != null)
-                {
-                    disconnect(channel);
-                }
+                m_Disconnect?.Invoke(channel);
             }
         }
     }

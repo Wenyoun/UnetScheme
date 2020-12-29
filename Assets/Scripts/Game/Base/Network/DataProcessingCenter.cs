@@ -6,20 +6,20 @@ namespace Zyq.Game.Base
 {
     internal class ClientDataProcessingCenter
     {
-        private byte[] rawBuffer;
-        private PacketHandler handler;
+        private byte[] m_RawBuffer;
+        private PacketHandler m_Handler;
 
         public ClientDataProcessingCenter()
         {
-            handler = new PacketHandler();
-            rawBuffer = new byte[ushort.MaxValue];
+            m_Handler = new PacketHandler();
+            m_RawBuffer = new byte[ushort.MaxValue];
         }
 
         public bool TryParseRecvKcpData(KcpUdpClient client, KcpConn con, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
         {
             while (true)
             {
-                int size = con.Recv(rawBuffer, 0, rawBuffer.Length);
+                int size = con.Recv(m_RawBuffer, 0, m_RawBuffer.Length);
 
                 if (size <= 0)
                 {
@@ -28,8 +28,8 @@ namespace Zyq.Game.Base
 
                 if (size == 8)
                 {
-                    uint flag = KcpHelper.Decode32u(rawBuffer, 0);
-                    uint conv = KcpHelper.Decode32u(rawBuffer, 4);
+                    uint flag = KcpHelper.Decode32u(m_RawBuffer, 0);
+                    uint conv = KcpHelper.Decode32u(m_RawBuffer, 4);
 
                     if (conv == con.Conv)
                     {
@@ -47,7 +47,7 @@ namespace Zyq.Game.Base
                     }
                 }
 
-                handler.HandleRecv(rawBuffer, 0, size, packets);
+                m_Handler.HandleRecv(m_RawBuffer, 0, size, packets);
             }
 
             return packets.Count > 0;
@@ -57,10 +57,10 @@ namespace Zyq.Game.Base
         {
             while (sendPacketQueue.TryDequeue(out Packet packet))
             {
-                int size = handler.HandleSend(rawBuffer, packet);
+                int size = m_Handler.HandleSend(m_RawBuffer, packet);
                 if (size > 0)
                 {
-                    con.Send(rawBuffer, 0, size);
+                    con.Send(m_RawBuffer, 0, size);
                 }
             }
         }
@@ -68,20 +68,20 @@ namespace Zyq.Game.Base
 
     internal class ServerDataProcessingCenter
     {
-        private byte[] rawBuffer;
-        private PacketHandler handler;
+        private byte[] m_RawBuffer;
+        private PacketHandler m_Handler;
 
         public ServerDataProcessingCenter()
         {
-            handler = new PacketHandler();
-            rawBuffer = new byte[ushort.MaxValue];
+            m_Handler = new PacketHandler();
+            m_RawBuffer = new byte[ushort.MaxValue];
         }
 
-        public bool TryParseRecvKcpData(ServerChannel channel, List<Packet> packets, IKcpConnect connectCallback, ServerHeartbeatProcessing heartbeat)
+        public bool TryParseRecvKcpData(ServerChannel channel, List<Packet> packets, IKcpConnect connect, ServerHeartbeatProcessing heartbeat)
         {
             while (true)
             {
-                int size = channel.Recv(rawBuffer, 0, rawBuffer.Length);
+                int size = channel.Recv(m_RawBuffer, 0, m_RawBuffer.Length);
 
                 if (size <= 0)
                 {
@@ -90,41 +90,35 @@ namespace Zyq.Game.Base
 
                 if (size == 8)
                 {
-                    uint flag = KcpHelper.Decode32u(rawBuffer, 0);
-                    uint conv = KcpHelper.Decode32u(rawBuffer, 4);
+                    uint flag = KcpHelper.Decode32u(m_RawBuffer, 0);
+                    uint conv = KcpHelper.Decode32u(m_RawBuffer, 4);
 
                     if (conv == channel.Conv)
                     {
                         if (flag == KcpConstants.Flag_Connect)
                         {
                             channel.SetConnectedStatus(true);
-                            if (connectCallback != null)
-                            {
-                                connectCallback.OnKcpConnect(channel);
-                            }
+                            connect?.OnKcpConnect(channel);
                             continue;
                         }
 
                         if (flag == KcpConstants.Flag_Disconnect)
                         {
                             channel.SetConnectedStatus(false);
-                            if (connectCallback != null)
-                            {
-                                connectCallback.OnKcpDisconnect(channel);
-                            }
+                            connect?.OnKcpDisconnect(channel);
                             channel.Disconnect();
                             continue;
                         }
 
                         if (flag == KcpConstants.Flag_Heartbeat)
                         {
-                            heartbeat.UpdateHeartbeat(channel, rawBuffer, 0, 8);
+                            heartbeat.UpdateHeartbeat(channel, m_RawBuffer, 0, 8);
                             continue;
                         }
                     }
                 }
 
-                handler.HandleRecv(rawBuffer, 0, size, packets);
+                m_Handler.HandleRecv(m_RawBuffer, 0, size, packets);
             }
 
             return packets.Count > 0;
@@ -134,10 +128,10 @@ namespace Zyq.Game.Base
         {
             while (sendPacketQueue.TryDequeue(out Packet packet))
             {
-                int size = handler.HandleSend(rawBuffer, packet);
+                int size = m_Handler.HandleSend(m_RawBuffer, packet);
                 if (size > 0)
                 {
-                    channel.Send(rawBuffer, 0, size);
+                    channel.Send(m_RawBuffer, 0, size);
                 }
             }
         }

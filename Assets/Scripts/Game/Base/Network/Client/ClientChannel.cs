@@ -5,31 +5,31 @@ namespace Zyq.Game.Base
 {
     public class ClientChannel : AbsChannel
     {
-        private byte status;
-        private KcpUdpClient kcpUdpClient;
-        private IClientCallback clientCallback;
+        private byte m_Status;
+        private IClientCallback m_Callback;
+        private KcpUdpClient m_KcpUdpClient;
 
         public ClientChannel(IClientCallback callback)
         {
-            clientCallback = callback;
-            status = KcpUdpClient.None;
+            m_Callback = callback;
+            m_Status = KcpUdpClient.None;
         }
 
         public override long ChannelId
         {
-            get { return kcpUdpClient != null ? kcpUdpClient.ConId : -1; }
+            get { return m_KcpUdpClient != null ? m_KcpUdpClient.ConId : -1; }
         }
 
         public override bool IsConnected
         {
-            get { return kcpUdpClient != null && kcpUdpClient.IsConnected; }
+            get { return m_KcpUdpClient != null && m_KcpUdpClient.IsConnected; }
         }
 
         public override void Send(ushort cmd, ByteBuffer buffer)
         {
-            if (kcpUdpClient != null)
+            if (m_KcpUdpClient != null)
             {
-                kcpUdpClient.Send(new Packet(cmd, buffer));
+                m_KcpUdpClient.Send(new Packet(cmd, buffer));
             }
         }
 
@@ -42,52 +42,49 @@ namespace Zyq.Game.Base
         public override void Disconnect()
         {
             ClearHandlers();
-            status = KcpUdpClient.None;
-            if (kcpUdpClient != null)
+            m_Status = KcpUdpClient.None;
+            if (m_KcpUdpClient != null)
             {
-                kcpUdpClient.Dispose();
-                kcpUdpClient = null;
+                m_KcpUdpClient.Dispose();
+                m_KcpUdpClient = null;
             }
         }
 
         public override void Dispatcher()
         {
-            if (kcpUdpClient == null)
+            if (m_KcpUdpClient == null)
             {
                 return;
             }
 
-            HandlePacket();
+            HandlePackets();
             CheckConnectStatus();
         }
 
         public void Connect(string host, int port)
         {
-            if (status == KcpUdpClient.Connecting)
+            if (m_Status == KcpUdpClient.Connecting)
             {
                 return;
             }
 
-            status = KcpUdpClient.Connecting;
-            kcpUdpClient = new KcpUdpClient();
-            kcpUdpClient.Connect(host, port);
+            m_Status = KcpUdpClient.Connecting;
+            m_KcpUdpClient = new KcpUdpClient();
+            m_KcpUdpClient.Connect(host, port);
         }
 
-        private void HandlePacket()
+        private void HandlePackets()
         {
+            if (m_KcpUdpClient == null)
+            {
+                return;
+            }
+
             try
             {
-                if (handlers != null && kcpUdpClient != null)
+                while (m_KcpUdpClient.Recv(out Packet packet))
                 {
-                    if (kcpUdpClient.Recv(out Packet packet))
-                    {
-                        ushort cmd = packet.Cmd;
-                        ByteBuffer byteBuffer = packet.Buffer;
-                        if (handlers.TryGetValue(packet.Cmd, out ChannelMessageDelegate handler))
-                        {
-                            handler.Invoke(new ChannelMessage(cmd, byteBuffer));
-                        }
-                    }
+                    Call(packet);
                 }
             }
             catch (Exception e)
@@ -98,37 +95,37 @@ namespace Zyq.Game.Base
 
         private void CheckConnectStatus()
         {
-            if (status == KcpUdpClient.None)
+            if (m_Status == KcpUdpClient.None)
             {
                 return;
             }
 
-            if (status == KcpUdpClient.Connecting)
+            if (m_Status == KcpUdpClient.Connecting)
             {
-                if (kcpUdpClient.Status == KcpUdpClient.Success)
+                if (m_KcpUdpClient.Status == KcpUdpClient.Success)
                 {
-                    status = KcpUdpClient.Success;
-                    clientCallback.OnServerConnect(this);
+                    m_Status = KcpUdpClient.Success;
+                    m_Callback.OnServerConnect(this);
                 }
-                else if (kcpUdpClient.Status == KcpUdpClient.Error)
+                else if (m_KcpUdpClient.Status == KcpUdpClient.Error)
                 {
-                    status = KcpUdpClient.None;
-                    clientCallback.OnServerDisconnect(this);
+                    m_Status = KcpUdpClient.None;
+                    m_Callback.OnServerDisconnect(this);
                     Disconnect();
                 }
             }
-            else if (status == KcpUdpClient.Error)
+            else if (m_Status == KcpUdpClient.Error)
             {
-                status = KcpUdpClient.None;
-                clientCallback.OnServerDisconnect(this);
+                m_Status = KcpUdpClient.None;
+                m_Callback.OnServerDisconnect(this);
                 Disconnect();
             }
-            else if (status == KcpUdpClient.Success)
+            else if (m_Status == KcpUdpClient.Success)
             {
-                if (!kcpUdpClient.IsConnected)
+                if (!m_KcpUdpClient.IsConnected)
                 {
-                    status = KcpUdpClient.None;
-                    clientCallback.OnServerDisconnect(this);
+                    m_Status = KcpUdpClient.None;
+                    m_Callback.OnServerDisconnect(this);
                     Disconnect();
                 }
             }

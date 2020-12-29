@@ -5,8 +5,8 @@ namespace Zyq.Game.Base
 {
     public class ServerChannel : AbsChannel
     {
-        private bool m_IsClose;
-        private bool m_IsDispose;
+        private bool m_Close;
+        private bool m_Dispose;
         private uint m_Conv;
         private long m_ConId;
 
@@ -21,8 +21,8 @@ namespace Zyq.Game.Base
             m_Conv = con.Conv;
             m_ConId = con.ConId;
 
-            m_IsClose = false;
-            m_IsDispose = false;
+            m_Close = false;
+            m_Dispose = false;
 
             m_Heartbeat = new ServerHeartbeatProcessing();
             m_RecvPacketQueue = new ConcurrentQueue<Packet>();
@@ -36,40 +36,35 @@ namespace Zyq.Game.Base
 
         public override bool IsConnected
         {
-            get { return !m_IsDispose && m_Con.IsConnected; }
+            get { return !m_Dispose && m_Con.IsConnected; }
         }
 
         public override void Disconnect()
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
-            m_IsClose = true;
+            m_Close = true;
         }
 
         public override void Dispatcher()
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
             if (m_RecvPacketQueue.TryDequeue(out Packet packet))
             {
-                ushort cmd = packet.Cmd;
-                ByteBuffer byteBuffer = packet.Buffer;
-                if (handlers.TryGetValue(packet.Cmd, out ChannelMessageDelegate handler))
-                {
-                    handler.Invoke(new ChannelMessage(cmd, byteBuffer));
-                }
+                Call(packet);
             }
         }
 
         public override void Send(ushort cmd, ByteBuffer buffer)
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return;
             }
@@ -81,12 +76,12 @@ namespace Zyq.Game.Base
         {
             lock (this)
             {
-                if (m_IsDispose)
+                if (m_Dispose)
                 {
                     return;
                 }
 
-                m_IsDispose = true;
+                m_Dispose = true;
             }
 
             base.Dispose();
@@ -101,7 +96,7 @@ namespace Zyq.Game.Base
         #region internal method
         internal int Send(byte[] buffer, int offset, int length)
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return -20;
             }
@@ -111,7 +106,7 @@ namespace Zyq.Game.Base
 
         internal int Recv(byte[] buffer, int offset, int length)
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return -20;
             }
@@ -121,7 +116,7 @@ namespace Zyq.Game.Base
 
         internal void Input(byte[] buffer, int offset, int length)
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return;
             }
@@ -131,7 +126,7 @@ namespace Zyq.Game.Base
 
         internal void Flush()
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return;
             }
@@ -141,7 +136,7 @@ namespace Zyq.Game.Base
 
         internal void ProcessSendPacket(ServerDataProcessingCenter process)
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return;
             }
@@ -153,7 +148,7 @@ namespace Zyq.Game.Base
 
         internal void ProcessRecvPacket(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connectCallback)
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return;
             }
@@ -173,7 +168,7 @@ namespace Zyq.Game.Base
 
         internal void SetConnectedStatus(bool status)
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return;
             }
@@ -188,7 +183,7 @@ namespace Zyq.Game.Base
 
         internal bool IsClose
         {
-            get { return m_IsDispose || m_IsClose; }
+            get { return m_Dispose || m_Close; }
         }
         #endregion
     }

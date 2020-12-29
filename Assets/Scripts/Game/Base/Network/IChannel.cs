@@ -7,10 +7,10 @@ namespace Zyq.Game.Base
 
     public struct ChannelMessage
     {
-        public int Cmd;
+        public ushort Cmd;
         public ByteBuffer Buffer;
 
-        public ChannelMessage(int cmd, ByteBuffer buffer)
+        public ChannelMessage(ushort cmd, ByteBuffer buffer)
         {
             Cmd = cmd;
             Buffer = buffer;
@@ -36,32 +36,27 @@ namespace Zyq.Game.Base
 
     public abstract class AbsChannel : IChannel
     {
-        protected Dictionary<ushort, ChannelMessageDelegate> handlers;
+        private Dictionary<ushort, ChannelMessageDelegate> m_Handlers;
 
         protected AbsChannel()
         {
-            handlers = new Dictionary<ushort, ChannelMessageDelegate>();
+            m_Handlers = new Dictionary<ushort, ChannelMessageDelegate>();
         }
 
         public void Register(ushort cmd, ChannelMessageDelegate handler)
         {
-            if (!handlers.ContainsKey(cmd))
+            if (!m_Handlers.ContainsKey(cmd))
             {
-                handlers.Add(cmd, handler);
+                m_Handlers.Add(cmd, handler);
             }
         }
 
         public void UnRegister(ushort cmd)
         {
-            if (handlers.ContainsKey(cmd))
+            if (m_Handlers.ContainsKey(cmd))
             {
-                handlers.Remove(cmd);
+                m_Handlers.Remove(cmd);
             }
-        }
-
-        protected void ClearHandlers()
-        {
-            handlers.Clear();
         }
 
         public virtual void Dispose()
@@ -78,5 +73,18 @@ namespace Zyq.Game.Base
         public abstract bool IsConnected { get; }
 
         public abstract void Send(ushort cmd, ByteBuffer buffer);
+
+        protected void ClearHandlers()
+        {
+            m_Handlers.Clear();
+        }
+
+        protected void Call(Packet packet)
+        {
+            if (m_Handlers.TryGetValue(packet.Cmd, out ChannelMessageDelegate handler))
+            {
+                handler.Invoke(new ChannelMessage(packet.Cmd, packet.Buffer));
+            }
+        }
     }
 }

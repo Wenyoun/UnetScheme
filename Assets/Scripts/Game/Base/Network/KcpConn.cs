@@ -32,16 +32,16 @@ namespace Zyq.Game.Base
         }
         #endregion
 
-        private Kcp kcp;
-        private Socket socket;
-        private EndPoint point;
+        private Kcp m_Kcp;
+        private Socket m_Socket;
+        private EndPoint m_Point;
 
-        private uint conv;
-        private long conId;
+        private uint m_Conv;
+        private long m_ConId;
 
-        private bool isDispose;
-        private bool isConnected;
-        private byte[] outputBuffer;
+        private bool m_Dispose;
+        private bool m_IsConnected;
+        private byte[] m_OutputBuffer;
 
         public KcpConn(long conId, uint conv, Socket socket) : this(conId, conv, socket, null)
         {
@@ -49,18 +49,17 @@ namespace Zyq.Game.Base
 
         public KcpConn(long conId, uint conv, Socket socket, EndPoint point)
         {
-            this.socket = socket;
-            this.point = point;
+            m_Point = point;
+            m_Socket = socket;
+            m_Kcp = new Kcp(conv, this, this);
+            m_Kcp.NoDelay(1, 10, 2, 1);
 
-            this.conv = conv;
-            this.conId = conId;
+            m_Conv = conv;
+            m_ConId = conId;
 
-            isDispose = false;
-            isConnected = false;
-
-            outputBuffer = new byte[KcpConstants.Packet_Length];
-            kcp = new Kcp(conv, this, this);
-            kcp.NoDelay(1, 10, 2, 1);
+            m_Dispose = false;
+            m_IsConnected = false;
+            m_OutputBuffer = new byte[KcpConstants.Packet_Length];
         }
 
         public IMemoryOwner<byte> RentBuffer(int length)
@@ -70,117 +69,117 @@ namespace Zyq.Game.Base
 
         public void Output(IMemoryOwner<byte> owner, int length)
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
             Memory<byte> memory = owner.Memory;
-            KcpHelper.Encode64(outputBuffer, 0, conId);
-            memory.Span.Slice(0, length).CopyTo(new Span<byte>(outputBuffer, HEAD_SIZE, outputBuffer.Length - HEAD_SIZE));
+            KcpHelper.Encode64(m_OutputBuffer, 0, m_ConId);
+            memory.Span.Slice(0, length).CopyTo(new Span<byte>(m_OutputBuffer, HEAD_SIZE, m_OutputBuffer.Length - HEAD_SIZE));
 
-            if (point == null)
+            if (m_Point == null)
             {
-                socket.Send(outputBuffer, length + HEAD_SIZE, SocketFlags.None);
+                m_Socket.Send(m_OutputBuffer, length + HEAD_SIZE, SocketFlags.None);
             }
             else
             {
-                socket.SendTo(outputBuffer, length + HEAD_SIZE, SocketFlags.None, point);
+                m_Socket.SendTo(m_OutputBuffer, length + HEAD_SIZE, SocketFlags.None, m_Point);
             }
         }
 
         public int Send(byte[] buffer, int offset, int length)
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return -10;
             }
-            return kcp.Send(new Span<byte>(buffer, offset, length));
+            return m_Kcp.Send(new Span<byte>(buffer, offset, length));
         }
 
         public int Recv(byte[] buffer, int offset, int length)
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return -10;
             }
-            return kcp.Recv(new Span<byte>(buffer, offset, length));
+            return m_Kcp.Recv(new Span<byte>(buffer, offset, length));
         }
 
         public void Dispose()
         {
             lock (this)
             {
-                if (isDispose)
+                if (m_Dispose)
                 {
                     return;
                 }
 
-                isDispose = true;
+                m_Dispose = true;
             }
 
-            isConnected = false;
-            kcp.Dispose();
+            m_IsConnected = false;
+            m_Kcp.Dispose();
 
-            kcp = null;
-            socket = null;
-            point = null;
-            outputBuffer = null;
+            m_Kcp = null;
+            m_Socket = null;
+            m_Point = null;
+            m_OutputBuffer = null;
         }
 
         #region internal
         internal void Flush()
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
-            kcp.Flush();
+            m_Kcp.Flush();
         }
 
         internal void Update(long time)
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
-            kcp.Update(time);
+            m_Kcp.Update(time);
         }
 
         internal void Input(byte[] buffer, int offset, int length)
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
-            kcp.Input(new Span<byte>(buffer, offset, length));
+            m_Kcp.Input(new Span<byte>(buffer, offset, length));
         }
         #endregion
 
         #region properties
         public uint Conv
         {
-            get { return conv; }
+            get { return m_Conv; }
         }
 
         public long ConId
         {
-            get { return conId; }
+            get { return m_ConId; }
         }
 
         public bool IsConnected
         {
-            get { return !isDispose && isConnected; }
-            internal set { isConnected = !isDispose && value; }
+            get { return !m_Dispose && m_IsConnected; }
+            internal set { m_IsConnected = !m_Dispose && value; }
         }
         #endregion
 
         public void SendDisconnect()
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
@@ -188,7 +187,7 @@ namespace Zyq.Game.Base
             byte[] buffer = new byte[8];
             ByteWriteMemory write = new ByteWriteMemory(buffer);
             write.Write(KcpConstants.Flag_Disconnect);
-            write.Write(conv);
+            write.Write(m_Conv);
             for (int i = 0; i < 3; ++i)
             {
                 Send(buffer, 0, 8);

@@ -8,68 +8,68 @@
 
     internal class ClientHeartbeatProcessing
     {
-        private long recvMills;
-        private long sendMills;
-        private byte[] rawBuffer;
+        private long m_RecvMills;
+        private long m_SendMills;
+        private readonly byte[] m_RawBuffer;
 
         public ClientHeartbeatProcessing()
         {
             long current = TimeUtil.Get1970ToNowMilliseconds();
-            recvMills = current;
-            sendMills = current - 1000000;
-            rawBuffer = new byte[32];
+            m_RecvMills = current;
+            m_SendMills = current - 1000000;
+            m_RawBuffer = new byte[32];
         }
 
         public void UpdateHeartbeat()
         {
-            recvMills = TimeUtil.Get1970ToNowMilliseconds();
+            m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
         public void OnUpdate(KcpUdpClient client, KcpConn con, long time)
         {
             long current = time;
 
-            if (time - recvMills >= HeartbaetConstants.Timeout_Interval_Mills)
+            if (current - m_RecvMills >= HeartbaetConstants.Timeout_Interval_Mills)
             {
                 client.Dispose();
                 return;
             }
 
-            if (current - sendMills >= HeartbaetConstants.Send_Interval_Mills)
+            if (current - m_SendMills >= HeartbaetConstants.Send_Interval_Mills)
             {
-                sendMills = current;
-                ByteWriteMemory write = new ByteWriteMemory(rawBuffer);
+                m_SendMills = current;
+                ByteWriteMemory write = new ByteWriteMemory(m_RawBuffer);
                 write.Write(KcpConstants.Flag_Heartbeat);
                 write.Write(con.Conv);
-                con.Send(rawBuffer, 0, 8);
+                con.Send(m_RawBuffer, 0, 8);
             }
         }
     }
 
     internal class ServerHeartbeatProcessing
     {
-        private long recvMills;
+        private long m_RecvMills;
 
         public ServerHeartbeatProcessing()
         {
-            recvMills = TimeUtil.Get1970ToNowMilliseconds();
+            m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
         public void UpdateHeartbeat()
         {
-            recvMills = TimeUtil.Get1970ToNowMilliseconds();
+            m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
-        public void UpdateHeartbeat(ServerChannel channel, byte[] rawBuffer, int ofsset, int length)
+        public void UpdateHeartbeat(ServerChannel channel, byte[] rawBuffer, int offset, int length)
         {
-            recvMills = TimeUtil.Get1970ToNowMilliseconds();
-            channel.Send(rawBuffer, ofsset, length);
+            m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
+            channel.Send(rawBuffer, offset, length);
         }
 
         public void OnUpdate(ServerChannel channel)
         {
             long current = TimeUtil.Get1970ToNowMilliseconds();
-            if (current - recvMills > HeartbaetConstants.Timeout_Interval_Mills)
+            if (current - m_RecvMills > HeartbaetConstants.Timeout_Interval_Mills)
             {
                 channel.Disconnect();
             }

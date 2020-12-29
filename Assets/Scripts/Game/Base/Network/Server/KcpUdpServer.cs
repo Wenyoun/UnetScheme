@@ -18,24 +18,24 @@ namespace Zyq.Game.Base
 
     public class KcpUdpServer : IDisposable
     {
-        private bool isDispose;
-        private Socket socket;
-        private IKcpConnect connectCallback;
-        private ConcurrentDictionary<long, ServerChannel> channels;
+        private bool m_Dispose;
+        private Socket m_Socket;
+        private IKcpConnect m_Connect;
+        private ConcurrentDictionary<long, ServerChannel> m_Channels;
 
         public KcpUdpServer()
         {
-            isDispose = false;
-            channels = new ConcurrentDictionary<long, ServerChannel>();
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            m_Dispose = false;
+            m_Channels = new ConcurrentDictionary<long, ServerChannel>();
+            m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         }
 
         public void Bind(int port, IKcpConnect connect)
         {
             CheckDispose();
 
-            connectCallback = connect;
-            socket.Bind(new IPEndPoint(IPAddress.Any, port));
+            m_Connect = connect;
+            m_Socket.Bind(new IPEndPoint(IPAddress.Any, port));
 
             KcpHelper.CreateThread(UpdateKcpLooper);
             KcpHelper.CreateThread(RecvUdpDataLooper);
@@ -44,23 +44,25 @@ namespace Zyq.Game.Base
 
         public void Dispose()
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 return;
             }
 
-            isDispose = true;
+            m_Dispose = true;
 
-            IEnumerator<KeyValuePair<long, ServerChannel>> its = channels.GetEnumerator();
-            while (its.MoveNext())
+            using (IEnumerator<KeyValuePair<long, ServerChannel>> its = m_Channels.GetEnumerator())
             {
-                its.Current.Value.Dispose();
+                while (its.MoveNext())
+                {
+                    its.Current.Value.Dispose();
+                }
+                m_Channels.Clear();
             }
-            channels.Clear();
 
-            if (socket != null)
+            if (m_Socket != null)
             {
-                socket.Dispose();
+                m_Socket.Dispose();
             }
         }
 
@@ -72,22 +74,22 @@ namespace Zyq.Game.Base
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
                 EndPoint remote = new IPEndPoint(IPAddress.Any, 0);
 
-                while (!isDispose)
+                while (!m_Dispose)
                 {
-                    if (!socket.Poll(100000, SelectMode.SelectRead))
+                    if (!m_Socket.Poll(100000, SelectMode.SelectRead))
                     {
                         continue;
                     }
 
-                    if (isDispose)
+                    if (m_Dispose)
                     {
                         break;
                     }
 
-                    int count = socket.ReceiveFrom(rawBuffer, SocketFlags.None, ref remote);
+                    int count = m_Socket.ReceiveFrom(rawBuffer, SocketFlags.None, ref remote);
                     long conId = remote.GetHashCode();
 
-                    if (!channels.TryGetValue(conId, out ServerChannel channel))
+                    if (!m_Channels.TryGetValue(conId, out ServerChannel channel))
                     {
                         if (count == 4)
                         {
@@ -96,9 +98,9 @@ namespace Zyq.Game.Base
                             {
                                 uint conv = startConvId++;
                                 EndPoint point = remote.Create(remote.Serialize());
-                                channel = new ServerChannel(new KcpConn(conId, conv, socket, point));
+                                channel = new ServerChannel(new KcpConn(conId, conv, m_Socket, point));
 
-                                if (channels.TryAdd(conId, channel))
+                                if (m_Channels.TryAdd(conId, channel))
                                 {
                                     KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
                                     KcpHelper.Encode32u(rawBuffer, 4, conv);
@@ -139,20 +141,21 @@ namespace Zyq.Game.Base
                 List<long> removes = new List<long>();
                 ServerDataProcessingCenter process = new ServerDataProcessingCenter();
 
-                while (!isDispose)
+                while (!m_Dispose)
                 {
-                    IEnumerator<KeyValuePair<long, ServerChannel>> its = channels.GetEnumerator();
-
-                    while (its.MoveNext())
+                    using (IEnumerator<KeyValuePair<long, ServerChannel>> its = m_Channels.GetEnumerator())
                     {
-                        ServerChannel channel = its.Current.Value;
-                        if (!channel.IsClose)
+                        while (its.MoveNext())
                         {
-                            channel.ProcessSendPacket(process);
-                        }
-                        else
-                        {
-                            removes.Add(channel.ChannelId);
+                            ServerChannel channel = its.Current.Value;
+                            if (!channel.IsClose)
+                            {
+                                channel.ProcessSendPacket(process);
+                            }
+                            else
+                            {
+                                removes.Add(channel.ChannelId);
+                            }
                         }
                     }
 
@@ -162,9 +165,9 @@ namespace Zyq.Game.Base
                         for (int i = 0; i < length; ++i)
                         {
                             long channelId = removes[i];
-                            if (channels.TryRemove(channelId, out ServerChannel channel))
+                            if (m_Channels.TryRemove(channelId, out ServerChannel channel))
                             {
-                                connectCallback?.OnKcpDisconnect(channel);
+                                m_Connect?.OnKcpDisconnect(channel);
                                 channel.Dispose();
                             }
                         }
@@ -187,16 +190,17 @@ namespace Zyq.Game.Base
                 List<Packet> packets = new List<Packet>();
                 ServerDataProcessingCenter process = new ServerDataProcessingCenter();
 
-                while (!isDispose)
+                while (!m_Dispose)
                 {
-                    IEnumerator<KeyValuePair<long, ServerChannel>> its = channels.GetEnumerator();
-
-                    while (its.MoveNext())
+                    using (IEnumerator<KeyValuePair<long, ServerChannel>> its = m_Channels.GetEnumerator())
                     {
-                        ServerChannel channel = its.Current.Value;
-                        if (!channel.IsClose)
+                        while (its.MoveNext())
                         {
-                            channel.ProcessRecvPacket(process, packets, connectCallback);
+                            ServerChannel channel = its.Current.Value;
+                            if (!channel.IsClose)
+                            {
+                                channel.ProcessRecvPacket(process, packets, m_Connect);
+                            }
                         }
                     }
 
@@ -211,7 +215,7 @@ namespace Zyq.Game.Base
 
         private void CheckDispose()
         {
-            if (isDispose)
+            if (m_Dispose)
             {
                 throw new KcpServerException("KcpUdpServer server already dispose");
             }
