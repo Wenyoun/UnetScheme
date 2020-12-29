@@ -5,58 +5,58 @@ namespace Zyq.Game.Base
 {
     public class ServerChannel : AbsChannel
     {
-        private bool isClose;
-        private bool isDispose;
-        private uint conv;
-        private long conId;
+        private bool m_IsClose;
+        private bool m_IsDispose;
+        private uint m_Conv;
+        private long m_ConId;
 
-        private KcpConn con;
-        private ServerHeartbeatProcessing heartbeat;
-        private ConcurrentQueue<Packet> recvPacketQueue;
-        private ConcurrentQueue<Packet> sendPacketQueue;
+        private KcpConn m_Con;
+        private ServerHeartbeatProcessing m_Heartbeat;
+        private ConcurrentQueue<Packet> m_RecvPacketQueue;
+        private ConcurrentQueue<Packet> m_SendPacketQueue;
 
         public ServerChannel(KcpConn con)
         {
-            this.con = con;
-            conv = con.Conv;
-            this.conId = con.ConId;
+            m_Con = con;
+            m_Conv = con.Conv;
+            m_ConId = con.ConId;
 
-            isClose = false;
-            isDispose = false;
+            m_IsClose = false;
+            m_IsDispose = false;
 
-            heartbeat = new ServerHeartbeatProcessing();
-            recvPacketQueue = new ConcurrentQueue<Packet>();
-            sendPacketQueue = new ConcurrentQueue<Packet>();
+            m_Heartbeat = new ServerHeartbeatProcessing();
+            m_RecvPacketQueue = new ConcurrentQueue<Packet>();
+            m_SendPacketQueue = new ConcurrentQueue<Packet>();
         }
 
         public override long ChannelId
         {
-            get { return conId; }
+            get { return m_ConId; }
         }
 
         public override bool IsConnected
         {
-            get { return !isDispose && con.IsConnected; }
+            get { return !m_IsDispose && m_Con.IsConnected; }
         }
 
         public override void Disconnect()
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return;
             }
 
-            isClose = true;
+            m_IsClose = true;
         }
 
         public override void Dispatcher()
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return;
             }
 
-            if (recvPacketQueue.TryDequeue(out Packet packet))
+            if (m_RecvPacketQueue.TryDequeue(out Packet packet))
             {
                 ushort cmd = packet.Cmd;
                 ByteBuffer byteBuffer = packet.Buffer;
@@ -69,126 +69,126 @@ namespace Zyq.Game.Base
 
         public override void Send(ushort cmd, ByteBuffer buffer)
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return;
             }
 
-            sendPacketQueue.Enqueue(new Packet(cmd, buffer));
+            m_SendPacketQueue.Enqueue(new Packet(cmd, buffer));
         }
 
         public override void Dispose()
         {
             lock (this)
             {
-                if (isDispose)
+                if (m_IsDispose)
                 {
                     return;
                 }
 
-                isDispose = true;
+                m_IsDispose = true;
             }
 
             base.Dispose();
 
-            con.SendDisconnect();
-            con.Dispose();
+            m_Con.SendDisconnect();
+            m_Con.Dispose();
 
-            sendPacketQueue.Clear();
-            recvPacketQueue.Clear();
+            m_SendPacketQueue.Clear();
+            m_RecvPacketQueue.Clear();
         }
 
         #region internal method
         internal int Send(byte[] buffer, int offset, int length)
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return -20;
             }
 
-            return con.Send(buffer, offset, length);
+            return m_Con.Send(buffer, offset, length);
         }
 
         internal int Recv(byte[] buffer, int offset, int length)
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return -20;
             }
 
-            return con.Recv(buffer, offset, length);
+            return m_Con.Recv(buffer, offset, length);
         }
 
         internal void Input(byte[] buffer, int offset, int length)
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return;
             }
 
-            con.Input(buffer, offset, length);
+            m_Con.Input(buffer, offset, length);
         }
 
         internal void Flush()
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return;
             }
 
-            con.Flush();
+            m_Con.Flush();
         }
 
         internal void ProcessSendPacket(ServerDataProcessingCenter process)
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return;
             }
 
-            process.TryParseSendKcpData(this, sendPacketQueue);
+            process.TryParseSendKcpData(this, m_SendPacketQueue);
 
-            con.Update(TimeUtil.Get1970ToNowMilliseconds());
+            m_Con.Update(TimeUtil.Get1970ToNowMilliseconds());
         }
 
         internal void ProcessRecvPacket(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connectCallback)
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return;
             }
 
-            if (process.TryParseRecvKcpData(this, packets, connectCallback, heartbeat))
+            if (process.TryParseRecvKcpData(this, packets, connectCallback, m_Heartbeat))
             {
-                heartbeat.UpdateHeartbeat();
+                m_Heartbeat.UpdateHeartbeat();
                 for (int i = 0; i < packets.Count; ++i)
                 {
-                    recvPacketQueue.Enqueue(packets[i]);
+                    m_RecvPacketQueue.Enqueue(packets[i]);
                 }
                 packets.Clear();
             }
 
-            heartbeat.OnUpdate(this);
+            m_Heartbeat.OnUpdate(this);
         }
 
         internal void SetConnectedStatus(bool status)
         {
-            if (isDispose)
+            if (m_IsDispose)
             {
                 return;
             }
 
-            con.IsConnected = status;
+            m_Con.IsConnected = status;
         }
 
         internal uint Conv
         {
-            get { return conv; }
+            get { return m_Conv; }
         }
 
         internal bool IsClose
         {
-            get { return isDispose || isClose; }
+            get { return m_IsDispose || m_IsClose; }
         }
         #endregion
     }

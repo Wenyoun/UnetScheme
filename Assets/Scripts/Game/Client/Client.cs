@@ -5,9 +5,7 @@ namespace Zyq.Game.Client
     public class Client : ICompose
     {
         #region single instance
-
         public static Client Ins;
-
         #endregion
 
         private World m_World;

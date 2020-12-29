@@ -29,7 +29,7 @@
         {
             long current = time;
 
-            if (current - recvMills >= HeartbaetConstants.Timeout_Interval_Mills)
+            if (time - recvMills >= HeartbaetConstants.Timeout_Interval_Mills)
             {
                 client.Dispose();
                 return;

@@ -9,7 +9,7 @@ namespace Zyq.Game.Base
     public class KcpConn : IKcpCallback, IRentable, IDisposable
     {
         public const int HEAD_SIZE = 8;
-        
+
         #region pool
         private class MemoryPool : IMemoryOwner<byte>
         {
@@ -174,7 +174,7 @@ namespace Zyq.Game.Base
         public bool IsConnected
         {
             get { return !isDispose && isConnected; }
-            internal set { isConnected = value; }
+            internal set { isConnected = !isDispose && value; }
         }
         #endregion
 
