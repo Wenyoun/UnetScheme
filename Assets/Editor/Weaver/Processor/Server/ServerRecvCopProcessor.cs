@@ -35,11 +35,9 @@ namespace Zyq.Weaver
 
                 foreach (MethodDefinition method in type.Methods)
                 {
-                    if (!method.IsStatic &&
-                        method.CustomAttributes.Count > 0 &&
-                        method.CustomAttributes[0].AttributeType.FullName == WeaverProgram.RecvType.FullName)
+                    if (!method.IsStatic && method.CustomAttributes.Count > 0 && method.CustomAttributes[0].AttributeType.FullName == WeaverProgram.RecvType.FullName)
                     {
-                        ushort msgId = (ushort)method.CustomAttributes[0].ConstructorArguments[0].Value;
+                        ushort msgId = (ushort) method.CustomAttributes[0].ConstructorArguments[0].Value;
                         methods.Add(new MethodDetail(msgId, method));
                     }
                 }
@@ -51,10 +49,7 @@ namespace Zyq.Weaver
 
                     if (onRemoveMethod == null)
                     {
-                        onRemoveMethod = MethodFactory.CreateMethod(module,
-                                                                    type,
-                                                                    "OnRemove",
-                                                                    MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual);
+                        onRemoveMethod = MethodFactory.CreateMethod(module, type, "OnRemove", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual);
 
                         ILProcessor pro = onRemoveMethod.Body.GetILProcessor();
                         Instruction ins = onRemoveMethod.Body.Instructions[onRemoveMethod.Body.Instructions.Count - 1];
@@ -65,11 +60,7 @@ namespace Zyq.Weaver
                     {
                         string registerHandlerName = "OnRegister" + type.Name + "Handler";
                         bool isExistsRegisterMethod = ResolveHelper.HasMethod(type, registerHandlerName);
-                        MethodDefinition registerMethod = MethodFactory.CreateMethod(module,
-                                                                                     type,
-                                                                                     registerHandlerName,
-                                                                                     MethodAttributes.Private | MethodAttributes.HideBySig,
-                                                                                     true);
+                        MethodDefinition registerMethod = MethodFactory.CreateMethod(module, type, registerHandlerName, MethodAttributes.Private | MethodAttributes.HideBySig, true);
                         {
                             registerMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ConnectionFetureType)));
                             registerMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));
@@ -95,11 +86,7 @@ namespace Zyq.Weaver
                                         continue;
                                     }
 
-                                    MethodDefinition handlerMethodImpl = MethodFactory.CreateMethod(module,
-                                                                                          type,
-                                                                                          "OnHandlerProtocol_" + wrapper.MsgId,
-                                                                                          MethodAttributes.Private | MethodAttributes.HideBySig,
-                                                                                          true);
+                                    MethodDefinition handlerMethodImpl = MethodFactory.CreateMethod(module, type, "OnHandlerProtocol_" + wrapper.MsgId, MethodAttributes.Private | MethodAttributes.HideBySig, true);
                                     {
                                         handlerMethodImpl.Parameters.Add(new ParameterDefinition("msg", ParameterAttributes.None, module.ImportReference(WeaverProgram.ChannelMessageType)));
                                         handlerMethodImpl.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ByteBufferType)));
@@ -121,17 +108,37 @@ namespace Zyq.Weaver
                                             int index = handlerMethodImpl.Body.Variables.Count - 1;
                                             indexs.Add(index);
 
+                                            if (parm.ParameterType.FullName == typeof(byte[]).FullName)
+                                            {
+                                                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteUtilsReadMethod)));
+                                                processor.Append(processor.Create(OpCodes.Stloc, index));
+                                                continue;
+                                            }
+
+                                            if (parm.ParameterType.FullName == typeof(ByteBuffer).FullName)
+                                            {
+                                                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteBufferUtilsReadMethod)));
+                                                processor.Append(processor.Create(OpCodes.Stloc, index));
+                                                continue;
+                                            }
+
                                             if (parm.ParameterType.IsArray)
                                             {
                                                 ArrayReadFactory.CreateMethodVariableReadInstruction(module, handlerMethodImpl, handlerProcessor, parmType);
+                                                continue;
                                             }
-                                            else if (BaseTypeFactory.IsBaseType(parmType))
+
+                                            if (BaseTypeFactory.IsBaseType(parmType))
                                             {
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloc_0));
                                                 handlerProcessor.Append(BaseTypeFactory.CreateReadInstruction(module, handlerProcessor, parmType));
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Stloc, index));
+                                                continue;
                                             }
-                                            else if (parmType.IsValueType)
+
+                                            if (parmType.IsValueType)
                                             {
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Ldloca, index));
                                                 handlerProcessor.Append(handlerProcessor.Create(OpCodes.Initobj, module.ImportReference(parmType)));
@@ -159,7 +166,7 @@ namespace Zyq.Weaver
                                         processor.Append(processor.Create(OpCodes.Ldc_I4, wrapper.MsgId));
                                         processor.Append(processor.Create(OpCodes.Ldarg_0));
                                         processor.Append(processor.Create(OpCodes.Ldftn, handlerMethodImpl));
-                                        processor.Append(processor.Create(OpCodes.Newobj, module.ImportReference(typeof(ChannelMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));
+                                        processor.Append(processor.Create(OpCodes.Newobj, module.ImportReference(typeof(ChannelMessageDelegate).GetConstructor(new Type[] {typeof(object), typeof(IntPtr)}))));
                                         processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionFetureRegisterHandlerMethod)));
                                         processor.Append(processor.Create(OpCodes.Nop));
                                     }
@@ -181,11 +188,7 @@ namespace Zyq.Weaver
                     {
                         string unregisterHandlerName = "OnUnRegister" + type.Name + "Handler";
                         bool isExistsUnregisterMethod = ResolveHelper.HasMethod(type, unregisterHandlerName);
-                        MethodDefinition unregisterMethod = MethodFactory.CreateMethod(module,
-                                                                                       type,
-                                                                                       unregisterHandlerName,
-                                                                                       MethodAttributes.Private | MethodAttributes.HideBySig,
-                                                                                       true);
+                        MethodDefinition unregisterMethod = MethodFactory.CreateMethod(module, type, unregisterHandlerName, MethodAttributes.Private | MethodAttributes.HideBySig, true);
                         {
                             unregisterMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ConnectionFetureType)));
                             unregisterMethod.Body.Variables.Add(new VariableDefinition(module.ImportReference(typeof(bool))));

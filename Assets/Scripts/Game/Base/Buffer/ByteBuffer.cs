@@ -63,18 +63,22 @@ namespace Nice.Game.Base
         }
 
         #region Write
-
-        public void Write(ByteBuffer buffer)
+        public void Write(ByteBuffer input)
         {
-            int length = buffer.ReadableLength;
-            EnsureLength(length);
-            Array.Copy(buffer.rawBuffer, buffer.readIndex, rawBuffer, writeIndex, length);
+            Write(input, input.ReadableLength);
         }
 
-        public void Write(byte[] buffer, int offset, int length)
+        public void Write(ByteBuffer input, int length)
+        {
+            input.CheckLength(length);
+            Write(input.rawBuffer,input.readIndex, length);
+            input.readIndex += length;
+        }
+
+        public void Write(byte[] input, int offset, int length)
         {
             EnsureLength(length);
-            Array.Copy(buffer, offset, rawBuffer, writeIndex, length);
+            Array.Copy(input, offset, rawBuffer, writeIndex, length);
             writeIndex += length;
         }
 
@@ -208,11 +212,9 @@ namespace Nice.Game.Base
             Write(value.z);
             Write(value.w);
         }
-
         #endregion
 
         #region Read
-
         public void Read(byte[] buffer, int offset, int length)
         {
             length = Math.Min(length, ReadableLength);

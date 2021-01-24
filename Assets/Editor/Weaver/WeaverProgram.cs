@@ -7,6 +7,8 @@ namespace Zyq.Weaver
 {
     public static class WeaverProgram
     {
+        public const int SugBufferSize = 512;
+
         #region User Module
         public const string Base = "Nice.Game.Base.dll";
         public const string Server = "Nice.Game.Server.dll";
@@ -27,12 +29,18 @@ namespace Zyq.Weaver
         public static TypeReference SyncClassType;
         public static TypeReference SyncFieldType;
         #endregion
-        
+
         #region Net
         public static TypeReference ChannelMessageType;
         public static FieldReference ChannelMessageBufferField;
         public static TypeReference ByteBufferType;
         public static MethodReference ByteBufferAllocateMethod;
+        public static TypeReference ByteUtilsType;
+        public static MethodReference ByteUtilsReadMethod;
+        public static MethodReference ByteUtilsWriteMethod;
+        public static TypeReference ByteBufferUtilsType;
+        public static MethodReference ByteBufferUtilsReadMethod;
+        public static MethodReference ByteBufferUtilsWriteMethod;
         #endregion
 
         #region Nice.Game.Base.IEntity
@@ -52,7 +60,7 @@ namespace Zyq.Weaver
         public static MethodReference ConnectionRegisterHandlerMethod;
         public static MethodReference ConnectionUnregisterHandlerMethod;
         #endregion
-        
+
         #region Nice.Game.Base.ConnectionFeture
         public static TypeReference ConnectionFetureType;
         public static MethodReference ConnectionFetureRegisterHandlerMethod;
@@ -63,6 +71,8 @@ namespace Zyq.Weaver
         public static TypeReference ClientType;
         public static FieldReference ClientInsField;
         public static MethodReference ClientSendMethod;
+        public static TypeReference NetworkClientType;
+        public static MethodReference NetworkClientSendMethod;
         #endregion
 
         #region Nice.Game.Server.Server
@@ -109,8 +119,7 @@ namespace Zyq.Weaver
         private static bool Weave(string unityEngineDLL, string assemblyPath, string[] depAssemblyPaths, string baseModuleRuntimeDLL)
         {
             using (DefaultAssemblyResolver asmResolver = new DefaultAssemblyResolver())
-            using (CurrentAssembly = AssemblyDefinition.ReadAssembly(assemblyPath,
-                                                                     new ReaderParameters { ReadWrite = true, ReadSymbols = true, AssemblyResolver = asmResolver }))
+            using (CurrentAssembly = AssemblyDefinition.ReadAssembly(assemblyPath, new ReaderParameters {ReadWrite = true, ReadSymbols = true, AssemblyResolver = asmResolver}))
             {
                 asmResolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
                 asmResolver.AddSearchDirectory(Helpers.FindUnityEngineDLLDirectoryName());
@@ -125,7 +134,7 @@ namespace Zyq.Weaver
                 {
                     try
                     {
-                        CurrentAssembly.Write(new WriterParameters { WriteSymbols = true });
+                        CurrentAssembly.Write(new WriterParameters {WriteSymbols = true});
                     }
                     finally
                     {
@@ -147,7 +156,7 @@ namespace Zyq.Weaver
                 SetupClientModuleTypes();
                 return ClientWeaver.Weave(module);
             }
-            
+
             if (module.Name.EndsWith(Server))
             {
                 BaseAssembly = AssemblyDefinition.ReadAssembly(baseModuleRuntimeDLL);
@@ -155,17 +164,23 @@ namespace Zyq.Weaver
                 SetupServerModuleTypes();
                 return ServerWeaver.Weave(module);
             }
-            
+
             return false;
         }
-        
+
         private static void SetupBaseModuleTypes()
         {
             ChannelMessageType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ChannelMessage");
             ChannelMessageBufferField = ResolveHelper.ResolveField(ChannelMessageType, "Buffer");
             ByteBufferType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ByteBuffer");
             ByteBufferAllocateMethod = ResolveHelper.ResolveMethod(ByteBufferType, "Allocate");
-                
+            ByteUtilsType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ByteUtils");
+            ByteUtilsReadMethod = ResolveHelper.ResolveMethod(ByteUtilsType, "Read");
+            ByteUtilsWriteMethod = ResolveHelper.ResolveMethod(ByteUtilsType, "Write");
+            ByteBufferUtilsType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ByteBufferUtils");
+            ByteBufferUtilsReadMethod = ResolveHelper.ResolveMethod(ByteBufferUtilsType, "Read");
+            ByteBufferUtilsWriteMethod = ResolveHelper.ResolveMethod(ByteBufferUtilsType, "Write");
+
             SendType = BaseAssembly.MainModule.GetType("Nice.Game.Base.SendAttribute");
             RecvType = BaseAssembly.MainModule.GetType("Nice.Game.Base.RecvAttribute");
             ProtocolType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ProtocolAttribute");
@@ -195,6 +210,8 @@ namespace Zyq.Weaver
             ClientType = CurrentAssembly.MainModule.GetType("Nice.Game.Client.Client");
             ClientInsField = ResolveHelper.ResolveField(ClientType, "Ins");
             ClientSendMethod = ResolveHelper.ResolveMethod(ClientType, "Send");
+            NetworkClientType = CurrentAssembly.MainModule.GetType("Nice.Game.Client.NetworkClient");
+            NetworkClientSendMethod = ResolveHelper.ResolveMethod(NetworkClientType, "Send");
         }
 
         private static void SetupServerModuleTypes()

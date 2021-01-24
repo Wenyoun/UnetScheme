@@ -56,17 +56,37 @@ namespace Zyq.Weaver
                             int index = protoMethodImpl.Body.Variables.Count - 1;
                             indexs.Add(index);
 
+                            if (parm.ParameterType.FullName == typeof(byte[]).FullName)
+                            {
+                                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteUtilsReadMethod)));
+                                processor.Append(processor.Create(OpCodes.Stloc, index));
+                                continue;
+                            }
+
+                            if (parm.ParameterType.FullName == typeof(ByteBuffer).FullName)
+                            {
+                                processor.Append(processor.Create(OpCodes.Ldloc_0));
+                                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteBufferUtilsReadMethod)));
+                                processor.Append(processor.Create(OpCodes.Stloc, index));
+                                continue;
+                            }
+
                             if (parm.ParameterType.IsArray)
                             {
                                 ArrayReadFactory.CreateMethodVariableReadInstruction(module, protoMethodImpl, processor, parmType);
+                                continue;
                             }
-                            else if (BaseTypeFactory.IsBaseType(parmType))
+
+                            if (BaseTypeFactory.IsBaseType(parmType))
                             {
                                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                                 processor.Append(BaseTypeFactory.CreateReadInstruction(module, processor, parmType));
                                 processor.Append(processor.Create(OpCodes.Stloc, index));
+                                continue;
                             }
-                            else if (parmType.IsValueType)
+
+                            if (parmType.IsValueType)
                             {
                                 MethodDefinition deserialize = StructMethodFactory.CreateDeserialize(module, parmType);
                                 processor.Append(processor.Create(OpCodes.Ldloca, index));
@@ -92,7 +112,7 @@ namespace Zyq.Weaver
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldc_I4, msgId));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldarg_0));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldftn, protoMethodImpl));
-                    registerProcessor.Append(registerProcessor.Create(OpCodes.Newobj, module.ImportReference(typeof(ChannelMessageDelegate).GetConstructor(new Type[] { typeof(object), typeof(IntPtr) }))));
+                    registerProcessor.Append(registerProcessor.Create(OpCodes.Newobj, module.ImportReference(typeof(ChannelMessageDelegate).GetConstructor(new Type[] {typeof(object), typeof(IntPtr)}))));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionRegisterHandlerMethod)));
                 }
                 registerProcessor.Append(registerProcessor.Create(OpCodes.Ret));
@@ -106,7 +126,7 @@ namespace Zyq.Weaver
 
                 ILProcessor unregisterProcessor = unregisterMethod.Body.GetILProcessor();
                 unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Nop));
-                foreach (short key in methods.Keys)
+                foreach (ushort key in methods.Keys)
                 {
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ldarg_0));
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Callvirt, getConnection));

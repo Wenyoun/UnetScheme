@@ -2,8 +2,8 @@
 {
     internal class HeartbaetConstants
     {
-        public const int Send_Interval_Mills = 5000;
-        public const int Timeout_Interval_Mills = 15000;
+        public const int Send_Interval_Mills = 10000;
+        public const int Timeout_Interval_Mills = 30000;
     }
 
     internal class ClientHeartbeatProcessing

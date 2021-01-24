@@ -18,9 +18,8 @@ namespace Nice.Game.Client
 
         public void OnInit()
         {
-            //Connect("192.168.31.132", 50000);
-            Connect("127.0.0.1", 50000);
             m_World.OnInit();
+            NetworkClient.Connect("127.0.0.1", 50000);
         }
 
         public void OnRemove()
@@ -42,11 +41,6 @@ namespace Nice.Game.Client
         public void OnLateUpdate()
         {
             m_World.OnLateUpdate();
-        }
-
-        public void Connect(string host, int port)
-        {
-            m_World.Connect(host, port);
         }
 
         public void Send(ushort cmd, ByteBuffer buffer)

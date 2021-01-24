@@ -7,11 +7,9 @@ namespace Nice.Game.Base
     internal class ClientDataProcessingCenter
     {
         private byte[] m_RawBuffer;
-        private PacketHandler m_Handler;
 
         public ClientDataProcessingCenter()
         {
-            m_Handler = new PacketHandler();
             m_RawBuffer = new byte[ushort.MaxValue];
         }
 
@@ -47,7 +45,7 @@ namespace Nice.Game.Base
                     }
                 }
 
-                m_Handler.HandleRecv(m_RawBuffer, 0, size, packets);
+                PacketHandler.HandleRecv(m_RawBuffer, 0, size, packets);
             }
 
             return packets.Count > 0;
@@ -57,7 +55,7 @@ namespace Nice.Game.Base
         {
             while (sendPacketQueue.TryDequeue(out Packet packet))
             {
-                int size = m_Handler.HandleSend(m_RawBuffer, packet);
+                int size = PacketHandler.HandleSend(m_RawBuffer, packet);
                 if (size > 0)
                 {
                     con.Send(m_RawBuffer, 0, size);
@@ -69,11 +67,9 @@ namespace Nice.Game.Base
     internal class ServerDataProcessingCenter
     {
         private byte[] m_RawBuffer;
-        private PacketHandler m_Handler;
 
         public ServerDataProcessingCenter()
         {
-            m_Handler = new PacketHandler();
             m_RawBuffer = new byte[ushort.MaxValue];
         }
 
@@ -118,7 +114,7 @@ namespace Nice.Game.Base
                     }
                 }
 
-                m_Handler.HandleRecv(m_RawBuffer, 0, size, packets);
+                PacketHandler.HandleRecv(m_RawBuffer, 0, size, packets);
             }
 
             return packets.Count > 0;
@@ -128,7 +124,7 @@ namespace Nice.Game.Base
         {
             while (sendPacketQueue.TryDequeue(out Packet packet))
             {
-                int size = m_Handler.HandleSend(m_RawBuffer, packet);
+                int size = PacketHandler.HandleSend(m_RawBuffer, packet);
                 if (size > 0)
                 {
                     channel.Send(m_RawBuffer, 0, size);
@@ -137,13 +133,13 @@ namespace Nice.Game.Base
         }
     }
 
-    internal class PacketHandler
+    internal static class PacketHandler
     {
         private const int MsgLength = 2;
         private const int CmdLength = 2;
         private const int MsgCmdLength = MsgLength + CmdLength;
 
-        public int HandleSend(byte[] buffer, Packet packet)
+        public static int HandleSend(byte[] buffer, Packet packet)
         {
             //消息格式
             //MsgLength个字节消息长度,CmdLength个字节消息类型长度,N字节消息数据长度
@@ -173,7 +169,7 @@ namespace Nice.Game.Base
         }
 
 
-        public void HandleRecv(byte[] buffer, int offset, int total, List<Packet> packets)
+        public static void HandleRecv(byte[] buffer, int offset, int total, List<Packet> packets)
         {
             while (total > MsgCmdLength)
             {

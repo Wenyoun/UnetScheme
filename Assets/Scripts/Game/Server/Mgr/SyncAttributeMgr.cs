@@ -21,7 +21,7 @@ namespace Nice.Game.Server
                             ISyncAttribute attribute = attributes[j];
                             if (attribute.IsDirty())
                             {
-                                ByteBuffer buffer = ByteBuffer.Allocate(1400);
+                                ByteBuffer buffer = ByteBuffer.Allocate(512);
                                 buffer.Write(entity.EntityId);
                                 buffer.Write(attribute.GetSyncId());
                                 attribute.Serialize(buffer);

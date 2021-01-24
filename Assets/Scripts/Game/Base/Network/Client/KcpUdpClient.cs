@@ -24,7 +24,7 @@ namespace Nice.Game.Base
 
         private long m_ConId;
         private byte m_Status;
-        private bool m_IsDispose;
+        private bool m_Dispose;
 
         private ClientHeartbeatProcessing m_Heartbeat;
         private ConcurrentQueue<Packet> m_SendPacketQueue;
@@ -34,7 +34,7 @@ namespace Nice.Game.Base
         {
             m_ConId = -1;
             m_Status = None;
-            m_IsDispose = false;
+            m_Dispose = false;
 
             m_Heartbeat = new ClientHeartbeatProcessing();
             m_SendPacketQueue = new ConcurrentQueue<Packet>();
@@ -59,7 +59,7 @@ namespace Nice.Game.Base
 
         public void Send(Packet packet)
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 return;
             }
@@ -69,7 +69,7 @@ namespace Nice.Game.Base
 
         public bool Recv(out Packet packet)
         {
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 packet = new Packet();
                 return false;
@@ -87,7 +87,7 @@ namespace Nice.Game.Base
         {
             get { return m_Status; }
         }
-        
+
         public bool IsConnected
         {
             get { return m_Status == Success; }
@@ -97,12 +97,12 @@ namespace Nice.Game.Base
         {
             lock (this)
             {
-                if (m_IsDispose)
+                if (m_Dispose)
                 {
                     return;
                 }
 
-                m_IsDispose = true;
+                m_Dispose = true;
             }
 
             if (m_Con != null)
@@ -122,7 +122,7 @@ namespace Nice.Game.Base
                 m_Socket.Connect((EndPoint) obj);
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
 
-                while (!m_IsDispose && m_Status == Connecting)
+                while (!m_Dispose && m_Status == Connecting)
                 {
                     KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
                     m_Socket.Send(rawBuffer, 0, 4, SocketFlags.None);
@@ -137,7 +137,7 @@ namespace Nice.Game.Base
                         continue;
                     }
 
-                    if (m_Status != Connecting || m_IsDispose)
+                    if (m_Status != Connecting || m_Dispose)
                     {
                         break;
                     }
@@ -187,7 +187,7 @@ namespace Nice.Game.Base
             {
                 ClientDataProcessingCenter process = new ClientDataProcessingCenter();
 
-                while (!m_IsDispose && m_Status == Success)
+                while (!m_Dispose && m_Status == Success)
                 {
                     process.TryParseSendKcpData(m_Con, m_SendPacketQueue);
 
@@ -195,7 +195,7 @@ namespace Nice.Game.Base
                     m_Con.Update(time);
                     m_Heartbeat.OnUpdate(this, m_Con, time);
 
-                    if (m_IsDispose || m_Status != Success)
+                    if (m_Dispose || m_Status != Success)
                     {
                         break;
                     }
@@ -218,14 +218,14 @@ namespace Nice.Game.Base
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
                 ClientDataProcessingCenter process = new ClientDataProcessingCenter();
 
-                while (!m_IsDispose && m_Status == Success)
+                while (!m_Dispose && m_Status == Success)
                 {
                     if (!m_Socket.Poll(100000, SelectMode.SelectRead))
                     {
                         continue;
                     }
 
-                    if (m_IsDispose || m_Status != Success)
+                    if (m_Dispose || m_Status != Success)
                     {
                         break;
                     }
@@ -233,18 +233,21 @@ namespace Nice.Game.Base
                     int count = m_Socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
                     if (count > Kcp.IKCP_OVERHEAD)
                     {
-                        m_Con.Input(rawBuffer, KcpConn.HEAD_SIZE, count - KcpConn.HEAD_SIZE);
-
-                        if (process.TryParseRecvKcpData(this, m_Con, packets, m_Heartbeat))
+                        long conId = KcpHelper.Decode64(rawBuffer, 0);
+                        if (conId == m_Con.ConId)
                         {
-                            int length = packets.Count;
-                            if (length > 0)
+                            m_Con.Input(rawBuffer, KcpConn.HEAD_SIZE, count - KcpConn.HEAD_SIZE);
+                            if (process.TryParseRecvKcpData(this, m_Con, packets, m_Heartbeat))
                             {
-                                for (int i = 0; i < length; ++i)
+                                int length = packets.Count;
+                                if (length > 0)
                                 {
-                                    m_RecvPacketQueue.Enqueue(packets[i]);
+                                    for (int i = 0; i < length; ++i)
+                                    {
+                                        m_RecvPacketQueue.Enqueue(packets[i]);
+                                    }
+                                    packets.Clear();
                                 }
-                                packets.Clear();
                             }
                         }
                     }
@@ -264,7 +267,7 @@ namespace Nice.Game.Base
                 throw new KcpClientException("KcpUdpClient client error");
             }
 
-            if (m_IsDispose)
+            if (m_Dispose)
             {
                 throw new KcpClientException("KcpUdpClient client already dispose");
             }
@@ -290,7 +293,6 @@ namespace Nice.Game.Base
 
         private void Clear()
         {
-            m_ConId = -1;
             KcpConDispose();
             SocketDispose();
             m_Status = None;

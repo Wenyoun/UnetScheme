@@ -54,7 +54,7 @@ namespace Nice.Game.Base
             result |= (long) p[4 + offset] << 32;
             result |= (long) p[5 + offset] << 40;
             result |= (long) p[6 + offset] << 48;
-            result |= (long) p[7 + offset] << 58;
+            result |= (long) p[7 + offset] << 56;
             return result;
         }
 

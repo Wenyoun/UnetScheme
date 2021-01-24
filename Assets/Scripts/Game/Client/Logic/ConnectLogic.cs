@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Text;
+using UnityEngine;
 using Nice.Game.Base;
 
 namespace Nice.Game.Client
@@ -24,7 +25,9 @@ namespace Nice.Game.Client
             login.Token = "yinhuayong";
             login.Timestamp = 10;
             login.Flag = 20;
-            Sender.Login(login);
+            ByteBuffer buffer = ByteBuffer.Allocate(512);
+            buffer.Write("零下206度5");
+            Sender.Login(login, buffer, Encoding.UTF8.GetBytes("11"), 567);
         }
 
         private void OnConnectError(IBody body)

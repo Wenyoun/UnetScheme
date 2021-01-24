@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Nice.Game.Base
 {
-    public class ServerNetwork : IDisposable
+    public class NetworkServer : IDisposable
     {
         private bool m_Dispose;
         private IServerCallback m_Callback;
@@ -12,7 +12,7 @@ namespace Nice.Game.Base
         private Dictionary<long, IChannel> m_Channels;
         private ConcurrentQueue<StatusChannel> m_StatusChannels;
 
-        public ServerNetwork(IServerCallback callback)
+        public NetworkServer(IServerCallback callback)
         {
             m_Dispose = false;
             m_Callback = callback;

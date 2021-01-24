@@ -6,11 +6,10 @@ namespace Nice.Game.Client
 	public class World : AbsWorld, IClientCallback
 	{
 		private Connection m_Connection;
-		private ClientChannel m_Channel;
 
 		public World() : base(1)
 		{
-			m_Channel = new ClientChannel(this);
+			NetworkClient.Init(this);
 		}
 
 		protected override void Init()
@@ -20,23 +19,17 @@ namespace Nice.Game.Client
 
 		protected override void Clear()
 		{
-			m_Channel.Dispose();
-			m_Connection?.Dispose();
+			NetworkClient.Dispose();
 		}
 
 		public override void OnUpdate(float delta)
 		{
-			m_Channel?.Dispatcher();
-		}
-
-		public void Connect(string host, int port)
-		{
-			m_Channel.Connect(host, port);
+			NetworkClient.Dispatcher();
 		}
 
 		public void Send(ushort cmd, ByteBuffer buffer)
 		{
-			m_Connection?.Send(cmd, buffer);
+			NetworkClient.Send(cmd, buffer);
 		}
 
 		public Connection Connection

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Mono.CecilX;
 using Mono.Collections.Generic;
+using Nice.Game.Base;
 
 namespace Zyq.Weaver
 {
@@ -33,12 +34,24 @@ namespace Zyq.Weaver
             {
                 ParameterDefinition parm = parms[i];
                 TypeDefinition parmType = parm.ParameterType.Resolve();
+
                 if (i == 0 && parmType.FullName == WeaverProgram.ConnectionType.FullName)
                 {
                     Debug.LogError(module + ": 方法[" + method.FullName + "]中第一个参数不能为[" + parmType.FullName + "]");
                     return false;
                 }
-                else if (!BaseTypeFactory.IsBaseType(parmType) && !parmType.IsValueType)
+
+                if (parmType.FullName == typeof(byte[]).FullName)
+                {
+                    continue;
+                }
+
+                if (parmType.FullName == typeof(ByteBuffer).FullName)
+                {
+                    continue;
+                }
+
+                if (!BaseTypeFactory.IsBaseType(parmType) && !parmType.IsValueType)
                 {
                     Debug.LogError(module + ": 方法[" + method.FullName + "]中的参数只能为[基本类型，字符串，枚举，结构体，基本类型数组，字符串数组，枚举数组，结构体数组]而不能为[" + parmType.FullName + "]");
                     return false;
@@ -56,14 +69,24 @@ namespace Zyq.Weaver
                 TypeDefinition parmType = parm.ParameterType.Resolve();
                 if (i == 0)
                 {
-                    if (!(parmType.FullName == WeaverProgram.ConnectionType.FullName))
+                    if (parmType.FullName != typeof(Connection).FullName)
                     {
-                        Debug.LogError(module + ": 方法[" + method.FullName + "]中第一个参数只能为[" + WeaverProgram.ConnectionType.FullName + "]");
+                        Debug.LogError(module + ": 方法[" + method.FullName + "]中第一个参数只能为[" + typeof(Connection).FullName + "]");
                         return false;
                     }
                 }
                 else if (!BaseTypeFactory.IsBaseType(parmType) && !parmType.IsValueType)
                 {
+                    if (parmType.FullName == typeof(byte[]).FullName)
+                    {
+                        continue;
+                    }
+
+                    if (parmType.FullName == typeof(ByteBuffer).FullName)
+                    {
+                        continue;
+                    }
+                    
                     Debug.LogError(module + ": 方法[" + method.FullName + "]中的参数只能为[基本类型，字符串，枚举，结构体，基本类型数组，字符串数组，枚举数组，结构体数组]而不能为[" + parmType.FullName + "]");
                     return false;
                 }

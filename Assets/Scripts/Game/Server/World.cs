@@ -6,12 +6,12 @@ namespace Nice.Game.Server
 {
     public class World : AbsWorld, IServerCallback
     {
-        private ServerNetwork m_Network;
+        private NetworkServer m_Network;
         private Dictionary<long, Connection> m_Connections;
 
         public World() : base(1)
         {
-            m_Network = new ServerNetwork(this);
+            m_Network = new NetworkServer(this);
             m_Connections = new Dictionary<long, Connection>();
         }
 

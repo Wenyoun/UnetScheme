@@ -2,6 +2,7 @@
 using Mono.CecilX.Cil;
 using Mono.Collections.Generic;
 using System.Collections.Generic;
+using Nice.Game.Base;
 
 namespace Zyq.Weaver
 {
@@ -25,7 +26,7 @@ namespace Zyq.Weaver
                 method.Body.Variables.Add(new VariableDefinition(module.ImportReference(WeaverProgram.ByteBufferType)));
 
                 processor.Append(processor.Create(OpCodes.Nop));
-                processor.Append(processor.Create(OpCodes.Ldc_I4, 1400));
+                processor.Append(processor.Create(OpCodes.Ldc_I4, WeaverProgram.SugBufferSize));
                 processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteBufferAllocateMethod)));
                 processor.Append(processor.Create(OpCodes.Stloc_0));
 
@@ -34,19 +35,39 @@ namespace Zyq.Weaver
                 {
                     ParameterDefinition parm = parms[i];
                     TypeDefinition parmType = parm.ParameterType.Resolve();
-                    byte index = (byte)(method.IsStatic ? i : i + 1);
+                    byte index = (byte) (method.IsStatic ? i : i + 1);
+
+                    if (parm.ParameterType.FullName == typeof(byte[]).FullName)
+                    {
+                        processor.Append(processor.Create(OpCodes.Ldarg_S, index));
+                        processor.Append(processor.Create(OpCodes.Ldloc_0));
+                        processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteUtilsWriteMethod)));
+                        continue;
+                    }
+
+                    if (parm.ParameterType.FullName == typeof(ByteBuffer).FullName)
+                    {
+                        processor.Append(processor.Create(OpCodes.Ldarg_S, index));
+                        processor.Append(processor.Create(OpCodes.Ldloc_0));
+                        processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteBufferUtilsWriteMethod)));
+                        continue;
+                    }
 
                     if (parm.ParameterType.IsArray)
                     {
                         ArrayWriteFactory.CreateMethodParamWriteInstruction(module, method, processor, parmType, index);
+                        continue;
                     }
-                    else if (BaseTypeFactory.IsBaseType(parmType))
+
+                    if (BaseTypeFactory.IsBaseType(parmType))
                     {
                         processor.Append(processor.Create(OpCodes.Ldloc_0));
                         processor.Append(processor.Create(OpCodes.Ldarg_S, index));
                         processor.Append(BaseTypeFactory.CreateWriteInstruction(module, processor, parmType));
+                        continue;
                     }
-                    else if (parmType.IsValueType)
+
+                    if (parmType.IsValueType)
                     {
                         processor.Append(processor.Create(OpCodes.Ldarga_S, index));
                         processor.Append(processor.Create(OpCodes.Ldloc_0));
