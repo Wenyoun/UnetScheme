@@ -10,9 +10,5 @@ namespace Nice.Game.Client
         public int PlayerID;
         public int Timestamp;
         public int Flag;
-
-        public void De(ByteBuffer buf)
-        {
-        }
     }
 }

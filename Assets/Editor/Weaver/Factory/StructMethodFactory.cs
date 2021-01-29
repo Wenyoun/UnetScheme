@@ -1,5 +1,7 @@
 ﻿using Mono.CecilX;
 using Mono.CecilX.Cil;
+using Nice.Game.Base;
+using UnityEngine;
 
 namespace Zyq.Weaver
 {
@@ -17,13 +19,9 @@ namespace Zyq.Weaver
 
         public static MethodDefinition CreateSerialize(ModuleDefinition module, TypeDefinition type)
         {
-            MethodDefinition serialize = MethodFactory.CreateMethod(module,
-                                                                    type,
-                                                                    "Serialize",
-                                                                    MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
-                                                                    true);
+            MethodDefinition serialize = MethodFactory.CreateMethod(module, type, "Serialize", MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, true);
 
-            serialize.Parameters.Add(new ParameterDefinition("buffer", ParameterAttributes.None, module.ImportReference(WeaverProgram.ByteBufferType)));
+            serialize.Parameters.Add(new ParameterDefinition("wBuffer", ParameterAttributes.None, module.ImportReference(WeaverProgram.ByteBufferType)));
 
             ILProcessor processor = serialize.Body.GetILProcessor();
             processor.Append(processor.Create(OpCodes.Nop));
@@ -34,6 +32,24 @@ namespace Zyq.Weaver
 
                 if (!CheckHelper.CheckStructFiled(WeaverProgram.Base, type, fieldType))
                 {
+                    continue;
+                }
+
+                if (field.FieldType.FullName == typeof(byte[]).FullName)
+                {
+                    processor.Append(processor.Create(OpCodes.Ldarg, 0));
+                    processor.Append(processor.Create(OpCodes.Ldfld, field));
+                    processor.Append(processor.Create(OpCodes.Ldarg, 1));
+                    processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteUtilsWriteMethod)));
+                    continue;
+                }
+
+                if (field.FieldType.FullName == typeof(ByteBuffer).FullName)
+                {
+                    processor.Append(processor.Create(OpCodes.Ldarg, 0));
+                    processor.Append(processor.Create(OpCodes.Ldfld, field));
+                    processor.Append(processor.Create(OpCodes.Ldarg, 1));
+                    processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteBufferUtilsWriteMethod)));
                     continue;
                 }
 
@@ -65,13 +81,9 @@ namespace Zyq.Weaver
 
         public static MethodDefinition CreateDeserialize(ModuleDefinition module, TypeDefinition type)
         {
-            MethodDefinition deserialize = MethodFactory.CreateMethod(module,
-                                                                      type,
-                                                                      "Deserialize",
-                                                                      MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
-                                                                      true);
+            MethodDefinition deserialize = MethodFactory.CreateMethod(module, type, "Deserialize", MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, true);
 
-            deserialize.Parameters.Add(new ParameterDefinition("buffer", ParameterAttributes.None, module.ImportReference(WeaverProgram.ByteBufferType)));
+            deserialize.Parameters.Add(new ParameterDefinition("rBuffer", ParameterAttributes.None, module.ImportReference(WeaverProgram.ByteBufferType)));
 
             ILProcessor processor = deserialize.Body.GetILProcessor();
             processor.Append(processor.Create(OpCodes.Nop));
@@ -82,6 +94,24 @@ namespace Zyq.Weaver
 
                 if (!CheckHelper.CheckStructFiled(WeaverProgram.Base, type, fieldType))
                 {
+                    continue;
+                }
+
+                if (field.FieldType.FullName == typeof(byte[]).FullName)
+                {
+                    processor.Append(processor.Create(OpCodes.Ldarg, 0));
+                    processor.Append(processor.Create(OpCodes.Ldarg, 1));
+                    processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteUtilsReadMethod)));
+                    processor.Append(processor.Create(OpCodes.Stfld, field));
+                    continue;
+                }
+
+                if (field.FieldType.FullName == typeof(ByteBuffer).FullName)
+                {
+                    processor.Append(processor.Create(OpCodes.Ldarg, 0));
+                    processor.Append(processor.Create(OpCodes.Ldarg, 1));
+                    processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.ByteBufferUtilsReadMethod)));
+                    processor.Append(processor.Create(OpCodes.Stfld, field));
                     continue;
                 }
 

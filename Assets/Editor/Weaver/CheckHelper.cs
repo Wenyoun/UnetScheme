@@ -9,11 +9,22 @@ namespace Zyq.Weaver
     {
         public static bool CheckStructFiled(string module, TypeDefinition type, TypeDefinition fieldType)
         {
+            if (fieldType.FullName == typeof(byte[]).FullName)
+            {
+                return true;
+            }
+
+            if (fieldType.FullName == typeof(ByteBuffer).FullName)
+            {
+                return true;
+            }
+
             if (!BaseTypeFactory.IsBaseType(fieldType) && !fieldType.IsValueType)
             {
                 Debug.LogError(module + ": [" + type.FullName + "]中的字段只能为[基本类型，字符串，枚举，结构体，基本类型数组，字符串数组，枚举数组，结构体数组]而不能为[" + fieldType.FullName + "]");
                 return false;
             }
+
             return true;
         }
 
@@ -86,7 +97,7 @@ namespace Zyq.Weaver
                     {
                         continue;
                     }
-                    
+
                     Debug.LogError(module + ": 方法[" + method.FullName + "]中的参数只能为[基本类型，字符串，枚举，结构体，基本类型数组，字符串数组，枚举数组，结构体数组]而不能为[" + parmType.FullName + "]");
                     return false;
                 }
