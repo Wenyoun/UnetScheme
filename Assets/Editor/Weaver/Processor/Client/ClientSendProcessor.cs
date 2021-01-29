@@ -84,7 +84,7 @@ namespace Zyq.Weaver
 
                 processor.Append(processor.Create(OpCodes.Ldc_I4, msgId));
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
-                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.NetworkClientSendMethod)));
+                processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.NetworkClientManagerSendMethod)));
                 processor.Append(processor.Create(OpCodes.Nop));
                 processor.Append(processor.Create(OpCodes.Ret));
             }

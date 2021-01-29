@@ -9,9 +9,8 @@ namespace Nice.Game.Base
         private IClientCallback m_Callback;
         private KcpUdpClient m_KcpUdpClient;
 
-        public ClientChannel(IClientCallback callback)
+        public ClientChannel()
         {
-            m_Callback = callback;
             m_Status = KcpUdpClient.None;
         }
 
@@ -61,13 +60,14 @@ namespace Nice.Game.Base
             CheckConnectStatus();
         }
 
-        public void Connect(string host, int port)
+        public void Connect(string host, int port, IClientCallback callback)
         {
             if (m_Status == KcpUdpClient.Connecting)
             {
                 return;
             }
 
+            m_Callback = callback;
             m_Status = KcpUdpClient.Connecting;
             m_KcpUdpClient = new KcpUdpClient();
             m_KcpUdpClient.Connect(host, port);

@@ -35,7 +35,7 @@ namespace Zyq.Weaver
                 ParameterDefinition parm = parms[i];
                 TypeDefinition parmType = parm.ParameterType.Resolve();
 
-                if (i == 0 && parmType.FullName == WeaverProgram.ConnectionType.FullName)
+                if (i == 0 && parmType.FullName == typeof(Connection).FullName)
                 {
                     Debug.LogError(module + ": 方法[" + method.FullName + "]中第一个参数不能为[" + parmType.FullName + "]");
                     return false;

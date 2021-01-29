@@ -23,22 +23,24 @@ namespace Nice.Game.Base
         public void OnUpdate(float delta)
         {
             int length = m_Removes.Count;
-            if (length > 0)
+            if (length == 0)
             {
-                for (int i = 0; i < length; ++i)
+                return;
+            }
+
+            for (int i = 0; i < length; ++i)
+            {
+                Wrapper wp = m_Removes[i];
+                if (m_Wrappers.TryGetValue(wp.Id, out List<Wrapper> wps))
                 {
-                    Wrapper wp = m_Removes[i];
-                    if (m_Wrappers.TryGetValue(wp.Id, out List<Wrapper> wps))
+                    int index = SearchIndex(wps, wp.Handler);
+                    if (index >= 0)
                     {
-                        int index = SearchIndex(wps, wp.Handler);
-                        if (index >= 0)
-                        {
-                            wps.RemoveAt(index);
-                        }
+                        wps.RemoveAt(index);
                     }
                 }
-                m_Removes.Clear();
             }
+            m_Removes.Clear();
         }
 
         public void Register(int id, MsgDelegate handler)

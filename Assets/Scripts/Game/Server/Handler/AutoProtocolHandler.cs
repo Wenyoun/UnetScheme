@@ -6,7 +6,13 @@ namespace Nice.Game.Server
     public class AutoProtocolHandler : IProtocolHandler
     {
         public Connection Connection { get; set; }
-        public void Register() { }
-        public void UnRegister() { }
+
+        public void Register()
+        {
+        }
+
+        public void UnRegister()
+        {
+        }
     }
 }

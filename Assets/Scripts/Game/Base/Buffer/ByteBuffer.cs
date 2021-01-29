@@ -11,32 +11,34 @@ namespace Nice.Game.Base
     [StructLayout(LayoutKind.Explicit)]
     internal struct UIntFloat
     {
-        [FieldOffset(0)] public float floatValue;
+        [FieldOffset(0)]
+        public float floatValue;
 
-        [FieldOffset(0)] public uint uintValue;
+        [FieldOffset(0)]
+        public uint uintValue;
     }
 
     [StructLayout(LayoutKind.Explicit)]
     internal struct ULongDouble
     {
-        [FieldOffset(0)] public double doubleValue;
+        [FieldOffset(0)]
+        public double doubleValue;
 
-        [FieldOffset(0)] public ulong ulongValue;
+        [FieldOffset(0)]
+        public ulong ulongValue;
     }
 
     public class ByteBuffer : IDisposable
     {
         private const int MaxStringLength = short.MaxValue;
-
-        private static readonly UTF8Encoding ENCODING = new UTF8Encoding(false, true);
-
-        private static readonly ConcurrentQueue<ByteBuffer> POOL = new ConcurrentQueue<ByteBuffer>();
+        private static readonly UTF8Encoding Encoding = new UTF8Encoding(false, true);
+        private static readonly ConcurrentQueue<ByteBuffer> Pool = new ConcurrentQueue<ByteBuffer>();
 
         public static ByteBuffer Allocate(int maxCapacity)
         {
             ByteBuffer byteBuffer;
 
-            if (!POOL.TryDequeue(out byteBuffer))
+            if (!Pool.TryDequeue(out byteBuffer))
             {
                 byteBuffer = new ByteBuffer(maxCapacity);
             }
@@ -54,12 +56,12 @@ namespace Nice.Game.Base
 
         private byte[] stringBuffer;
 
-        private ByteBuffer(int maxCapacity)
+        private ByteBuffer(int capacity)
         {
-            this.readIndex = 0;
-            this.writeIndex = 0;
-            this.maxCapacity = maxCapacity;
-            this.rawBuffer = new byte[maxCapacity];
+            readIndex = 0;
+            writeIndex = 0;
+            maxCapacity = capacity;
+            rawBuffer = new byte[capacity];
         }
 
         #region Write
@@ -71,7 +73,7 @@ namespace Nice.Game.Base
         public void Write(ByteBuffer input, int length)
         {
             input.CheckLength(length);
-            Write(input.rawBuffer,input.readIndex, length);
+            Write(input.rawBuffer, input.readIndex, length);
             input.readIndex += length;
         }
 
@@ -139,19 +141,13 @@ namespace Nice.Game.Base
 
         public void Write(float value)
         {
-            UIntFloat convert = new UIntFloat
-            {
-                floatValue = value
-            };
+            UIntFloat convert = new UIntFloat {floatValue = value};
             Write(convert.uintValue);
         }
 
         public void Write(double value)
         {
-            ULongDouble convert = new ULongDouble
-            {
-                doubleValue = value
-            };
+            ULongDouble convert = new ULongDouble {doubleValue = value};
             Write(convert.ulongValue);
         }
 
@@ -162,7 +158,7 @@ namespace Nice.Game.Base
                 Write((short) 0);
                 return;
             }
-            
+
             if (stringBuffer == null)
             {
                 stringBuffer = new byte[MaxStringLength];
@@ -170,12 +166,10 @@ namespace Nice.Game.Base
 
             if (value.Length > MaxStringLength)
             {
-                throw new IndexOutOfRangeException("ByteBuffer.Write(string) too long: " + value.Length + ". Limit: " +
-                                                   MaxStringLength);
+                throw new IndexOutOfRangeException("ByteBuffer.Write(string) too long: " + value.Length + ". Limit: " + MaxStringLength);
             }
 
-            int size = ENCODING.GetBytes(value, 0, value.Length, stringBuffer, 0);
-            
+            int size = Encoding.GetBytes(value, 0, value.Length, stringBuffer, 0);
             Write((short) size);
             Write(stringBuffer, 0, size);
         }
@@ -186,7 +180,7 @@ namespace Nice.Game.Base
             Write(value.x);
             Write(value.y);
         }
-        
+
         public void Write(Vector3 value)
         {
             EnsureLength(12);
@@ -194,7 +188,7 @@ namespace Nice.Game.Base
             Write(value.y);
             Write(value.z);
         }
-        
+
         public void Write(Vector4 value)
         {
             EnsureLength(16);
@@ -203,7 +197,7 @@ namespace Nice.Game.Base
             Write(value.z);
             Write(value.w);
         }
-        
+
         public void Write(Quaternion value)
         {
             EnsureLength(16);
@@ -286,19 +280,13 @@ namespace Nice.Game.Base
 
         public float ReadFloat()
         {
-            UIntFloat converter = new UIntFloat
-            {
-                uintValue = ReadUInt()
-            };
+            UIntFloat converter = new UIntFloat {uintValue = ReadUInt()};
             return converter.floatValue;
         }
 
         public double ReadDouble()
         {
-            ULongDouble converter = new ULongDouble
-            {
-                ulongValue = ReadULong()
-            };
+            ULongDouble converter = new ULongDouble {ulongValue = ReadULong()};
             return converter.doubleValue;
         }
 
@@ -313,8 +301,7 @@ namespace Nice.Game.Base
 
             if (length > MaxStringLength)
             {
-                throw new IndexOutOfRangeException("ByteBuffer.ReadString() too long: " + length + ". Limit: " +
-                                                   MaxStringLength);
+                throw new IndexOutOfRangeException("ByteBuffer.ReadString() too long: " + length + ". Limit: " + MaxStringLength);
             }
 
             CheckLength(length);
@@ -323,9 +310,9 @@ namespace Nice.Game.Base
 
             readIndex += length;
 
-            return ENCODING.GetString(data.Array, data.Offset, data.Count);
+            return Encoding.GetString(data.Array, data.Offset, data.Count);
         }
-        
+
         public Vector2 ReadVector2()
         {
             Vector2 value = new Vector2();
@@ -342,7 +329,7 @@ namespace Nice.Game.Base
             value.z = ReadFloat();
             return value;
         }
-        
+
         public Vector4 ReadVector4()
         {
             Vector4 value = new Vector4();
@@ -352,7 +339,7 @@ namespace Nice.Game.Base
             value.w = ReadFloat();
             return value;
         }
-        
+
         public Quaternion ReadQuaternion()
         {
             Quaternion value = new Quaternion();
@@ -370,7 +357,7 @@ namespace Nice.Game.Base
         public int ReadIndex => readIndex;
 
         public int WriteIndex => writeIndex;
-        
+
         public byte[] RawBuffer => rawBuffer;
 
         public int ReadableLength => writeIndex - readIndex;
@@ -388,7 +375,7 @@ namespace Nice.Game.Base
         public void Dispose()
         {
             Reset();
-            POOL.Enqueue(this);
+            Pool.Enqueue(this);
         }
 
         private void CheckLength(int length)
@@ -396,8 +383,7 @@ namespace Nice.Game.Base
             int readableLength = ReadableLength;
             if (length > readableLength)
             {
-                throw new EndOfStreamException("raw buffer out of range current readable length=" + readableLength + ",ready length=" +
-                                               length);
+                throw new EndOfStreamException("raw buffer out of range current readable length=" + readableLength + ",ready length=" + length);
             }
         }
 

@@ -12,10 +12,9 @@ namespace Nice.Game.Base
         private Dictionary<long, IChannel> m_Channels;
         private ConcurrentQueue<StatusChannel> m_StatusChannels;
 
-        public NetworkServer(IServerCallback callback)
+        public NetworkServer()
         {
             m_Dispose = false;
-            m_Callback = callback;
             m_KcpUdpServer = new KcpUdpServer();
             m_Channels = new Dictionary<long, IChannel>();
             m_StatusChannels = new ConcurrentQueue<StatusChannel>();
@@ -37,13 +36,14 @@ namespace Nice.Game.Base
             }
         }
 
-        public void Bind(int port)
+        public void Bind(int port, IServerCallback callback)
         {
             if (m_Dispose)
             {
                 return;
             }
 
+            m_Callback = callback;
             m_KcpUdpServer.Bind(port, new KcpConnect(OnKcpConnect, OnKcpDisconnect));
         }
 

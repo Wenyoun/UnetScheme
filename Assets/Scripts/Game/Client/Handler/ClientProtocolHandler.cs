@@ -5,7 +5,6 @@ namespace Nice.Game.Client
 {
     public class ClientProtocolHandler : IProtocolHandler
     {
-        public World World { get; set; }
         public Connection Connection { get; set; }
 
         public void Register()
@@ -23,7 +22,7 @@ namespace Nice.Game.Client
             ByteBuffer buffer = msg.Buffer;
             uint eid = buffer.ReadUInt();
             uint syncId = buffer.ReadUInt();
-            Entity entity = World.GetEntity(eid);
+            Entity entity = Client.Ins.World.GetEntity(eid);
             if (entity != null)
             {
                 ISyncAttribute attribute = entity.GetSyncAttribute(syncId);

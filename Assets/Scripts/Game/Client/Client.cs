@@ -14,22 +14,25 @@ namespace Nice.Game.Client
         {
             Ins = this;
             m_World = new World();
+            NetworkClientManager.Init();
         }
 
         public void OnInit()
         {
             m_World.OnInit();
-            NetworkClient.Connect("127.0.0.1", 50000);
+            NetworkClientManager.Connect("127.0.0.1", 50000);
         }
 
         public void OnRemove()
         {
+            NetworkClientManager.Dispose();
             m_World.Dispose();
             Ins = null;
         }
 
         public void OnUpdate(float delta)
         {
+            NetworkClientManager.OnUpdate();
             m_World.OnUpdate(delta);
         }
 
@@ -43,19 +46,9 @@ namespace Nice.Game.Client
             m_World.OnLateUpdate();
         }
 
-        public void Send(ushort cmd, ByteBuffer buffer)
-        {
-            m_World.Send(cmd, buffer);
-        }
-
         public World World
         {
             get { return m_World; }
-        }
-
-        public Connection Connection
-        {
-            get { return m_World.Connection; }
         }
     }
 }

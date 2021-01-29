@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Nice.Game.Base
+﻿namespace Nice.Game.Base
 {
     public interface IWorldLogic
     {
@@ -27,7 +23,7 @@ namespace Nice.Game.Base
             m_World = null;
         }
 
-        public IWorld World
+        protected IWorld World
         {
             get { return m_World; }
         }
@@ -38,6 +34,16 @@ namespace Nice.Game.Base
 
         protected virtual void Clear()
         {
+        }
+
+        protected void Register(int id, MsgDelegate handler)
+        {
+            m_World.Messager.Register(id, handler);
+        }
+
+        protected void UnRegister(int id, MsgDelegate handler)
+        {
+            m_World.Messager.UnRegister(id, handler);
         }
     }
 }

@@ -13,38 +13,26 @@ namespace Nice.Game.Server
         public Server()
         {
             Ins = this;
+            NetworkServerManager.Init();
             m_World = new World();
         }
 
         public void OnInit()
         {
+            NetworkServerManager.Bind(50000);
             m_World.OnInit();
-            Bind(50000);
         }
 
         public void OnRemove()
         {
+            NetworkServerManager.Dispose();
             m_World.Dispose();
             Ins = null;
         }
 
-        public void Bind(int port)
-        {
-            m_World.Bind(port);
-        }
-
-        public void Broadcast(ushort cmd, ByteBuffer buffer)
-        {
-            m_World.Broadcast(cmd, buffer);
-        }
-
-        public void Send(Connection connection, ushort cmd, ByteBuffer buffer)
-        {
-            m_World.Send(connection, cmd, buffer);
-        }
-
         public void OnUpdate(float delta)
         {
+            NetworkServerManager.OnUpdate();
             m_World.OnUpdate(delta);
         }
 

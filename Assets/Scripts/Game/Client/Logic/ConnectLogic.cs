@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using UnityEngine;
 using Nice.Game.Base;
 
 namespace Nice.Game.Client
@@ -8,14 +7,14 @@ namespace Nice.Game.Client
     {
         protected override void Init()
         {
-            World.Messager.Register(MessageConstants.Connect_Success, OnConnectSuccess);
-            World.Messager.Register(MessageConstants.Connect_Error, OnConnectError);
+            Register(MessageConstants.Connect_Success, OnConnectSuccess);
+            Register(MessageConstants.Connect_Error, OnConnectError);
         }
 
         protected override void Clear()
         {
-            World.Messager.UnRegister(MessageConstants.Connect_Success, OnConnectSuccess);
-            World.Messager.UnRegister(MessageConstants.Connect_Error, OnConnectError);
+            UnRegister(MessageConstants.Connect_Success, OnConnectSuccess);
+            UnRegister(MessageConstants.Connect_Error, OnConnectError);
         }
 
         private void OnConnectSuccess(IBody body)

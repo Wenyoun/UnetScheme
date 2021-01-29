@@ -56,7 +56,6 @@ namespace Zyq.Weaver
 
         #region Nice.Game.Base.Connection
         public static TypeReference ConnectionType;
-        public static MethodReference ConnectionSendMethod;
         public static MethodReference ConnectionRegisterHandlerMethod;
         public static MethodReference ConnectionUnregisterHandlerMethod;
         #endregion
@@ -68,18 +67,14 @@ namespace Zyq.Weaver
         #endregion
 
         #region Nice.Game.Client.Client
-        public static TypeReference ClientType;
-        public static FieldReference ClientInsField;
-        public static MethodReference ClientSendMethod;
-        public static TypeReference NetworkClientType;
-        public static MethodReference NetworkClientSendMethod;
+        public static TypeReference NetworkClientManagerType;
+        public static MethodReference NetworkClientManagerSendMethod;
         #endregion
 
         #region Nice.Game.Server.Server
-        public static TypeReference ServerType;
-        public static FieldReference ServerInsField;
-        public static MethodReference ServerSendMethod;
-        public static MethodReference ServerBroadcastMethod;
+        public static TypeReference NetworkServerManagerType;
+        public static MethodReference NetworkServerManagerSendMethod;
+        public static MethodReference NetworkServerManagerBroadcastMethod;
         #endregion
 
         public static bool WeaveAssemblies(string unityEngineDLL, string baseModuleRuntimeDLL, string assemblyPath, string[] depAssemblyPaths)
@@ -196,7 +191,6 @@ namespace Zyq.Weaver
             AbsCopGetEntityMethod = ResolveHelper.ResolveMethod(AbsCopType, "get_Entity");
 
             ConnectionType = BaseAssembly.MainModule.GetType("Nice.Game.Base.Connection");
-            ConnectionSendMethod = ResolveHelper.ResolveMethod(ConnectionType, "Send");
             ConnectionRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "RegisterHandler");
             ConnectionUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "UnRegisterHandler");
 
@@ -207,19 +201,15 @@ namespace Zyq.Weaver
 
         private static void SetupClientModuleTypes()
         {
-            ClientType = CurrentAssembly.MainModule.GetType("Nice.Game.Client.Client");
-            ClientInsField = ResolveHelper.ResolveField(ClientType, "Ins");
-            ClientSendMethod = ResolveHelper.ResolveMethod(ClientType, "Send");
-            NetworkClientType = CurrentAssembly.MainModule.GetType("Nice.Game.Client.NetworkClient");
-            NetworkClientSendMethod = ResolveHelper.ResolveMethod(NetworkClientType, "Send");
+            NetworkClientManagerType = CurrentAssembly.MainModule.GetType("Nice.Game.Client.NetworkClientManager");
+            NetworkClientManagerSendMethod = ResolveHelper.ResolveMethod(NetworkClientManagerType, "Send");
         }
 
         private static void SetupServerModuleTypes()
         {
-            ServerType = CurrentAssembly.MainModule.GetType("Nice.Game.Server.Server");
-            ServerInsField = ResolveHelper.ResolveField(ServerType, "Ins");
-            ServerSendMethod = ResolveHelper.ResolveMethod(ServerType, "Send");
-            ServerBroadcastMethod = ResolveHelper.ResolveMethod(ServerType, "Broadcast");
+            NetworkServerManagerType = CurrentAssembly.MainModule.GetType("Nice.Game.Server.NetworkServerManager");
+            NetworkServerManagerSendMethod = ResolveHelper.ResolveMethod(NetworkServerManagerType, "Send");
+            NetworkServerManagerBroadcastMethod = ResolveHelper.ResolveMethod(NetworkServerManagerType, "Broadcast");
         }
     }
 }

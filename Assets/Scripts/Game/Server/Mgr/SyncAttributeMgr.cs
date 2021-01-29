@@ -25,7 +25,7 @@ namespace Nice.Game.Server
                                 buffer.Write(entity.EntityId);
                                 buffer.Write(attribute.GetSyncId());
                                 attribute.Serialize(buffer);
-                                world.Broadcast(MsgID.Sync_Attribute, buffer);
+                                NetworkServerManager.Broadcast(MsgID.Sync_Attribute, buffer);
                             }
                         }
                     }
