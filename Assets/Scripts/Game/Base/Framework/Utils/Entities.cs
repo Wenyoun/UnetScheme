@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace Nice.Game.Base
 {
-    public class Entities : IDisposable, IUpdate, IFixedUpdate
+    public class Entities : IDisposable
     {
-        private IWorld m_World;
+        private World m_World;
         private List<uint> m_Removes;
         private List<Entity> m_EntityList;
         private Dictionary<uint, Entity> m_EntityDict;
 
-        public Entities(IWorld world)
+        public Entities(World world)
         {
             m_World = world;
             m_Removes = new List<uint>();
@@ -20,6 +20,7 @@ namespace Nice.Game.Base
 
         public void Dispose()
         {
+            m_World = null;
             m_Removes.Clear();
             m_EntityList.Clear();
             m_EntityDict.Clear();
@@ -27,7 +28,7 @@ namespace Nice.Game.Base
 
         public void OnUpdate(float delta)
         {
-            CheckRemoveEntity();
+            TickRemoveEntity();
             int length = m_EntityList.Count;
             for (int i = 0; i < length; ++i)
             {
@@ -35,16 +36,7 @@ namespace Nice.Game.Base
             }
         }
 
-        public void OnFixedUpdate(float delta)
-        {
-            int length = m_EntityList.Count;
-            for (int i = 0; i < length; ++i)
-            {
-                m_EntityList[i].OnFixedUpdate(delta);
-            }
-        }
-
-        public bool AddEntity(Entity entity)
+        public void AddEntity(Entity entity)
         {
             uint entityId = entity.EntityId;
             if (!m_EntityDict.ContainsKey(entityId))
@@ -53,36 +45,46 @@ namespace Nice.Game.Base
                 m_EntityDict.Add(entityId, entity);
                 entity.World = m_World;
                 entity.OnInit();
-                return true;
             }
-            return false;
         }
 
-        public bool RemoveEntity(uint entityId)
+        public void RemoveEntity(uint entityId)
         {
             Entity entity = GetEntity(entityId);
             if (entity != null)
             {
                 entity.IsRemove = true;
                 m_Removes.Add(entityId);
-                return true;
             }
-            return false;
         }
 
         public Entity GetEntity(uint entityId)
         {
-            Entity entity;
-            m_EntityDict.TryGetValue(entityId, out entity);
-            return entity;
+            if (m_EntityDict.TryGetValue(entityId, out Entity entity))
+            {
+                if (!entity.IsRemove)
+                {
+                    return entity;
+                }
+            }
+            return null;
         }
 
-        public List<Entity> Entitys
+        public bool CopyEntities(List<Entity> list)
         {
-            get { return m_EntityList; }
+            int length = m_EntityList.Count;
+            for (int i = 0; i < length; ++i)
+            {
+                Entity entity = m_EntityList[i];
+                if (!entity.IsRemove)
+                {
+                    list.Add(entity);
+                }
+            }
+            return true;
         }
 
-        private void CheckRemoveEntity()
+        private void TickRemoveEntity()
         {
             int length = m_Removes.Count;
             if (length > 0)

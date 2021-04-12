@@ -6,10 +6,10 @@ using System.Collections.Generic;
 public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 {
     public static GameMgr Ins = new GameMgr();
-
+    private bool m_Dispose;
     private List<ICompose> m_Composes;
 
-    public GameMgr()
+    private GameMgr()
     {
         m_Composes = new List<ICompose>();
     }
@@ -23,12 +23,18 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public void OnInit()
     {
+        m_Dispose = false;
         Add<AudioMgr>();
         Add<SystemBehaviour>();
     }
 
     public void OnRemove()
     {
+        if (m_Dispose)
+        {
+            return;
+        }
+        m_Dispose = true;
         int length = m_Composes.Count;
         for (int i = 0; i < length; ++i)
         {
@@ -40,6 +46,10 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public void OnUpdate(float delta)
     {
+        if (m_Dispose)
+        {
+            return;
+        }
         int length = m_Composes.Count;
         for (int i = 0; i < length; ++i)
         {
@@ -47,17 +57,25 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
         }
     }
 
-    public void OnLateUpdate()
+    public void OnLateUpdate(float delta)
     {
+        if (m_Dispose)
+        {
+            return;
+        }
         int length = m_Composes.Count;
         for (int i = 0; i < length; ++i)
         {
-            m_Composes[i].OnLateUpdate();
+            m_Composes[i].OnLateUpdate(delta);
         }
     }
 
     public void OnFixedUpdate(float delta)
     {
+        if (m_Dispose)
+        {
+            return;
+        }
         int length = m_Composes.Count;
         for (int i = 0; i < length; ++i)
         {
@@ -67,6 +85,10 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public T Add<T>() where T : ICompose, new()
     {
+        if (m_Dispose)
+        {
+            return default(T);
+        }
         ICompose compose = Find<T>();
         if (compose == null)
         {
@@ -79,6 +101,10 @@ public class GameMgr : ILifecycle, IUpdate, ILateUpdate, IFixedUpdate
 
     public void Remove<T>() where T : ICompose
     {
+        if (m_Dispose)
+        {
+            return;
+        }
         ICompose compose = Find<T>();
         if (compose != null)
         {

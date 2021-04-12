@@ -177,7 +177,7 @@ namespace Nice.Game.Base
         }
         #endregion
 
-        public void SendDisconnect()
+        internal void SendDisconnect()
         {
             if (m_Dispose)
             {

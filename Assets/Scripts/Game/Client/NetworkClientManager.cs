@@ -1,32 +1,36 @@
 ﻿using Nice.Game.Base;
+using UnityEngine;
+using UnityEngine.Experimental.PlayerLoop;
 
 namespace Nice.Game.Client
 {
-    public static class NetworkClientManager
+    public class NetworkClientManager
     {
-        private static bool m_Initialize;
+        private static bool m_Dispose;
         private static ClientChannel m_Channel;
         private static Connection m_Connection;
 
         public static void Init()
         {
-            if (m_Initialize)
+            if (m_Dispose)
             {
                 return;
             }
 
-            m_Initialize = true;
+            m_Dispose = false;
             m_Channel = new ClientChannel();
+            SystemLoop.AddUpdate(OnUpdate);
         }
 
         public static void Dispose()
         {
-            if (!m_Initialize)
+            if (m_Dispose)
             {
                 return;
             }
 
-            m_Initialize = false;
+            m_Dispose = false;
+            SystemLoop.RemoveUpdate(OnUpdate);
 
             if (m_Channel != null)
             {
@@ -43,7 +47,7 @@ namespace Nice.Game.Client
 
         public static void Connect(string host, int port)
         {
-            if (!m_Initialize)
+            if (m_Dispose)
             {
                 return;
             }
@@ -53,7 +57,7 @@ namespace Nice.Game.Client
 
         public static void Disconnect()
         {
-            if (!m_Initialize)
+            if (m_Dispose)
             {
                 return;
             }
@@ -61,19 +65,9 @@ namespace Nice.Game.Client
             m_Channel.Disconnect();
         }
 
-        public static void OnUpdate()
-        {
-            if (!m_Initialize)
-            {
-                return;
-            }
-
-            m_Channel.Dispatcher();
-        }
-
         public static void Send(ushort cmd, ByteBuffer buffer)
         {
-            if (!m_Initialize)
+            if (m_Dispose)
             {
                 return;
             }
@@ -86,32 +80,42 @@ namespace Nice.Game.Client
             get { return m_Connection; }
         }
 
+        private static void OnUpdate()
+        {
+            if (m_Dispose)
+            {
+                return;
+            }
+
+            m_Channel.Dispatcher();
+        }
+
         private static void AddChannel(IChannel channel)
         {
-            if (!m_Initialize)
+            if (m_Dispose)
             {
                 return;
             }
 
             m_Connection = new Connection(channel);
             RegisterProtocols(m_Connection);
-            Client.Ins.World.Dispatcher(MessageConstants.Connect_Success);
+            Client.Ins.World.DispatchMessage(MessageConstants.Connect_Success);
         }
 
         private static void RemoveChannel(IChannel channel)
         {
-            if (!m_Initialize)
+            if (m_Dispose)
             {
                 return;
             }
 
             m_Connection.Dispose();
-            Client.Ins.World.Dispatcher(MessageConstants.Connect_Error);
+            Client.Ins.World.DispatchMessage(MessageConstants.Connect_Error);
         }
 
         private static void RegisterProtocols(Connection connection)
         {
-            if (!m_Initialize)
+            if (m_Dispose)
             {
                 return;
             }
@@ -124,12 +128,12 @@ namespace Nice.Game.Client
         {
             public void OnServerConnect(IChannel channel)
             {
-                NetworkClientManager.AddChannel(channel);
+                AddChannel(channel);
             }
 
             public void OnServerDisconnect(IChannel channel)
             {
-                NetworkClientManager.RemoveChannel(channel);
+                RemoveChannel(channel);
             }
         }
     }

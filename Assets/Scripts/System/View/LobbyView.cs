@@ -43,7 +43,9 @@ namespace System
 
             m_JoinServer.onClick.AddListener(() =>
             {
-                GameMgr.Ins.Add<Client>();
+                //GameMgr.Ins.Add<Client>();
+                GameMgr.Ins.Remove<Server>();
+                GameMgr.Ins.Remove<Client>();
             });
         }
     }

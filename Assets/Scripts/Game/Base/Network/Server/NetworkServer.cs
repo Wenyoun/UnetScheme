@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using UnityEngine.Experimental.PlayerLoop;
 
 namespace Nice.Game.Base
 {
@@ -10,14 +11,14 @@ namespace Nice.Game.Base
         private IServerCallback m_Callback;
         private KcpUdpServer m_KcpUdpServer;
         private Dictionary<long, IChannel> m_Channels;
-        private ConcurrentQueue<StatusChannel> m_StatusChannels;
+        private ConcurrentQueue<WrapperChannel> m_WrapperChannels;
 
         public NetworkServer()
         {
             m_Dispose = false;
             m_KcpUdpServer = new KcpUdpServer();
             m_Channels = new Dictionary<long, IChannel>();
-            m_StatusChannels = new ConcurrentQueue<StatusChannel>();
+            m_WrapperChannels = new ConcurrentQueue<WrapperChannel>();
         }
 
         public void Dispose()
@@ -31,7 +32,7 @@ namespace Nice.Game.Base
             m_Channels.Clear();
             m_KcpUdpServer.Dispose();
 
-            while (m_StatusChannels.TryDequeue(out StatusChannel channel))
+            while (m_WrapperChannels.TryDequeue(out WrapperChannel channel))
             {
             }
         }
@@ -68,8 +69,8 @@ namespace Nice.Game.Base
                 return;
             }
 
-            CheckStatusChannels();
-            HandlePackets();
+            CheckWrapperChannels();
+            OnHandlePackets();
         }
 
         private void OnKcpConnect(IChannel channel)
@@ -79,7 +80,7 @@ namespace Nice.Game.Base
                 return;
             }
 
-            m_StatusChannels.Enqueue(new StatusChannel(Status.Add, channel));
+            m_WrapperChannels.Enqueue(new WrapperChannel(Status.Add, channel));
         }
 
         private void OnKcpDisconnect(IChannel channel)
@@ -89,10 +90,10 @@ namespace Nice.Game.Base
                 return;
             }
 
-            m_StatusChannels.Enqueue(new StatusChannel(Status.Remove, channel));
+            m_WrapperChannels.Enqueue(new WrapperChannel(Status.Remove, channel));
         }
 
-        private void HandlePackets()
+        private void OnHandlePackets()
         {
             using (Dictionary<long, IChannel>.Enumerator its = m_Channels.GetEnumerator())
             {
@@ -103,34 +104,26 @@ namespace Nice.Game.Base
             }
         }
 
-        private void CheckStatusChannels()
+        private void CheckWrapperChannels()
         {
-            while (m_StatusChannels.TryDequeue(out StatusChannel status))
+            while (m_WrapperChannels.TryDequeue(out WrapperChannel wrapper))
             {
-                IChannel channel = status.Channel;
+                IChannel channel = wrapper.Channel;
 
-                if (status.Status == Status.Add)
+                if (wrapper.Status == Status.Add)
                 {
                     if (!m_Channels.ContainsKey(channel.ChannelId))
                     {
                         m_Channels.Add(channel.ChannelId, channel);
-
-                        if (m_Callback != null)
-                        {
-                            m_Callback.OnClientConnect(channel);
-                        }
+                        m_Callback?.OnClientConnect(channel);
                     }
                 }
-                else if (status.Status == Status.Remove)
+                else if (wrapper.Status == Status.Remove)
                 {
                     if (m_Channels.ContainsKey(channel.ChannelId))
                     {
-                        if (m_Callback != null)
-                        {
-                            m_Callback.OnClientDisconnect(channel);
-                        }
-
                         m_Channels.Remove(channel.ChannelId);
+                        m_Callback?.OnClientDisconnect(channel);
                     }
                 }
             }
@@ -142,12 +135,12 @@ namespace Nice.Game.Base
             Remove
         }
 
-        private struct StatusChannel
+        private struct WrapperChannel
         {
             public Status Status;
             public IChannel Channel;
 
-            public StatusChannel(Status status, IChannel channel)
+            public WrapperChannel(Status status, IChannel channel)
             {
                 Status = status;
                 Channel = channel;

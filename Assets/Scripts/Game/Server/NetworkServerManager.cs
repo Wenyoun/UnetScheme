@@ -3,55 +3,59 @@ using System.Collections.Generic;
 
 namespace Nice.Game.Server
 {
-    public static class NetworkServerManager
+    public class NetworkServerManager
     {
-        private static bool m_Initalize;
+        private static bool m_Dispose;
         private static NetworkServer m_Network;
         private static Dictionary<long, Connection> m_Connections;
 
         public static void Init()
         {
-            if (m_Initalize)
+            if (m_Dispose)
             {
                 return;
             }
-            m_Initalize = true;
+            m_Dispose = false;
             m_Network = new NetworkServer();
             m_Connections = new Dictionary<long, Connection>();
+            SystemLoop.AddUpdate(OnUpdate);
         }
 
         public static void Dispose()
         {
-            if (!m_Initalize)
+            if (m_Dispose)
             {
                 return;
             }
-            m_Initalize = false;
-            m_Network.Dispose();
-            m_Connections.Clear();
+
+            m_Dispose = false;
+            SystemLoop.RemoveUpdate(OnUpdate);
+
+            if (m_Network != null)
+            {
+                m_Network.Dispose();
+                m_Network = null;
+            }
+
+            if (m_Connections != null)
+            {
+                m_Connections.Clear();
+                m_Connections = null;
+            }
         }
 
         public static void Bind(int port)
         {
-            if (!m_Initalize)
+            if (m_Dispose)
             {
                 return;
             }
             m_Network.Bind(port, new ServerCallback());
         }
 
-        public static void OnUpdate()
-        {
-            if (!m_Initalize)
-            {
-                return;
-            }
-            m_Network.OnUpdate();
-        }
-
         public static void Send(Connection connection, ushort cmd, ByteBuffer buffer)
         {
-            if (!m_Initalize || connection == null || buffer == null)
+            if (m_Dispose || connection == null || buffer == null)
             {
                 return;
             }
@@ -65,7 +69,7 @@ namespace Nice.Game.Server
 
         public static void Broadcast(ushort cmd, ByteBuffer buffer)
         {
-            if (!m_Initalize)
+            if (m_Dispose)
             {
                 return;
             }
@@ -77,6 +81,15 @@ namespace Nice.Game.Server
                     its.Current.Value.Send(cmd, buffer);
                 }
             }
+        }
+
+        private static void OnUpdate()
+        {
+            if (m_Dispose)
+            {
+                return;
+            }
+            m_Network.OnUpdate();
         }
 
         private static void AddChannel(IChannel channel)
@@ -92,9 +105,8 @@ namespace Nice.Game.Server
 
         private static void RemoveChannel(IChannel channel)
         {
-            Connection connection;
             long connectionId = channel.ChannelId;
-            if (m_Connections.TryGetValue(connectionId, out connection))
+            if (m_Connections.TryGetValue(connectionId, out Connection connection))
             {
                 m_Connections.Remove(connectionId);
                 connection.Dispose();
@@ -111,12 +123,12 @@ namespace Nice.Game.Server
         {
             public void OnClientConnect(IChannel channel)
             {
-                NetworkServerManager.AddChannel(channel);
+                AddChannel(channel);
             }
 
             public void OnClientDisconnect(IChannel channel)
             {
-                NetworkServerManager.RemoveChannel(channel);
+                RemoveChannel(channel);
             }
         }
     }

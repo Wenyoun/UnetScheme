@@ -34,11 +34,11 @@ namespace Base
             }
         }
 
-        public override void OnLateUpdate()
+        public override void OnLateUpdate(float delta)
         {
             for (int i = 0; i < mModuleLts.Count; ++i)
             {
-                mModuleLts[i].OnLateUpdate();
+                mModuleLts[i].OnLateUpdate(delta);
             }
         }
 

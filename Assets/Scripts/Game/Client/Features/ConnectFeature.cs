@@ -3,21 +3,21 @@ using Nice.Game.Base;
 
 namespace Nice.Game.Client
 {
-    public class ConnectLogic : AbsWorldLogic
+    public class ConnectFeature : AbsWorldFeature
     {
         protected override void Init()
         {
-            Register(MessageConstants.Connect_Success, OnConnectSuccess);
-            Register(MessageConstants.Connect_Error, OnConnectError);
+            m_World.RegisterMessage(MessageConstants.Connect_Success, OnConnectSuccess);
+            m_World.RegisterMessage(MessageConstants.Connect_Error, OnConnectError);
         }
 
         protected override void Clear()
         {
-            UnRegister(MessageConstants.Connect_Success, OnConnectSuccess);
-            UnRegister(MessageConstants.Connect_Error, OnConnectError);
+            m_World.UnRegisterMessage(MessageConstants.Connect_Success, OnConnectSuccess);
+            m_World.UnRegisterMessage(MessageConstants.Connect_Error, OnConnectError);
         }
 
-        private void OnConnectSuccess(IBody body)
+        private void OnConnectSuccess(Body body)
         {
             SLogin login = new SLogin();
             login.PlayerID = 567;
@@ -29,7 +29,7 @@ namespace Nice.Game.Client
             Sender.Login(login, buffer, Encoding.UTF8.GetBytes("11"), 567);
         }
 
-        private void OnConnectError(IBody body)
+        private void OnConnectError(Body body)
         {
         }
     }

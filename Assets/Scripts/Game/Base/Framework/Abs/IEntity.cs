@@ -1,6 +1,6 @@
 ﻿namespace Nice.Game.Base
 {
-    public interface IEntity : ILifecycle, IUpdate, IFixedUpdate
+    public interface IEntity : ILifecycle
     {
         T AddCop<T>(T cop) where T : ICop;
 
@@ -30,7 +30,7 @@
 
         uint EntityId { get; }
 
-        IWorld World { get; }
+        World World { get; }
 
         TimerRegister Timer { get; }
 

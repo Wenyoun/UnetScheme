@@ -14,7 +14,7 @@
 
     public interface ILateUpdate
     {
-        void OnLateUpdate();
+        void OnLateUpdate(float delta);
     }
 
     public interface IFixedUpdate

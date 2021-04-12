@@ -18,6 +18,7 @@
         public void OnRemove()
         {
             Clear();
+            m_Entity = null;
         }
 
         public uint CopId

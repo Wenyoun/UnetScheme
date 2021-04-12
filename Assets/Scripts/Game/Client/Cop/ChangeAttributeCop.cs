@@ -7,7 +7,7 @@ namespace Nice.Game.Client
         protected override void Init()
         {
             BaseAttribute attribute = Entity.GetSyncAttribute<BaseAttribute>();
-            Entity.World.Messager.Register(MessageConstants.Sync_Attribute, (IBody body) =>
+            Entity.World.RegisterMessage(MessageConstants.Sync_Attribute, (Body body) =>
             {
                 //UnityEngine.Debug.Log(attribute.Hp1 + "." + attribute.Hp11 + "," + attribute.Hp12);
             });

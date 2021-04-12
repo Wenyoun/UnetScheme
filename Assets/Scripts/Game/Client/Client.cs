@@ -1,4 +1,5 @@
 ﻿using Nice.Game.Base;
+using UnityEngine;
 
 namespace Nice.Game.Client
 {
@@ -13,7 +14,7 @@ namespace Nice.Game.Client
         public Client()
         {
             Ins = this;
-            m_World = new World();
+            m_World = new ClientWorld();
             NetworkClientManager.Init();
         }
 
@@ -32,7 +33,6 @@ namespace Nice.Game.Client
 
         public void OnUpdate(float delta)
         {
-            NetworkClientManager.OnUpdate();
             m_World.OnUpdate(delta);
         }
 
@@ -41,9 +41,9 @@ namespace Nice.Game.Client
             m_World.OnFixedUpdate(delta);
         }
 
-        public void OnLateUpdate()
+        public void OnLateUpdate(float delta)
         {
-            m_World.OnLateUpdate();
+            m_World.OnLateUpdate(delta);
         }
 
         public World World

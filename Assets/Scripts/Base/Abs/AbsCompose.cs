@@ -10,7 +10,7 @@ namespace Base
 
         public virtual void OnUpdate(float delta) { }
 
-        public virtual void OnLateUpdate() { }
+        public virtual void OnLateUpdate(float delta) { }
 
         public virtual void OnFixedUpdate(float delta) { }
     }

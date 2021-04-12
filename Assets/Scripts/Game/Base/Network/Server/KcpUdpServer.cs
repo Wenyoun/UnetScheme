@@ -121,6 +121,10 @@ namespace Nice.Game.Base
                         {
                             channel.Input(rawBuffer, KcpConn.HEAD_SIZE, count - KcpConn.HEAD_SIZE);
                         }
+                        else
+                        {
+                            Debug.Log("ConId有问题");
+                        }
                     }
                     else
                     {

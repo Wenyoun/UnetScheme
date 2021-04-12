@@ -52,9 +52,8 @@ namespace Nice.Game.Base
 
             Clear();
             m_Status = Connecting;
-
             m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            KcpHelper.CreateThread(ConnectLooper, new IPEndPoint(IPAddress.Parse(host), port));
+            KcpHelper.CreateThread(OnConnectLooper, new IPEndPoint(IPAddress.Parse(host), port));
         }
 
         public void Send(Packet packet)
@@ -113,7 +112,7 @@ namespace Nice.Game.Base
             Clear();
         }
 
-        private void ConnectLooper(object obj)
+        private void OnConnectLooper(object obj)
         {
             try
             {
@@ -124,8 +123,8 @@ namespace Nice.Game.Base
 
                 while (!m_Dispose && m_Status == Connecting)
                 {
-                    KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
-                    m_Socket.Send(rawBuffer, 0, 4, SocketFlags.None);
+                    int length = KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
+                    m_Socket.Send(rawBuffer, 0, length, SocketFlags.None);
                     if (!m_Socket.Poll(100000, SelectMode.SelectRead))
                     {
                         time += 100;

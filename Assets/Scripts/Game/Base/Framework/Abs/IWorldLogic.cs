@@ -1,17 +1,17 @@
 ﻿namespace Nice.Game.Base
 {
-    public interface IWorldLogic
+    public interface IWorldFeature
     {
-        void OnInit(IWorld world);
+        void OnInit(World world);
 
         void OnRemove();
     }
 
-    public abstract class AbsWorldLogic : IWorldLogic
+    public abstract class AbsWorldFeature : IWorldFeature
     {
-        private IWorld m_World;
+        protected World m_World;
 
-        public void OnInit(IWorld world)
+        public void OnInit(World world)
         {
             m_World = world;
             Init();
@@ -23,27 +23,12 @@
             m_World = null;
         }
 
-        protected IWorld World
-        {
-            get { return m_World; }
-        }
-
         protected virtual void Init()
         {
         }
 
         protected virtual void Clear()
         {
-        }
-
-        protected void Register(int id, MsgDelegate handler)
-        {
-            m_World.Messager.Register(id, handler);
-        }
-
-        protected void UnRegister(int id, MsgDelegate handler)
-        {
-            m_World.Messager.UnRegister(id, handler);
         }
     }
 }

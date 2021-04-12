@@ -2,7 +2,7 @@
 {
     public abstract class AbsEntity : IEntity
     {
-        private IWorld m_World;
+        private World m_World;
         private bool m_isRemove;
         private uint m_EntityId;
 
@@ -159,22 +159,13 @@
             m_Updater.OnUpdate(delta);
         }
 
-        public void OnFixedUpdate(float delta)
-        {
-            if (m_isRemove)
-            {
-                return;
-            }
-            m_Updater.OnFixedUpdate(delta);
-        }
-
         public bool IsRemove
         {
             get { return m_isRemove; }
             internal set { m_isRemove = true; }
         }
 
-        public IWorld World
+        public World World
         {
             get { return m_World; }
             internal set { m_World = value; }

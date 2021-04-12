@@ -14,7 +14,7 @@ namespace Nice.Game.Server
         {
             Ins = this;
             NetworkServerManager.Init();
-            m_World = new World();
+            m_World = new ServerWorld();
         }
 
         public void OnInit()
@@ -32,7 +32,6 @@ namespace Nice.Game.Server
 
         public void OnUpdate(float delta)
         {
-            NetworkServerManager.OnUpdate();
             m_World.OnUpdate(delta);
         }
 
@@ -41,9 +40,9 @@ namespace Nice.Game.Server
             m_World.OnFixedUpdate(delta);
         }
 
-        public void OnLateUpdate()
+        public void OnLateUpdate(float delta)
         {
-            m_World.OnLateUpdate();
+            m_World.OnLateUpdate(delta);
         }
     }
 }

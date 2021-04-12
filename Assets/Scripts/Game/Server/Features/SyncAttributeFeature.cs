@@ -3,16 +3,25 @@ using System.Collections.Generic;
 
 namespace Nice.Game.Server
 {
-    public static class SyncAttributeMgr
+    public class SyncAttributeFeature : AbsWorldFeature
     {
-        public static void OnUpdate(World world, List<Entity> entities, float delta)
+        private List<Entity> m_List;
+
+        protected override void Init()
         {
-            if (entities != null)
+            m_List = new List<Entity>();
+            m_World.RegisterUpdate(OnUpdate);
+        }
+
+        private void OnUpdate(float delta)
+        {
+            m_List.Clear();
+            if (m_World.CopyEntities(m_List))
             {
-                int length = entities.Count;
+                int length = m_List.Count;
                 for (int i = 0; i < length; ++i)
                 {
-                    Entity entity = entities[i];
+                    Entity entity = m_List[i];
                     List<ISyncAttribute> attributes = entity.Sync.Attributes;
                     if (attributes.Count > 0)
                     {

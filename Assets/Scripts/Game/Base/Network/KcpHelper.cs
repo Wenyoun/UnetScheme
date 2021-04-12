@@ -14,12 +14,13 @@ namespace Nice.Game.Base
 
     internal static class KcpHelper
     {
-        internal static void Encode32u(byte[] p, int offset, uint w)
+        internal static int Encode32u(byte[] p, int offset, uint w)
         {
             p[0 + offset] = (byte) (w >> 0);
             p[1 + offset] = (byte) (w >> 8);
             p[2 + offset] = (byte) (w >> 16);
             p[3 + offset] = (byte) (w >> 24);
+            return 4;
         }
 
         internal static uint Decode32u(byte[] p, int offset)
