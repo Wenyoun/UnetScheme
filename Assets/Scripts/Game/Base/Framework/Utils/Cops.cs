@@ -57,9 +57,8 @@ namespace Nice.Game.Base
 
         public void RemoveCop<T>() where T : ICop
         {
-            ICop cop;
             Type type = typeof(T);
-            if (m_CopDys.TryGetValue(type, out cop))
+            if (m_CopDys.TryGetValue(type, out ICop cop))
             {
                 m_CopLts.Remove(cop);
                 m_CopDys.Remove(type);
@@ -69,9 +68,11 @@ namespace Nice.Game.Base
 
         public T GetCop<T>() where T : ICop
         {
-            ICop cop = null;
-            m_CopDys.TryGetValue(typeof(T), out cop);
-            return (T) cop;
+            if (m_CopDys.TryGetValue(typeof(T), out ICop cop))
+            {
+                return (T) cop;
+            }
+            return default(T);
         }
     }
 }

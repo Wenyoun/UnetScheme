@@ -10,8 +10,6 @@ namespace Nice.Game.Server
             Entity entity = new Entity();
 
             entity.AddSyncAttribute(new BaseAttribute());
-            entity.AddFeture(new ConnectionFeture(connection));
-            entity.AddFeture(new ServerObjectFeture(position));
             entity.AddCop<ServerChangeAttributeCop>();
 
             return entity;

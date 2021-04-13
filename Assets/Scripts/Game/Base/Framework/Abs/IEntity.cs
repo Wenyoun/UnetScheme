@@ -10,10 +10,6 @@
 
         T GetCop<T>() where T : ICop;
 
-        T AddConfig<T>(T config) where T : IConfig;
-
-        T GetConfig<T>() where T : IConfig;
-
         T AddAttribute<T>(T attribute) where T : IAttribute;
 
         T GetAttribute<T>() where T : IAttribute;
@@ -23,10 +19,6 @@
         T GetSyncAttribute<T>() where T : ISyncAttribute;
 
         ISyncAttribute GetSyncAttribute(uint syncId);
-
-        T AddFeture<T>(T feture) where T : IFeture;
-
-        T GetFeture<T>() where T : IFeture;
 
         uint EntityId { get; }
 

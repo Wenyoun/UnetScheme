@@ -11,8 +11,6 @@ namespace Nice.Game.Client
             entity.OnInit();
 
             entity.AddSyncAttribute(new BaseAttribute());
-            entity.AddFeture(new ConnectionFeture(NetworkClientManager.Connection));
-            entity.AddFeture(new ClientObjectFeture("Prefabs/Game/Tank", position));
             entity.AddCop<ChangeAttributeCop>();
 
             return entity;

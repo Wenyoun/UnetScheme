@@ -53,7 +53,7 @@ namespace Nice.Game.Base
             Entity entity = GetEntity(entityId);
             if (entity != null)
             {
-                entity.IsRemove = true;
+                entity.IsDispose = true;
                 m_Removes.Add(entityId);
             }
         }
@@ -62,7 +62,7 @@ namespace Nice.Game.Base
         {
             if (m_EntityDict.TryGetValue(entityId, out Entity entity))
             {
-                if (!entity.IsRemove)
+                if (!entity.IsDispose)
                 {
                     return entity;
                 }
@@ -76,7 +76,7 @@ namespace Nice.Game.Base
             for (int i = 0; i < length; ++i)
             {
                 Entity entity = m_EntityList[i];
-                if (!entity.IsRemove)
+                if (!entity.IsDispose)
                 {
                     list.Add(entity);
                 }

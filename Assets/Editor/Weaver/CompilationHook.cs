@@ -14,7 +14,7 @@ namespace Zyq.Weaver
         {
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             CompilationPipeline.assemblyCompilationFinished += OnAssemblyCompilationFinished;
-            OnPlayModeStateChanged(PlayModeStateChange.ExitingEditMode);
+            //OnPlayModeStateChanged(PlayModeStateChange.ExitingEditMode);
         }
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
@@ -48,16 +48,20 @@ namespace Zyq.Weaver
 
         private static void OnAssemblyCompilationFinished(string assemblyPath, CompilerMessage[] messages)
         {
-            if (EditorApplication.isPlaying ||
-                assemblyPath.IndexOf(".Editor") >= 0 ||
-                assemblyPath.IndexOf("-Editor") >= 0 ||
-                assemblyPath.IndexOf("Assembly-CSharp.dll") >= 0)
+            if (EditorApplication.isPlaying || assemblyPath.IndexOf(".Editor") >= 0 || assemblyPath.IndexOf("-Editor") >= 0 || assemblyPath.IndexOf("Assembly-CSharp.dll") >= 0)
             {
                 return;
             }
 
-            if (assemblyPath.IndexOf(WeaverProgram.Client) == -1 &&
-                assemblyPath.IndexOf(WeaverProgram.Server) == -1)
+            for (int i = 0; i < messages.Length; ++i)
+            {
+                if (messages[i].type == CompilerMessageType.Error)
+                {
+                    return;
+                }
+            }
+            
+            if (assemblyPath.IndexOf(WeaverProgram.Client) == -1 && assemblyPath.IndexOf(WeaverProgram.Server) == -1)
             {
                 return;
             }
@@ -71,8 +75,8 @@ namespace Zyq.Weaver
             bool result = WeaverProgram.WeaveAssemblies(unityEngineCoreModuleRuntimeDLL, baseModuleRuntimeDLL, assemblyPath, dependencyPaths.ToArray());
             string module = Path.GetFileName(assemblyPath);
             SessionState.SetBool(module, result);
-            
+
             UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
         }
     }
-    }
+}
