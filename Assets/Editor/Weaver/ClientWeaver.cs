@@ -32,10 +32,12 @@ namespace Zyq.Weaver
                 ClientRecvProcessor.Weave(module, recvAttributeMethods, protocol);
             }
 
+            /**
             if (copTypes.Count > 0)
             {
                 ClientRecvCopProcessor.Weave(module, copTypes);
             }
+            **/
 
             if (syncTypes.Count > 0)
             {

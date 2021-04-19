@@ -43,11 +43,6 @@ namespace Zyq.Weaver
         public static MethodReference ByteBufferUtilsWriteMethod;
         #endregion
 
-        #region Nice.Game.Base.IEntity
-        public static TypeReference IEntityType;
-        public static MethodReference IEntityGetFetureMethod;
-        #endregion
-
         #region Nice.Game.Base.AbsCop
         public static TypeReference AbsCopType;
         public static MethodReference AbsCopOnRemoveMethod;
@@ -58,12 +53,6 @@ namespace Zyq.Weaver
         public static TypeReference ConnectionType;
         public static MethodReference ConnectionRegisterHandlerMethod;
         public static MethodReference ConnectionUnregisterHandlerMethod;
-        #endregion
-
-        #region Nice.Game.Base.ConnectionFeture
-        public static TypeReference ConnectionFetureType;
-        public static MethodReference ConnectionFetureRegisterHandlerMethod;
-        public static MethodReference ConnectionFetureUnregisterHandlerMethod;
         #endregion
 
         #region Nice.Game.Client.Client
@@ -183,9 +172,6 @@ namespace Zyq.Weaver
             SyncClassType = BaseAssembly.MainModule.GetType("Nice.Game.Base.SyncClassAttribute");
             SyncFieldType = BaseAssembly.MainModule.GetType("Nice.Game.Base.SyncFieldAttribute");
 
-            IEntityType = BaseAssembly.MainModule.GetType("Nice.Game.Base.IEntity");
-            IEntityGetFetureMethod = ResolveHelper.ResolveMethod(IEntityType, "GetFeture");
-
             AbsCopType = BaseAssembly.MainModule.GetType("Nice.Game.Base.AbsCop");
             AbsCopOnRemoveMethod = ResolveHelper.ResolveMethod(AbsCopType, "OnRemove");
             AbsCopGetEntityMethod = ResolveHelper.ResolveMethod(AbsCopType, "get_Entity");
@@ -193,10 +179,6 @@ namespace Zyq.Weaver
             ConnectionType = BaseAssembly.MainModule.GetType("Nice.Game.Base.Connection");
             ConnectionRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "RegisterHandler");
             ConnectionUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "UnRegisterHandler");
-
-            ConnectionFetureType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ConnectionFeture");
-            ConnectionFetureRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "RegisterHandler");
-            ConnectionFetureUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionFetureType, "UnRegisterHandler");
         }
 
         private static void SetupClientModuleTypes()

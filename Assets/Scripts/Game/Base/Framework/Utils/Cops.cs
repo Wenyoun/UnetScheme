@@ -25,7 +25,7 @@ namespace Nice.Game.Base
             m_CopDys.Clear();
         }
 
-        public T AddCop<T>(ICop cop, IEntity entity) where T : ICop
+        public T AddCop<T>(ICop cop, Entity entity) where T : ICop
         {
             Type type = cop.GetType();
             if (!m_CopDys.ContainsKey(type))
@@ -39,7 +39,7 @@ namespace Nice.Game.Base
             return (T) cop;
         }
 
-        public T AddCop<T>(IEntity entity) where T : ICop, new()
+        public T AddCop<T>(Entity entity) where T : ICop, new()
         {
             Type type = typeof(T);
             if (!m_CopDys.ContainsKey(type))

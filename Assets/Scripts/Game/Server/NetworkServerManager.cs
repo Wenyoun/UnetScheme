@@ -55,7 +55,7 @@ namespace Nice.Game.Server
 
         public static void Send(Connection connection, ushort cmd, ByteBuffer buffer)
         {
-            if (m_Dispose || connection == null || buffer == null)
+            if (m_Dispose)
             {
                 return;
             }

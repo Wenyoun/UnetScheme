@@ -39,10 +39,12 @@ namespace Zyq.Weaver
                 ServerBroadcastProcessor.Weave(module, broadcastAttributeMethods);
             }
 
+            /**
             if (copTypes.Count > 0)
             {
                 ServerRecvCopProcessor.Weave(module, copTypes);
             }
+            **/
 
             if (syncAttributeTypes.Count > 0)
             {

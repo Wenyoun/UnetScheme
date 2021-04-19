@@ -7,12 +7,15 @@ namespace Nice.Game.Server
     {
         public static Entity CreatePlayer(Connection connection, Vector3 position)
         {
+            /**
             Entity entity = new Entity();
 
             entity.AddSyncAttribute(new BaseAttribute());
             entity.AddCop<ServerChangeAttributeCop>();
 
             return entity;
+            **/
+            return null;
         }
     }
 }

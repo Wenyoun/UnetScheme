@@ -4,8 +4,8 @@
     {
         uint CopId { get; }
 
-        IEntity Entity { set; }
+        Entity Entity { set; }
 
-        T CastEntity<T>() where T : IEntity;
+        T CastEntity<T>() where T : Entity;
     }
 }

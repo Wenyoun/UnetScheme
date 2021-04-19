@@ -1,20 +1,19 @@
 ﻿namespace Nice.Game.Base
 {
-    public abstract class AbsEntity : IEntity
+    public abstract class Entity
     {
         private World m_World;
         private bool m_Dispose;
         private uint m_EntityId;
-
+        
         private Cops m_Cops;
-
         private Attributes m_Attributes;
         private SyncAttributes m_SyncAttributes;
 
         private TimerRegister m_Timer;
         private UpdaterRegister m_Updater;
 
-        protected AbsEntity()
+        protected Entity()
         {
             m_Dispose = false;
             m_EntityId = UniGenID.GenNextEntityID();

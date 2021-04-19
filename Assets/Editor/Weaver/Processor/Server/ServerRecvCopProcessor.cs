@@ -1,4 +1,5 @@
-﻿using System;
+﻿/**
+using System;
 using Nice.Game.Base;
 using Mono.CecilX;
 using Mono.CecilX.Cil;
@@ -70,7 +71,7 @@ namespace Zyq.Weaver
                                 processor.Append(processor.Create(OpCodes.Nop));
                                 processor.Append(processor.Create(OpCodes.Ldarg_0));
                                 processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopGetEntityMethod)));
-                                processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IEntityGetFetureMethod.MakeGenericMethod(WeaverProgram.ConnectionFetureType))));
+                                //processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IEntityGetFetureMethod.MakeGenericMethod(WeaverProgram.ConnectionFetureType))));
                                 processor.Append(processor.Create(OpCodes.Stloc_0));
                                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                                 processor.Append(processor.Create(OpCodes.Ldnull));
@@ -198,7 +199,7 @@ namespace Zyq.Weaver
                                 processor.Append(processor.Create(OpCodes.Nop));
                                 processor.Append(processor.Create(OpCodes.Ldarg_0));
                                 processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.AbsCopGetEntityMethod)));
-                                processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IEntityGetFetureMethod.MakeGenericMethod(WeaverProgram.ConnectionFetureType))));
+                                //processor.Append(processor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IEntityGetFetureMethod.MakeGenericMethod(WeaverProgram.ConnectionFetureType))));
                                 processor.Append(processor.Create(OpCodes.Stloc_0));
                                 processor.Append(processor.Create(OpCodes.Ldloc_0));
                                 processor.Append(processor.Create(OpCodes.Ldnull));
@@ -231,3 +232,4 @@ namespace Zyq.Weaver
         }
     }
 }
+**/

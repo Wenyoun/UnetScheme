@@ -3,7 +3,7 @@
     public abstract class AbsCop : ICop
     {
         private uint m_CopId;
-        private IEntity m_Entity;
+        private Entity m_Entity;
 
         public AbsCop()
         {
@@ -26,13 +26,13 @@
             get { return m_CopId; }
         }
 
-        public IEntity Entity
+        public Entity Entity
         {
             get { return m_Entity; }
             set { m_Entity = value; }
         }
 
-        public T CastEntity<T>() where T : IEntity
+        public T CastEntity<T>() where T : Entity
         {
             return (T) m_Entity;
         }

@@ -7,6 +7,7 @@ namespace Nice.Game.Client
     {
         public static Entity CreatePlayer(Vector3 position)
         {
+            /**
             Entity entity = new Entity();
             entity.OnInit();
 
@@ -14,6 +15,8 @@ namespace Nice.Game.Client
             entity.AddCop<ChangeAttributeCop>();
 
             return entity;
+            **/
+            return null;
         }
     }
 }

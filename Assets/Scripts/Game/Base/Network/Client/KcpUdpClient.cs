@@ -43,8 +43,6 @@ namespace Nice.Game.Base
 
         public void Connect(string host, int port)
         {
-            CheckDispose();
-
             if (m_Status == Connecting)
             {
                 return;
@@ -52,8 +50,17 @@ namespace Nice.Game.Base
 
             Clear();
             m_Status = Connecting;
-            m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            KcpHelper.CreateThread(OnConnectLooper, new IPEndPoint(IPAddress.Parse(host), port));
+
+            IPAddress[] addresses = Dns.GetHostAddresses(host);
+
+            if (addresses.Length < 1)
+            {
+                throw new KcpClientException("不能解析的地址:" + host);
+            }
+
+            IPEndPoint endPoint = new IPEndPoint(addresses[0], port);
+            m_Socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+            KcpHelper.CreateThread(OnConnectLooper, endPoint);
         }
 
         public void Send(Packet packet)
@@ -136,7 +143,7 @@ namespace Nice.Game.Base
                         continue;
                     }
 
-                    if (m_Status != Connecting || m_Dispose)
+                    if (m_Dispose || m_Status != Connecting)
                     {
                         break;
                     }
@@ -256,19 +263,6 @@ namespace Nice.Game.Base
             {
                 m_Status = Error;
                 Debug.LogError(e.ToString());
-            }
-        }
-
-        private void CheckDispose()
-        {
-            if (m_Status == Error)
-            {
-                throw new KcpClientException("KcpUdpClient client error");
-            }
-
-            if (m_Dispose)
-            {
-                throw new KcpClientException("KcpUdpClient client already dispose");
             }
         }
 
