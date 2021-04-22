@@ -6,7 +6,7 @@ using Net.KcpImpl;
 
 namespace Nice.Game.Base
 {
-    public class KcpConn : IKcpCallback, IRentable, IDisposable
+    public abstract class KcpConn : IKcpCallback, IRentable, IDisposable
     {
         #region pool
         private class MemoryPool : IMemoryOwner<byte>
@@ -31,21 +31,21 @@ namespace Nice.Game.Base
         #endregion
 
         private Kcp m_Kcp;
-        private Socket m_Socket;
-        private EndPoint m_Point;
+        protected Socket m_Socket;
+        protected EndPoint m_Point;
 
         private uint m_Conv;
-        private long m_ConId;
+        private uint m_ConId;
 
         private bool m_Dispose;
         private bool m_IsConnected;
         private byte[] m_OutputBuffer;
 
-        public KcpConn(long conId, uint conv, Socket socket) : this(conId, conv, socket, null)
+        protected KcpConn(uint conId, uint conv, Socket socket) : this(conId, conv, socket, null)
         {
         }
 
-        public KcpConn(long conId, uint conv, Socket socket, EndPoint point)
+        protected KcpConn(uint conId, uint conv, Socket socket, EndPoint point)
         {
             m_Point = point;
             m_Socket = socket;
@@ -72,20 +72,14 @@ namespace Nice.Game.Base
                 return;
             }
 
-            KcpHelper.Encode64(m_OutputBuffer, 0, m_ConId);
-            m_OutputBuffer[KcpConstants.Head_Size] = MsgChannel.Reliable;
-            memory.Span.Slice(0, length).CopyTo(new Span<byte>(m_OutputBuffer, KcpConstants.Head_Size, m_OutputBuffer.Length - KcpConstants.Head_Size));
+            KcpHelper.Encode32u(m_OutputBuffer, 0, m_ConId);
+            m_OutputBuffer[KcpConstants.Conv_Size] = MsgChannel.Reliable;
+            memory.Span.Slice(0, length).CopyTo(new Span<byte>(m_OutputBuffer, KcpConstants.Head_Size, length));
 
-            if (m_Point == null)
-            {
-                m_Socket.Send(m_OutputBuffer, 0,length + KcpConstants.Head_Size + 1, SocketFlags.None);
-            }
-            else
-            {
-                m_Socket.SendTo(m_OutputBuffer, 0, length + KcpConstants.Head_Size + 1, SocketFlags.None, m_Point);
-            }
+            OnSendData(m_OutputBuffer, 0, length + KcpConstants.Head_Size);
         }
 
+        
         public int Send(byte[] buffer, int offset, int length)
         {
             if (m_Dispose)
@@ -102,20 +96,13 @@ namespace Nice.Game.Base
                 return -10;
             }
 
-            KcpHelper.Encode64(m_OutputBuffer, 0, m_ConId);
-            m_OutputBuffer[KcpConstants.Head_Size] = MsgChannel.Unreliable;
-            Array.Copy(buffer, offset, m_OutputBuffer, KcpConstants.Head_Size + 1, length);
+            KcpHelper.Encode32u(m_OutputBuffer, 0, m_ConId);
+            m_OutputBuffer[KcpConstants.Conv_Size] = MsgChannel.Unreliable;
+            Array.Copy(buffer, offset, m_OutputBuffer, KcpConstants.Head_Size, length);
+            
+            OnSendData(m_OutputBuffer, 0, length + KcpConstants.Conv_Size + 1);
 
-            if (m_Point == null)
-            {
-                m_Socket.Send(m_OutputBuffer, length + KcpConstants.Head_Size + 1, SocketFlags.None);
-            }
-            else
-            {
-                m_Socket.SendTo(m_OutputBuffer, length + KcpConstants.Head_Size + 1, SocketFlags.None, m_Point);
-            }
-
-            return length + KcpConstants.Head_Size + 1;
+            return length + KcpConstants.Head_Size;
         }
 
         public int Recv(byte[] buffer, int offset, int length)
@@ -184,7 +171,7 @@ namespace Nice.Game.Base
             get { return m_Conv; }
         }
 
-        public long ConId
+        public uint ConId
         {
             get { return m_ConId; }
         }
@@ -207,11 +194,13 @@ namespace Nice.Game.Base
             ByteWriteMemory write = new ByteWriteMemory(buffer);
             write.Write(KcpConstants.Flag_Disconnect);
             write.Write(m_Conv);
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 Send(buffer, 0, 8);
                 Flush();
             }
         }
+        
+        protected abstract void OnSendData(byte[] data, int offset, int size);
     }
 }

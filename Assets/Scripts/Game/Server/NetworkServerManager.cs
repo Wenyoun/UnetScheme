@@ -7,7 +7,7 @@ namespace Nice.Game.Server
     {
         private static bool m_Dispose;
         private static NetworkServer m_Network;
-        private static Dictionary<long, Connection> m_Connections;
+        private static Dictionary<uint, Connection> m_Connections;
 
         public static void Init()
         {
@@ -17,7 +17,7 @@ namespace Nice.Game.Server
             }
             m_Dispose = false;
             m_Network = new NetworkServer();
-            m_Connections = new Dictionary<long, Connection>();
+            m_Connections = new Dictionary<uint, Connection>();
             SystemLoop.AddUpdate(OnUpdate);
         }
 
@@ -60,7 +60,7 @@ namespace Nice.Game.Server
                 return;
             }
 
-            long connectionId = connection.ConnectionId;
+            uint connectionId = connection.ConnectionId;
             if (m_Connections.ContainsKey(connectionId))
             {
                 connection.Send(cmd, buffer);
@@ -74,7 +74,7 @@ namespace Nice.Game.Server
                 return;
             }
 
-            using (Dictionary<long, Connection>.Enumerator its = m_Connections.GetEnumerator())
+            using (Dictionary<uint, Connection>.Enumerator its = m_Connections.GetEnumerator())
             {
                 while (its.MoveNext())
                 {
@@ -94,7 +94,7 @@ namespace Nice.Game.Server
 
         private static void AddChannel(IChannel channel)
         {
-            long connectionId = channel.ChannelId;
+            uint connectionId = channel.ChannelId;
             if (!m_Connections.ContainsKey(connectionId))
             {
                 Connection connection = new Connection(channel);
@@ -105,7 +105,7 @@ namespace Nice.Game.Server
 
         private static void RemoveChannel(IChannel channel)
         {
-            long connectionId = channel.ChannelId;
+            uint connectionId = channel.ChannelId;
             if (m_Connections.TryGetValue(connectionId, out Connection connection))
             {
                 m_Connections.Remove(connectionId);

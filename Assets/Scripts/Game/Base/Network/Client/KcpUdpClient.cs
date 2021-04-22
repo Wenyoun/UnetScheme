@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Net.KcpImpl;
 using UnityEngine;
 
 namespace Nice.Game.Base
@@ -22,7 +21,7 @@ namespace Nice.Game.Base
         private KcpConn m_Con;
         private Socket m_Socket;
 
-        private long m_ConId;
+        private uint m_ConId;
         private byte m_Status;
         private bool m_Dispose;
 
@@ -30,9 +29,9 @@ namespace Nice.Game.Base
         private ConcurrentQueue<Packet> m_SendPackets;
         private ConcurrentQueue<Packet> m_RecvPackets;
 
-        public KcpUdpClient()
+        public KcpUdpClient() 
         {
-            m_ConId = -1;
+            m_ConId = 0;
             m_Status = None;
             m_Dispose = false;
 
@@ -58,9 +57,9 @@ namespace Nice.Game.Base
                 throw new KcpClientException("不能解析的地址:" + host);
             }
 
-            IPEndPoint endPoint = new IPEndPoint(addresses[0], port);
-            m_Socket = new Socket(endPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-            KcpHelper.CreateThread(OnConnectLooper, endPoint);
+            IPEndPoint point = new IPEndPoint(addresses[0], port);
+            m_Socket = new Socket(point.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+            KcpHelper.CreateThread(OnConnectLooper, point);
         }
 
         public void Send(Packet packet)
@@ -82,7 +81,7 @@ namespace Nice.Game.Base
             return m_RecvPackets.TryDequeue(out packet);
         }
 
-        public long ConId
+        public uint ConId
         {
             get { return m_ConId; }
         }
@@ -122,13 +121,14 @@ namespace Nice.Game.Base
             {
                 int time = 0;
                 int timeout = 5000;
-                m_Socket.Connect((EndPoint) obj);
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
+                
+                m_Socket.Connect((EndPoint) obj);
 
                 while (!m_Dispose && m_Status == Connecting)
                 {
-                    int length = KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
-                    m_Socket.Send(rawBuffer, 0, length, SocketFlags.None);
+                    int size = KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
+                    m_Socket.Send(rawBuffer, 0, size, SocketFlags.None);
                     if (!m_Socket.Poll(100000, SelectMode.SelectRead))
                     {
                         time += 100;
@@ -147,15 +147,15 @@ namespace Nice.Game.Base
 
                     int count = m_Socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
 
-                    if (count == 40)
+                    if (count == 37)
                     {
-                        long conId = KcpHelper.Decode64(rawBuffer, 0);
-                        uint flag = KcpHelper.Decode32u(rawBuffer, 32);
-                        uint conv = KcpHelper.Decode32u(rawBuffer, 36);
+                        uint cid = KcpHelper.Decode32u(rawBuffer, 0);
+                        uint flag = KcpHelper.Decode32u(rawBuffer, 29);
+                        uint conv = KcpHelper.Decode32u(rawBuffer, 33);
 
                         if (flag == KcpConstants.Flag_Connect)
                         {
-                            m_Con = new KcpConn(conId, conv, m_Socket);
+                            m_Con = new KcpConClient(cid, conv, m_Socket);
                             m_Con.Input(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size);
                             count = m_Con.Recv(rawBuffer, 0, rawBuffer.Length);
 
@@ -166,7 +166,7 @@ namespace Nice.Game.Base
                                 m_Con.Send(rawBuffer, 0, 8);
                                 m_Con.Flush();
 
-                                m_ConId = conId;
+                                m_ConId = cid;
                                 m_Status = Success;
 
                                 KcpHelper.CreateThread(UpdateKcpLooper);
@@ -235,32 +235,24 @@ namespace Nice.Game.Base
 
                     int count = m_Socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
                     
-                    if (count > KcpConstants.Head_Size + 1)
+                    if (count > KcpConstants.Head_Size)
                     {
-                        long conId = KcpHelper.Decode64(rawBuffer, 0);
-                        if (conId == m_Con.ConId)
+                        uint remoteCid  = KcpHelper.Decode32u(rawBuffer, 0);
+                        if (m_Con.ConId == remoteCid)
                         {
-                            byte msgChannel = rawBuffer[KcpConstants.Head_Size];
+                            byte msgChannel = rawBuffer[KcpConstants.Conv_Size];
                             
                             if (msgChannel == MsgChannel.Reliable)
                             {
-                                m_Con.Input(rawBuffer, KcpConstants.Head_Size + 1, count - KcpConstants.Head_Size - 1);
+                                m_Con.Input(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size);
                                 process.RecvReliablePackets(this, m_Con, packets, m_Heartbeat);
                             }
                             else if (msgChannel == MsgChannel.Unreliable)
                             {
-                                process.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size + 1, count - KcpConstants.Head_Size - 1, packets, m_Heartbeat);
+                                process.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size, packets, m_Heartbeat);
                             }
 
-                            int length = packets.Count;
-                            if (length > 0)
-                            {
-                                for (int i = 0; i < length; ++i)
-                                {
-                                    m_RecvPackets.Enqueue(packets[i]);
-                                }
-                                packets.Clear();
-                            }
+                            PutPackets(packets);
                         }
                     }
                 }
@@ -297,6 +289,16 @@ namespace Nice.Game.Base
             m_Status = None;
             m_SendPackets.Clear();
             m_RecvPackets.Clear();
+        }
+
+        private void PutPackets(List<Packet> packets) {
+            int length = packets.Count;
+            if (length > 0) {
+                for (int i = 0; i < length; ++i) {
+                    m_RecvPackets.Enqueue(packets[i]);
+                }
+                packets.Clear();
+            }
         }
 
         private class KcpClientException : Exception

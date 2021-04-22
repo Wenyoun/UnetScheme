@@ -8,7 +8,7 @@ namespace Nice.Game.Base
         private bool m_Close;
         private bool m_Dispose;
         private uint m_Conv;
-        private long m_ConId;
+        private uint m_ConId;
 
         private KcpConn m_Con;
         private ServerHeartbeatProcessing m_Heartbeat;
@@ -29,7 +29,7 @@ namespace Nice.Game.Base
             m_SendPackets = new ConcurrentQueue<Packet>();
         }
 
-        public override long ChannelId
+        public override uint ChannelId
         {
             get { return m_ConId; }
         }
@@ -141,7 +141,7 @@ namespace Nice.Game.Base
             m_Con.Flush();
         }
 
-        internal void ProcessSendPacket(ServerDataProcessingCenter process)
+        internal void ProcessSendPackets(ServerDataProcessingCenter process)
         {
             if (m_Dispose)
             {

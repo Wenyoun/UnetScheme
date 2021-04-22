@@ -163,16 +163,15 @@ namespace Nice.Game.Base
 
     internal static class PacketHandler
     {
-        private const int ChaLength = 1;
         private const int CmdLength = 2;
         private const int MsgLength = 2;
-        private const int ChaCmdMsgLength = ChaLength + CmdLength + MsgLength;
+        private const int CmdMsgLength = CmdLength + MsgLength;
 
         public static int HandleSend(byte[] buffer, Packet packet)
         {
             //消息格式
-            //1字节channel, 2字节消息类型，2字节消息长度，N字节消息体
-            int size = ChaCmdMsgLength + packet.Buffer.ReadableLength;
+            //2字节消息类型，2字节消息长度，N字节消数据
+            int size = CmdMsgLength + packet.Buffer.ReadableLength;
 
             if (size > buffer.Length)
             {
@@ -182,16 +181,13 @@ namespace Nice.Game.Base
 
             ByteWriteMemory memory = new ByteWriteMemory(buffer);
 
-            //1.写入channel
-            memory.Write(packet.Channel);
-
-            //2.写入消息类型
+            //1.写入消息类型
             memory.Write(packet.Cmd);
 
-            //3.写入消息长度
+            //2.写入消息长度
             memory.Write((ushort) packet.Buffer.ReadableLength);
 
-            //4.写入消息数据
+            //3.写入消息数据
             memory.Write(packet.Buffer);
 
             return size;
@@ -201,21 +197,17 @@ namespace Nice.Game.Base
         public static void HandleRecv(byte[] data, int offset, int size, List<Packet> packets)
         {
             //消息格式
-            //1字节channel, 2字节消息类型，2字节消息长度，N字节消息体
-            while (size > ChaCmdMsgLength)
+            //2字节消息类型，2字节消息长度，N字节消息数据
+            while (size > CmdMsgLength)
             {
                 //MsgLength个字节消息长度,CmdLength个字节消息类型长度,N字节消息数据长度
                 ByteReadMemory memory = new ByteReadMemory(data, offset, size);
 
-                //1.读取channel
-                byte channel = memory.ReadByte();
-                size -= ChaLength;
-
-                //2.读取消息类型
+                //1.读取消息类型
                 ushort cmd = memory.ReadUShort();
                 size -= CmdLength;
 
-                //3.读取消息长度
+                //2.读取消息长度
                 ushort length = memory.ReadUShort();
                 size -= MsgLength;
 
@@ -225,12 +217,12 @@ namespace Nice.Game.Base
                     break;
                 }
 
-                //4.读取消息数据
+                //3.读取消息数据
                 ByteBuffer buffer = ByteBuffer.Allocate(length);
                 memory.Read(buffer, length);
                 size -= length;
 
-                packets.Add(new Packet(cmd, buffer, channel));
+                packets.Add(new Packet(cmd, buffer, 0));
             }
         }
     }

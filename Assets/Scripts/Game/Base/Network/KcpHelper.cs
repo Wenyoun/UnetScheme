@@ -6,11 +6,13 @@ namespace Nice.Game.Base
 {
     internal class KcpConstants
     {
-        public const int Head_Size = 8;
+        public const int Conv_Size = 4;
+        public const int Channel_Size = 1;
+        public const int Head_Size = Conv_Size + Channel_Size;
         public const int Packet_Length = 1300;
-        public const uint Flag_Connect = 0xfffffff0;
-        public const uint Flag_Heartbeat = 0xfffffff1;
-        public const uint Flag_Disconnect = 0xffffffff;
+        public const uint Flag_Connect = 0x0ffffff0;
+        public const uint Flag_Heartbeat = 0x0ffffff1;
+        public const uint Flag_Disconnect = 0x0fffffff;
     }
 
     internal static class KcpHelper

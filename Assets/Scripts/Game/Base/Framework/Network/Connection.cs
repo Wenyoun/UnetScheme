@@ -48,7 +48,7 @@ namespace Nice.Game.Base
             m_Channel.Send(cmd, buffer, MsgChannel.Unreliable);
         }
 
-        public long ConnectionId
+        public uint ConnectionId
         {
             get { return m_Channel.ChannelId; }
         }

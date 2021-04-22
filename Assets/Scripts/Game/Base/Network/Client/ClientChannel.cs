@@ -14,9 +14,9 @@ namespace Nice.Game.Base
             m_Status = KcpUdpClient.None;
         }
 
-        public override long ChannelId
+        public override uint ChannelId
         {
-            get { return m_KcpUdpClient != null ? m_KcpUdpClient.ConId : -1; }
+            get { return m_KcpUdpClient != null ? m_KcpUdpClient.ConId : 0; }
         }
 
         public override bool IsConnected

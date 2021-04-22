@@ -10,14 +10,14 @@ namespace Nice.Game.Base
         private bool m_Dispose;
         private IServerCallback m_Callback;
         private KcpUdpServer m_KcpUdpServer;
-        private Dictionary<long, IChannel> m_Channels;
+        private Dictionary<uint, IChannel> m_Channels;
         private ConcurrentQueue<WrapperChannel> m_WrapperChannels;
 
         public NetworkServer()
         {
             m_Dispose = false;
             m_KcpUdpServer = new KcpUdpServer();
-            m_Channels = new Dictionary<long, IChannel>();
+            m_Channels = new Dictionary<uint, IChannel>();
             m_WrapperChannels = new ConcurrentQueue<WrapperChannel>();
         }
 
@@ -48,7 +48,7 @@ namespace Nice.Game.Base
             m_KcpUdpServer.Bind(port, new KcpConnect(OnKcpConnect, OnKcpDisconnect));
         }
 
-        public void CloseChannel(int channelId)
+        public void CloseChannel(uint channelId)
         {
             if (m_Dispose)
             {
@@ -95,7 +95,7 @@ namespace Nice.Game.Base
 
         private void OnHandlePackets()
         {
-            using (Dictionary<long, IChannel>.Enumerator its = m_Channels.GetEnumerator())
+            using (Dictionary<uint, IChannel>.Enumerator its = m_Channels.GetEnumerator())
             {
                 while (its.MoveNext())
                 {

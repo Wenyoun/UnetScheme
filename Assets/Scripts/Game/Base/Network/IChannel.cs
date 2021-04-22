@@ -19,7 +19,7 @@ namespace Nice.Game.Base
 
     public interface IChannel : IDisposable
     {
-        long ChannelId { get; }
+        uint ChannelId { get; }
 
         bool IsConnected { get; }
 
@@ -68,7 +68,7 @@ namespace Nice.Game.Base
 
         public abstract void Disconnect();
 
-        public abstract long ChannelId { get; }
+        public abstract uint ChannelId { get; }
 
         public abstract bool IsConnected { get; }
 

@@ -21,13 +21,15 @@ namespace Nice.Game.Base
         private bool m_Dispose;
         private Socket m_Socket;
         private IKcpConnect m_Connect;
-        private ConcurrentDictionary<long, ServerChannel> m_Channels;
+        private ConcurrentDictionary<uint, ServerChannel> m_Channels;
+        private ServerDataProcessingCenter m_Process;
 
         public KcpUdpServer()
         {
             m_Dispose = false;
-            m_Channels = new ConcurrentDictionary<long, ServerChannel>();
+            m_Channels = new ConcurrentDictionary<uint, ServerChannel>();
             m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            m_Process = new ServerDataProcessingCenter();
         }
 
         public void Bind(int port, IKcpConnect connect)
@@ -51,7 +53,7 @@ namespace Nice.Game.Base
 
             m_Dispose = true;
 
-            using (IEnumerator<KeyValuePair<long, ServerChannel>> its = m_Channels.GetEnumerator())
+            using (IEnumerator<KeyValuePair<uint, ServerChannel>> its = m_Channels.GetEnumerator())
             {
                 while (its.MoveNext())
                 {
@@ -75,7 +77,6 @@ namespace Nice.Game.Base
                 EndPoint remote = new IPEndPoint(IPAddress.Any, 0);
 
                 List<Packet> packets = new List<Packet>();
-                ServerDataProcessingCenter process = new ServerDataProcessingCenter();
 
                 while (!m_Dispose)
                 {
@@ -90,9 +91,9 @@ namespace Nice.Game.Base
                     }
 
                     int count = m_Socket.ReceiveFrom(rawBuffer, SocketFlags.None, ref remote);
-                    long conId = remote.GetHashCode();
+                    uint cid = (uint) remote.GetHashCode();
 
-                    if (!m_Channels.TryGetValue(conId, out ServerChannel channel))
+                    if (!m_Channels.TryGetValue(cid, out ServerChannel channel))
                     {
                         if (count == 4)
                         {
@@ -101,9 +102,9 @@ namespace Nice.Game.Base
                             {
                                 uint conv = startConvId++;
                                 EndPoint point = remote.Create(remote.Serialize());
-                                channel = new ServerChannel(new KcpConn(conId, conv, m_Socket, point));
+                                channel = new ServerChannel(new KcpConServer(cid, conv, m_Socket, point));
 
-                                if (m_Channels.TryAdd(conId, channel))
+                                if (m_Channels.TryAdd(cid, channel))
                                 {
                                     KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
                                     KcpHelper.Encode32u(rawBuffer, 4, conv);
@@ -115,17 +116,17 @@ namespace Nice.Game.Base
                     }
                     else if (count > KcpConstants.Head_Size)
                     {
-                        long rmConId = KcpHelper.Decode64(rawBuffer, 0);
-                        if (rmConId == conId)
+                        uint remoteCid = KcpHelper.Decode32u(rawBuffer, 0);
+                        if (cid == remoteCid)
                         {
-                            byte msgChannel = rawBuffer[KcpConstants.Head_Size];
+                            byte msgChannel = rawBuffer[KcpConstants.Conv_Size];
                             if (msgChannel == MsgChannel.Reliable)
                             {
-                                channel.Input(rawBuffer, KcpConstants.Head_Size + 1, count - KcpConstants.Head_Size - 1);
+                                channel.Input(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size);
                             }
                             else if (msgChannel == MsgChannel.Unreliable)
                             {
-                                channel.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size + 1, count - KcpConstants.Head_Size - 1, process, packets);
+                                channel.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size, m_Process, packets);
                             }
                         }
                     }
@@ -141,19 +142,18 @@ namespace Nice.Game.Base
         {
             try
             {
-                List<long> removes = new List<long>();
-                ServerDataProcessingCenter process = new ServerDataProcessingCenter();
+                List<uint> removes = new List<uint>();
 
                 while (!m_Dispose)
                 {
-                    using (IEnumerator<KeyValuePair<long, ServerChannel>> its = m_Channels.GetEnumerator())
+                    using (IEnumerator<KeyValuePair<uint, ServerChannel>> its = m_Channels.GetEnumerator())
                     {
                         while (its.MoveNext())
                         {
                             ServerChannel channel = its.Current.Value;
                             if (!channel.IsClose)
                             {
-                                channel.ProcessSendPacket(process);
+                                channel.ProcessSendPackets(m_Process);
                             }
                             else
                             {
@@ -167,7 +167,7 @@ namespace Nice.Game.Base
                     {
                         for (int i = 0; i < length; ++i)
                         {
-                            long channelId = removes[i];
+                            uint channelId = removes[i];
                             if (m_Channels.TryRemove(channelId, out ServerChannel channel))
                             {
                                 m_Connect?.OnKcpDisconnect(channel);
@@ -195,7 +195,7 @@ namespace Nice.Game.Base
 
                 while (!m_Dispose)
                 {
-                    using (IEnumerator<KeyValuePair<long, ServerChannel>> its = m_Channels.GetEnumerator())
+                    using (IEnumerator<KeyValuePair<uint, ServerChannel>> its = m_Channels.GetEnumerator())
                     {
                         while (its.MoveNext())
                         {
