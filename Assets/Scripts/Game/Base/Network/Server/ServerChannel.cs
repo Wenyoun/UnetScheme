@@ -13,7 +13,7 @@ namespace Nice.Game.Base
         private KcpConn m_Con;
         private ServerHeartbeatProcessing m_Heartbeat;
         private ConcurrentQueue<Packet> m_RecvPacketQueue;
-        private ConcurrentQueue<Packet> m_SendPacketQueue;
+        private ConcurrentQueue<Packet> m_SendPackets;
 
         public ServerChannel(KcpConn con)
         {
@@ -26,7 +26,7 @@ namespace Nice.Game.Base
 
             m_Heartbeat = new ServerHeartbeatProcessing();
             m_RecvPacketQueue = new ConcurrentQueue<Packet>();
-            m_SendPacketQueue = new ConcurrentQueue<Packet>();
+            m_SendPackets = new ConcurrentQueue<Packet>();
         }
 
         public override long ChannelId
@@ -62,14 +62,13 @@ namespace Nice.Game.Base
             }
         }
 
-        public override void Send(ushort cmd, ByteBuffer buffer)
+        public override void Send(ushort cmd, ByteBuffer buffer, byte channel)
         {
             if (m_Dispose)
             {
                 return;
             }
-
-            m_SendPacketQueue.Enqueue(new Packet(cmd, buffer));
+            m_SendPackets.Enqueue(new Packet(cmd, buffer, channel));
         }
 
         public override void Dispose()
@@ -89,18 +88,26 @@ namespace Nice.Game.Base
             m_Con.SendDisconnect();
             m_Con.Dispose();
 
-            m_SendPacketQueue.Clear();
+            m_SendPackets.Clear();
             m_RecvPacketQueue.Clear();
         }
 
         #region internal method
+        internal int RawSend(byte[] buffer, int offset, int length)
+        {
+            if (m_Dispose)
+            {
+                return -20;
+            }
+            return m_Con.RawSend(buffer, offset, length);
+        }
+
         internal int Send(byte[] buffer, int offset, int length)
         {
             if (m_Dispose)
             {
                 return -20;
             }
-
             return m_Con.Send(buffer, offset, length);
         }
 
@@ -141,29 +148,35 @@ namespace Nice.Game.Base
                 return;
             }
 
-            process.TryParseSendKcpData(this, m_SendPacketQueue);
+            process.SendPackets(this, m_SendPackets);
 
             m_Con.Update(TimeUtil.Get1970ToNowMilliseconds());
         }
 
-        internal void ProcessRecvPacket(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connectCallback)
+        internal void RecvReliablePackets(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connect)
         {
             if (m_Dispose)
             {
                 return;
             }
 
-            if (process.TryParseRecvKcpData(this, packets, connectCallback, m_Heartbeat))
+            if (process.RecvReliablePackets(this, packets, connect, m_Heartbeat))
             {
-                m_Heartbeat.UpdateHeartbeat();
-                for (int i = 0; i < packets.Count; ++i)
-                {
-                    m_RecvPacketQueue.Enqueue(packets[i]);
-                }
-                packets.Clear();
+                HandlePackets(packets);
+            }
+        }
+
+        internal void RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, ServerDataProcessingCenter process, List<Packet> packets)
+        {
+            if (m_Dispose)
+            {
+                return;
             }
 
-            m_Heartbeat.OnUpdate(this);
+            if (process.RecvUnreliablePackets(rawBuffer, offset, count, packets))
+            {
+                HandlePackets(packets);
+            }
         }
 
         internal void SetConnectedStatus(bool status)
@@ -186,5 +199,19 @@ namespace Nice.Game.Base
             get { return m_Dispose || m_Close; }
         }
         #endregion
+
+        private void HandlePackets(List<Packet> packets)
+        {
+            if (packets.Count > 0)
+            {
+                m_Heartbeat.UpdateHeartbeat();
+                for (int i = 0; i < packets.Count; ++i)
+                {
+                    m_RecvPacketQueue.Enqueue(packets[i]);
+                }
+                packets.Clear();
+                m_Heartbeat.OnUpdate(this);
+            }
+        }
     }
 }

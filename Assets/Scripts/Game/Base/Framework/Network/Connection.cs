@@ -45,7 +45,7 @@ namespace Nice.Game.Base
 
         public void Send(ushort cmd, ByteBuffer buffer)
         {
-            m_Channel.Send(cmd, buffer);
+            m_Channel.Send(cmd, buffer, MsgChannel.Unreliable);
         }
 
         public long ConnectionId

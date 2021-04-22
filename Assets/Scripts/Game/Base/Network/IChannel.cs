@@ -23,7 +23,7 @@ namespace Nice.Game.Base
 
         bool IsConnected { get; }
 
-        void Send(ushort cmd, ByteBuffer buffer);
+        void Send(ushort cmd, ByteBuffer buffer, byte channel);
 
         void Dispatcher();
 
@@ -72,7 +72,7 @@ namespace Nice.Game.Base
 
         public abstract bool IsConnected { get; }
 
-        public abstract void Send(ushort cmd, ByteBuffer buffer);
+        public abstract void Send(ushort cmd, ByteBuffer buffer, byte channel);
 
         protected void ClearHandlers()
         {

@@ -15,7 +15,7 @@ namespace Net.KcpImpl
         /// <param name="avalidLength">数据的有效长度</param>
         /// <returns>不需要返回值</returns>
         /// <remarks>通过增加 avalidLength 能够在协议栈中有效的减少数据拷贝</remarks>
-        void Output(IMemoryOwner<byte> buffer, int length);
+        void Output(Memory<byte> memory, int length);
     }
 
 

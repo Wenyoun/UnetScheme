@@ -543,7 +543,6 @@ namespace Net.KcpImpl
         /// <returns></returns>
         public int PeekSize()
         {
-
             if (rcv_queue.Count == 0)
             {
                 ///没有可用包
@@ -842,7 +841,6 @@ namespace Net.KcpImpl
                 //检查释放
                 return -4;
             }
-
             return 0;
         }
 
@@ -1126,7 +1124,7 @@ namespace Net.KcpImpl
                 {
                     if (offset + IKCP_OVERHEAD > mtu)
                     {
-                        callbackHandle.Output(buffer, offset);
+                        callbackHandle.Output(buffer.Memory, offset);
                         offset = 0;
                         buffer = CreateBuffer(BufferNeedSize);
                     }
@@ -1182,7 +1180,7 @@ namespace Net.KcpImpl
                     seg.cmd = IKCP_CMD_WASK;
                     if (offset + IKCP_OVERHEAD > (int)mtu)
                     {
-                        callbackHandle.Output(buffer, offset);
+                        callbackHandle.Output(buffer.Memory, offset);
                         offset = 0;
                         buffer = CreateBuffer(BufferNeedSize);
                     }
@@ -1194,7 +1192,7 @@ namespace Net.KcpImpl
                     seg.cmd = IKCP_CMD_WINS;
                     if (offset + IKCP_OVERHEAD > (int)mtu)
                     {
-                        callbackHandle.Output(buffer, offset);
+                        callbackHandle.Output(buffer.Memory, offset);
                         offset = 0;
                         buffer = CreateBuffer(BufferNeedSize);
                     }
@@ -1302,7 +1300,7 @@ namespace Net.KcpImpl
                         var need = IKCP_OVERHEAD + segment.len;
                         if (offset + need > mtu)
                         {
-                            callbackHandle.Output(buffer, offset);
+                            callbackHandle.Output(buffer.Memory, offset);
                             offset = 0;
                             buffer = CreateBuffer(BufferNeedSize);
                         }
@@ -1321,7 +1319,7 @@ namespace Net.KcpImpl
             // flash remain segments
             if (offset > 0)
             {
-                callbackHandle.Output(buffer, offset);
+                callbackHandle.Output(buffer.Memory, offset);
                 offset = 0;
                 buffer = CreateBuffer(BufferNeedSize);
             }

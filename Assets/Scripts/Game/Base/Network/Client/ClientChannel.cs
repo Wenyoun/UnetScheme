@@ -24,11 +24,11 @@ namespace Nice.Game.Base
             get { return m_KcpUdpClient != null && m_KcpUdpClient.IsConnected; }
         }
 
-        public override void Send(ushort cmd, ByteBuffer buffer)
+        public override void Send(ushort cmd, ByteBuffer buffer, byte channel)
         {
             if (m_KcpUdpClient != null)
             {
-                m_KcpUdpClient.Send(new Packet(cmd, buffer));
+                m_KcpUdpClient.Send(new Packet(cmd, buffer, channel));
             }
         }
 

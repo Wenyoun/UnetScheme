@@ -71,8 +71,7 @@ namespace Nice.Game.Client
             {
                 return;
             }
-
-            m_Channel.Send(cmd, buffer);
+            m_Channel.Send(cmd, buffer, MsgChannel.Unreliable);
         }
 
         public static Connection Connection

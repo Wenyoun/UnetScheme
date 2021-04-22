@@ -6,18 +6,20 @@ namespace Nice.Game.Base
 {
     internal class ClientDataProcessingCenter
     {
-        private byte[] m_RawBuffer;
+        private byte[] m_SendBuffer;
+        private byte[] m_RecvBuffer;
 
         public ClientDataProcessingCenter()
         {
-            m_RawBuffer = new byte[ushort.MaxValue];
+            m_SendBuffer = new byte[ushort.MaxValue / 2];
+            m_RecvBuffer = new byte[ushort.MaxValue / 2];
         }
 
-        public bool TryParseRecvKcpData(KcpUdpClient client, KcpConn con, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
+        public void RecvReliablePackets(KcpUdpClient client, KcpConn con, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
         {
             while (true)
             {
-                int size = con.Recv(m_RawBuffer, 0, m_RawBuffer.Length);
+                int size = con.Recv(m_RecvBuffer, 0, m_RecvBuffer.Length);
 
                 if (size <= 0)
                 {
@@ -26,8 +28,8 @@ namespace Nice.Game.Base
 
                 if (size == 8)
                 {
-                    uint flag = KcpHelper.Decode32u(m_RawBuffer, 0);
-                    uint conv = KcpHelper.Decode32u(m_RawBuffer, 4);
+                    uint flag = KcpHelper.Decode32u(m_RecvBuffer, 0);
+                    uint conv = KcpHelper.Decode32u(m_RecvBuffer, 4);
 
                     if (conv == con.Conv)
                     {
@@ -45,20 +47,31 @@ namespace Nice.Game.Base
                     }
                 }
 
-                PacketHandler.HandleRecv(m_RawBuffer, 0, size, packets);
+                PacketHandler.HandleRecv(m_RecvBuffer, 0, size, packets);
             }
-
-            return packets.Count > 0;
         }
 
-        public void TryParseSendKcpData(KcpConn con, ConcurrentQueue<Packet> sendPacketQueue)
+        public void RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
         {
-            while (sendPacketQueue.TryDequeue(out Packet packet))
+            heartbeat.UpdateHeartbeat();
+            PacketHandler.HandleRecv(rawBuffer, offset, count, packets);
+        }
+
+        public void SendPackets(KcpConn con, ConcurrentQueue<Packet> packets)
+        {
+            while (packets.TryDequeue(out Packet packet))
             {
-                int size = PacketHandler.HandleSend(m_RawBuffer, packet);
+                int size = PacketHandler.HandleSend(m_SendBuffer, packet);
                 if (size > 0)
                 {
-                    con.Send(m_RawBuffer, 0, size);
+                    if (packet.Channel == MsgChannel.Reliable)
+                    {
+                        con.Send(m_SendBuffer, 0, size);
+                    }
+                    else if (packet.Channel == MsgChannel.Unreliable)
+                    {
+                        con.RawSend(m_SendBuffer, 0, size);
+                    }
                 }
             }
         }
@@ -66,18 +79,20 @@ namespace Nice.Game.Base
 
     internal class ServerDataProcessingCenter
     {
-        private byte[] m_RawBuffer;
+        private byte[] m_SendBuffer;
+        private byte[] m_RecvBuffer;
 
         public ServerDataProcessingCenter()
         {
-            m_RawBuffer = new byte[ushort.MaxValue];
+            m_SendBuffer = new byte[ushort.MaxValue / 2];
+            m_RecvBuffer = new byte[ushort.MaxValue / 2];
         }
 
-        public bool TryParseRecvKcpData(ServerChannel channel, List<Packet> packets, IKcpConnect connect, ServerHeartbeatProcessing heartbeat)
+        public bool RecvReliablePackets(ServerChannel channel, List<Packet> packets, IKcpConnect connect, ServerHeartbeatProcessing heartbeat)
         {
             while (true)
             {
-                int size = channel.Recv(m_RawBuffer, 0, m_RawBuffer.Length);
+                int size = channel.Recv(m_RecvBuffer, 0, m_RecvBuffer.Length);
 
                 if (size <= 0)
                 {
@@ -86,8 +101,8 @@ namespace Nice.Game.Base
 
                 if (size == 8)
                 {
-                    uint flag = KcpHelper.Decode32u(m_RawBuffer, 0);
-                    uint conv = KcpHelper.Decode32u(m_RawBuffer, 4);
+                    uint flag = KcpHelper.Decode32u(m_RecvBuffer, 0);
+                    uint conv = KcpHelper.Decode32u(m_RecvBuffer, 4);
 
                     if (conv == channel.Conv)
                     {
@@ -108,26 +123,39 @@ namespace Nice.Game.Base
 
                         if (flag == KcpConstants.Flag_Heartbeat)
                         {
-                            heartbeat.UpdateHeartbeat(channel, m_RawBuffer, 0, 8);
+                            heartbeat.UpdateHeartbeat(channel, m_RecvBuffer, 0, 8);
                             continue;
                         }
                     }
                 }
 
-                PacketHandler.HandleRecv(m_RawBuffer, 0, size, packets);
+                PacketHandler.HandleRecv(m_RecvBuffer, 0, size, packets);
             }
 
             return packets.Count > 0;
         }
 
-        public void TryParseSendKcpData(ServerChannel channel, ConcurrentQueue<Packet> sendPacketQueue)
+        public bool RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, List<Packet> packets)
         {
-            while (sendPacketQueue.TryDequeue(out Packet packet))
+            PacketHandler.HandleRecv(rawBuffer, offset, count, packets);
+            return packets.Count > 0;
+        }
+
+        public void SendPackets(ServerChannel channel, ConcurrentQueue<Packet> packets)
+        {
+            while (packets.TryDequeue(out Packet packet))
             {
-                int size = PacketHandler.HandleSend(m_RawBuffer, packet);
+                int size = PacketHandler.HandleSend(m_SendBuffer, packet);
                 if (size > 0)
                 {
-                    channel.Send(m_RawBuffer, 0, size);
+                    if (packet.Channel == MsgChannel.Reliable)
+                    {
+                        channel.Send(m_SendBuffer, 0, size);
+                    }
+                    else if (packet.Channel == MsgChannel.Unreliable)
+                    {
+                        channel.RawSend(m_SendBuffer, 0, size);
+                    }
                 }
             }
         }
@@ -135,69 +163,74 @@ namespace Nice.Game.Base
 
     internal static class PacketHandler
     {
-        private const int MsgLength = 2;
+        private const int ChaLength = 1;
         private const int CmdLength = 2;
-        private const int MsgCmdLength = MsgLength + CmdLength;
+        private const int MsgLength = 2;
+        private const int ChaCmdMsgLength = ChaLength + CmdLength + MsgLength;
 
         public static int HandleSend(byte[] buffer, Packet packet)
         {
             //消息格式
-            //MsgLength个字节消息长度,CmdLength个字节消息类型长度,N字节消息数据长度
-            int total = MsgCmdLength + packet.Buffer.ReadableLength;
+            //1字节channel, 2字节消息类型，2字节消息长度，N字节消息体
+            int size = ChaCmdMsgLength + packet.Buffer.ReadableLength;
 
-            if (total > buffer.Length)
+            if (size > buffer.Length)
             {
-                Debug.LogError("PacketHandler HandleSend error total: " + total + " > buffer.Length:" + buffer.Length);
+                Debug.LogError("PacketHandler HandleSend error total: " + size + " > buffer.Length:" + buffer.Length);
                 return -1;
             }
 
-            //消息长度 = 消息类型长度 + N字节消息数据长度
-            int length = total - MsgLength;
-
             ByteWriteMemory memory = new ByteWriteMemory(buffer);
 
-            //1.写入消息长度MsgLength字节
-            memory.Write((ushort) length);
+            //1.写入channel
+            memory.Write(packet.Channel);
 
-            //2.写入消息类型CmdLength字节
+            //2.写入消息类型
             memory.Write(packet.Cmd);
 
-            //3.写入消息数据
+            //3.写入消息长度
+            memory.Write((ushort) packet.Buffer.ReadableLength);
+
+            //4.写入消息数据
             memory.Write(packet.Buffer);
 
-            return total;
+            return size;
         }
 
 
-        public static void HandleRecv(byte[] buffer, int offset, int total, List<Packet> packets)
+        public static void HandleRecv(byte[] data, int offset, int size, List<Packet> packets)
         {
-            while (total > MsgCmdLength)
+            //消息格式
+            //1字节channel, 2字节消息类型，2字节消息长度，N字节消息体
+            while (size > ChaCmdMsgLength)
             {
                 //MsgLength个字节消息长度,CmdLength个字节消息类型长度,N字节消息数据长度
-                ByteReadMemory memory = new ByteReadMemory(buffer, offset, total);
+                ByteReadMemory memory = new ByteReadMemory(data, offset, size);
 
-                //解析长度
-                int length = memory.ReadUShort();
+                //1.读取channel
+                byte channel = memory.ReadByte();
+                size -= ChaLength;
 
-                total -= MsgLength;
+                //2.读取消息类型
+                ushort cmd = memory.ReadUShort();
+                size -= CmdLength;
 
-                if (length > total)
+                //3.读取消息长度
+                ushort length = memory.ReadUShort();
+                size -= MsgLength;
+
+                if (length > size)
                 {
-                    Debug.LogError("PacketHandler HandleRecv error length:" + length + " > total:" + total);
+                    Debug.LogError("PacketHandler HandleRecv error length:" + length + " > total:" + size);
                     break;
                 }
 
-                total -= length;
+                //4.读取消息数据
+                ByteBuffer buffer = ByteBuffer.Allocate(length);
+                memory.Read(buffer, length);
+                size -= length;
 
-                //读取CmdLength个字节消息类型
-                ushort cmd = memory.ReadUShort();
-
-                //(length - CmdLength)个字节的消息数据
-                length -= CmdLength;
-                ByteBuffer byteBuffer = ByteBuffer.Allocate(length);
-                memory.Read(byteBuffer, length);
-
-                packets.Add(new Packet(cmd, byteBuffer));
+                packets.Add(new Packet(cmd, buffer, channel));
             }
         }
     }

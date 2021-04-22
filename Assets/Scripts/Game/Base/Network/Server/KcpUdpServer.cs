@@ -74,6 +74,9 @@ namespace Nice.Game.Base
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
                 EndPoint remote = new IPEndPoint(IPAddress.Any, 0);
 
+                List<Packet> packets = new List<Packet>();
+                ServerDataProcessingCenter process = new ServerDataProcessingCenter();
+
                 while (!m_Dispose)
                 {
                     if (!m_Socket.Poll(100000, SelectMode.SelectRead))
@@ -109,26 +112,22 @@ namespace Nice.Game.Base
                                 }
                             }
                         }
-                        else
-                        {
-                            Debug.Log("未创建连接，接收到无效包，len=" + count);
-                        }
                     }
-                    else if (count > Kcp.IKCP_OVERHEAD)
+                    else if (count > KcpConstants.Head_Size)
                     {
-                        long pConId = KcpHelper.Decode64(rawBuffer, 0);
-                        if (pConId == conId)
+                        long rmConId = KcpHelper.Decode64(rawBuffer, 0);
+                        if (rmConId == conId)
                         {
-                            channel.Input(rawBuffer, KcpConn.HEAD_SIZE, count - KcpConn.HEAD_SIZE);
+                            byte msgChannel = rawBuffer[KcpConstants.Head_Size];
+                            if (msgChannel == MsgChannel.Reliable)
+                            {
+                                channel.Input(rawBuffer, KcpConstants.Head_Size + 1, count - KcpConstants.Head_Size - 1);
+                            }
+                            else if (msgChannel == MsgChannel.Unreliable)
+                            {
+                                channel.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size + 1, count - KcpConstants.Head_Size - 1, process, packets);
+                            }
                         }
-                        else
-                        {
-                            Debug.Log("ConId有问题");
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log("已创建连接，接收到无效包，len=" + count);
                     }
                 }
             }
@@ -203,7 +202,7 @@ namespace Nice.Game.Base
                             ServerChannel channel = its.Current.Value;
                             if (!channel.IsClose)
                             {
-                                channel.ProcessRecvPacket(process, packets, m_Connect);
+                                channel.RecvReliablePackets(process, packets, m_Connect);
                             }
                         }
                     }

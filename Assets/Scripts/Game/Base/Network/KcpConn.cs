@@ -8,8 +8,6 @@ namespace Nice.Game.Base
 {
     public class KcpConn : IKcpCallback, IRentable, IDisposable
     {
-        public const int HEAD_SIZE = 8;
-
         #region pool
         private class MemoryPool : IMemoryOwner<byte>
         {
@@ -67,24 +65,24 @@ namespace Nice.Game.Base
             return new MemoryPool(length);
         }
 
-        public void Output(IMemoryOwner<byte> owner, int length)
+        public void Output(Memory<byte> memory, int length)
         {
             if (m_Dispose)
             {
                 return;
             }
 
-            Memory<byte> memory = owner.Memory;
             KcpHelper.Encode64(m_OutputBuffer, 0, m_ConId);
-            memory.Span.Slice(0, length).CopyTo(new Span<byte>(m_OutputBuffer, HEAD_SIZE, m_OutputBuffer.Length - HEAD_SIZE));
+            m_OutputBuffer[KcpConstants.Head_Size] = MsgChannel.Reliable;
+            memory.Span.Slice(0, length).CopyTo(new Span<byte>(m_OutputBuffer, KcpConstants.Head_Size, m_OutputBuffer.Length - KcpConstants.Head_Size));
 
             if (m_Point == null)
             {
-                m_Socket.Send(m_OutputBuffer, length + HEAD_SIZE, SocketFlags.None);
+                m_Socket.Send(m_OutputBuffer, 0,length + KcpConstants.Head_Size + 1, SocketFlags.None);
             }
             else
             {
-                m_Socket.SendTo(m_OutputBuffer, length + HEAD_SIZE, SocketFlags.None, m_Point);
+                m_Socket.SendTo(m_OutputBuffer, 0, length + KcpConstants.Head_Size + 1, SocketFlags.None, m_Point);
             }
         }
 
@@ -95,6 +93,29 @@ namespace Nice.Game.Base
                 return -10;
             }
             return m_Kcp.Send(new Span<byte>(buffer, offset, length));
+        }
+
+        public int RawSend(byte[] buffer, int offset, int length)
+        {
+            if (m_Dispose)
+            {
+                return -10;
+            }
+
+            KcpHelper.Encode64(m_OutputBuffer, 0, m_ConId);
+            m_OutputBuffer[KcpConstants.Head_Size] = MsgChannel.Unreliable;
+            Array.Copy(buffer, offset, m_OutputBuffer, KcpConstants.Head_Size + 1, length);
+
+            if (m_Point == null)
+            {
+                m_Socket.Send(m_OutputBuffer, length + KcpConstants.Head_Size + 1, SocketFlags.None);
+            }
+            else
+            {
+                m_Socket.SendTo(m_OutputBuffer, length + KcpConstants.Head_Size + 1, SocketFlags.None, m_Point);
+            }
+
+            return length + KcpConstants.Head_Size + 1;
         }
 
         public int Recv(byte[] buffer, int offset, int length)
@@ -114,7 +135,6 @@ namespace Nice.Game.Base
                 {
                     return;
                 }
-
                 m_Dispose = true;
             }
 
@@ -154,7 +174,6 @@ namespace Nice.Game.Base
             {
                 return;
             }
-
             m_Kcp.Input(new Span<byte>(buffer, offset, length));
         }
         #endregion
