@@ -5,84 +5,82 @@ namespace Nice.Game.Base
 {
     public class ClientChannel : AbsChannel
     {
-        private byte m_Status;
+        private bool m_Dispose;
         private IClientCallback m_Callback;
-        private KcpUdpClient m_KcpUdpClient;
-
-        public ClientChannel()
-        {
-            m_Status = KcpUdpClient.None;
-        }
+        private ClientSocket m_SocketSocket;
 
         public override uint ChannelId
         {
-            get { return m_KcpUdpClient != null ? m_KcpUdpClient.ConId : 0; }
+            get { return !m_Dispose ? m_SocketSocket.ConId : 0; }
         }
 
         public override bool IsConnected
         {
-            get { return m_KcpUdpClient != null && m_KcpUdpClient.IsConnected; }
+            get { return !m_Dispose && m_SocketSocket.IsConnected; }
         }
 
         public override void Send(ushort cmd, ByteBuffer buffer, byte channel)
         {
-            if (m_KcpUdpClient != null)
+            if (m_Dispose)
             {
-                m_KcpUdpClient.Send(new Packet(cmd, buffer, channel));
+                return;
             }
+            m_SocketSocket.Send(new Packet(cmd, buffer, channel));
         }
 
         public override void Dispose()
         {
+            if (m_Dispose)
+            {
+                return;
+            }
+
             Disconnect();
+            m_Dispose = true;
             base.Dispose();
         }
 
         public override void Disconnect()
         {
             ClearHandlers();
-            m_Status = KcpUdpClient.None;
-            if (m_KcpUdpClient != null)
+            if (m_SocketSocket != null)
             {
-                m_KcpUdpClient.Dispose();
-                m_KcpUdpClient = null;
+                m_SocketSocket.Dispose();
+                m_SocketSocket = null;
             }
         }
 
         public override void Dispatcher()
         {
-            if (m_KcpUdpClient == null)
+            if (m_Dispose)
             {
                 return;
             }
-
             HandlePackets();
-            CheckConnectStatus();
         }
 
         public void Connect(string host, int port, IClientCallback callback)
         {
-            if (m_Status == KcpUdpClient.Connecting)
+            if (m_Dispose)
             {
                 return;
             }
-
             m_Callback = callback;
-            m_Status = KcpUdpClient.Connecting;
-            m_KcpUdpClient = new KcpUdpClient();
-            m_KcpUdpClient.Connect(host, port);
+            m_SocketSocket = new ClientSocket();
+            m_SocketSocket.Connect(host, port);
+            RegisterMessages();
         }
 
         private void HandlePackets()
         {
-            if (m_KcpUdpClient == null)
+            if (m_Dispose)
             {
                 return;
             }
 
             try
             {
-                while (m_KcpUdpClient.Recv(out Packet packet))
+                while (m_SocketSocket.Recv(out Packet packet))
                 {
                     Call(packet);
                 }
@@ -93,42 +91,20 @@ namespace Nice.Game.Base
             }
         }
 
-        private void CheckConnectStatus()
+        private void RegisterMessages()
         {
-            if (m_Status == KcpUdpClient.None)
-            {
-                return;
-            }
+            Register(ClientSocket.Success, OnConnectSuccess);
+            Register(ClientSocket.Error, OnConnectError);
+        }
 
-            if (m_Status == KcpUdpClient.Connecting)
-            {
-                if (m_KcpUdpClient.Status == KcpUdpClient.Success)
-                {
-                    m_Status = KcpUdpClient.Success;
-                    m_Callback.OnServerConnect(this);
-                }
-                else if (m_KcpUdpClient.Status == KcpUdpClient.Error)
-                {
-                    m_Status = KcpUdpClient.None;
-                    m_Callback.OnServerDisconnect(this);
-                    Disconnect();
-                }
-            }
-            else if (m_Status == KcpUdpClient.Error)
-            {
-                m_Status = KcpUdpClient.None;
-                m_Callback.OnServerDisconnect(this);
-                Disconnect();
-            }
-            else if (m_Status == KcpUdpClient.Success)
-            {
-                if (!m_KcpUdpClient.IsConnected)
-                {
-                    m_Status = KcpUdpClient.None;
-                    m_Callback.OnServerDisconnect(this);
-                    Disconnect();
-                }
-            }
+        private void OnConnectSuccess(ChannelMessage msg)
+        {
+            m_Callback.OnServerConnect(this);
+        }
+
+        private void OnConnectError(ChannelMessage msg)
+        {
+            m_Callback.OnServerDisconnect(this);
         }
     }
 }

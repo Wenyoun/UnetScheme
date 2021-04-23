@@ -10,12 +10,12 @@ namespace Nice.Game.Base
         private uint m_Conv;
         private uint m_ConId;
 
-        private KcpConn m_Con;
+        private KcpCon m_Con;
         private ServerHeartbeatProcessing m_Heartbeat;
         private ConcurrentQueue<Packet> m_RecvPacketQueue;
         private ConcurrentQueue<Packet> m_SendPackets;
 
-        public ServerChannel(KcpConn con)
+        public ServerChannel(KcpCon con)
         {
             m_Con = con;
             m_Conv = con.Conv;

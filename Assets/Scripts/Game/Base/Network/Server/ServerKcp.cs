@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using Net.KcpImpl;
 using UnityEngine;
 
 namespace Nice.Game.Base
@@ -16,7 +15,7 @@ namespace Nice.Game.Base
         void OnKcpDisconnect(IChannel channel);
     }
 
-    public class KcpUdpServer : IDisposable
+    public class ServerKcp : IDisposable
     {
         private bool m_Dispose;
         private Socket m_Socket;
@@ -24,7 +23,7 @@ namespace Nice.Game.Base
         private ConcurrentDictionary<uint, ServerChannel> m_Channels;
         private ServerDataProcessingCenter m_Process;
 
-        public KcpUdpServer()
+        public ServerKcp()
         {
             m_Dispose = false;
             m_Channels = new ConcurrentDictionary<uint, ServerChannel>();

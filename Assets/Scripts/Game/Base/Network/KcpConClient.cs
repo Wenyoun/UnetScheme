@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 
 namespace Nice.Game.Base {
-    public sealed class KcpConClient : KcpConn {
+    public sealed class KcpConClient : KcpCon {
         public KcpConClient(uint conId, uint conv, Socket socket) : base(conId, conv, socket, null) {
         }
 

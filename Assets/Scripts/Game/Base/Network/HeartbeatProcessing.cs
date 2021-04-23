@@ -25,13 +25,13 @@
             m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
-        public void OnUpdate(KcpUdpClient client, KcpConn con, long time)
+        public void OnUpdate(ClientSocket socket, KcpCon kcp, long time)
         {
             long current = time;
 
             if (current - m_RecvMills >= HeartbaetConstants.Timeout_Interval_Mills)
             {
-                client.Dispose();
+                socket.Dispose();
                 return;
             }
 
@@ -40,8 +40,8 @@
                 m_SendMills = current;
                 ByteWriteMemory write = new ByteWriteMemory(m_RawBuffer);
                 write.Write(KcpConstants.Flag_Heartbeat);
-                write.Write(con.Conv);
-                con.Send(m_RawBuffer, 0, 8);
+                write.Write(kcp.Conv);
+                kcp.Send(m_RawBuffer, 0, 8);
             }
         }
     }

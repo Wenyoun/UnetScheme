@@ -15,11 +15,11 @@ namespace Nice.Game.Base
             m_RecvBuffer = new byte[ushort.MaxValue / 2];
         }
 
-        public void RecvReliablePackets(KcpUdpClient client, KcpConn con, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
+        public void RecvReliablePackets(ClientSocket socket, KcpCon kcp, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
         {
             while (true)
             {
-                int size = con.Recv(m_RecvBuffer, 0, m_RecvBuffer.Length);
+                int size = kcp.Recv(m_RecvBuffer, 0, m_RecvBuffer.Length);
 
                 if (size <= 0)
                 {
@@ -31,7 +31,7 @@ namespace Nice.Game.Base
                     uint flag = KcpHelper.Decode32u(m_RecvBuffer, 0);
                     uint conv = KcpHelper.Decode32u(m_RecvBuffer, 4);
 
-                    if (conv == con.Conv)
+                    if (conv == kcp.Conv)
                     {
                         if (flag == KcpConstants.Flag_Heartbeat)
                         {
@@ -41,7 +41,7 @@ namespace Nice.Game.Base
 
                         if (flag == KcpConstants.Flag_Disconnect)
                         {
-                            client.Dispose();
+                            socket.Dispose();
                             continue;
                         }
                     }
@@ -57,7 +57,7 @@ namespace Nice.Game.Base
             PacketHandler.HandleRecv(rawBuffer, offset, count, packets);
         }
 
-        public void SendPackets(KcpConn con, ConcurrentQueue<Packet> packets)
+        public void SendPackets(KcpCon kcp, ConcurrentQueue<Packet> packets)
         {
             while (packets.TryDequeue(out Packet packet))
             {
@@ -66,11 +66,11 @@ namespace Nice.Game.Base
                 {
                     if (packet.Channel == MsgChannel.Reliable)
                     {
-                        con.Send(m_SendBuffer, 0, size);
+                        kcp.Send(m_SendBuffer, 0, size);
                     }
                     else if (packet.Channel == MsgChannel.Unreliable)
                     {
-                        con.RawSend(m_SendBuffer, 0, size);
+                        kcp.RawSend(m_SendBuffer, 0, size);
                     }
                 }
             }

@@ -6,7 +6,7 @@ using Net.KcpImpl;
 
 namespace Nice.Game.Base
 {
-    public abstract class KcpConn : IKcpCallback, IRentable, IDisposable
+    public abstract class KcpCon : IKcpCallback, IRentable, IDisposable
     {
         #region pool
         private class MemoryPool : IMemoryOwner<byte>
@@ -41,11 +41,11 @@ namespace Nice.Game.Base
         private bool m_IsConnected;
         private byte[] m_OutputBuffer;
 
-        protected KcpConn(uint conId, uint conv, Socket socket) : this(conId, conv, socket, null)
+        protected KcpCon(uint conId, uint conv, Socket socket) : this(conId, conv, socket, null)
         {
         }
 
-        protected KcpConn(uint conId, uint conv, Socket socket, EndPoint point)
+        protected KcpCon(uint conId, uint conv, Socket socket, EndPoint point)
         {
             m_Point = point;
             m_Socket = socket;
