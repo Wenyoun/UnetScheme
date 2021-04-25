@@ -9,14 +9,14 @@ namespace Nice.Game.Base
     {
         private bool m_Dispose;
         private IServerCallback m_Callback;
-        private ServerKcp m_serverKcp;
+        private ServerSocket m_Socket;
         private Dictionary<uint, IChannel> m_Channels;
         private ConcurrentQueue<WrapperChannel> m_WrapperChannels;
 
         public NetworkServer()
         {
             m_Dispose = false;
-            m_serverKcp = new ServerKcp();
+            m_Socket = new ServerSocket();
             m_Channels = new Dictionary<uint, IChannel>();
             m_WrapperChannels = new ConcurrentQueue<WrapperChannel>();
         }
@@ -30,7 +30,7 @@ namespace Nice.Game.Base
 
             m_Dispose = true;
             m_Channels.Clear();
-            m_serverKcp.Dispose();
+            m_Socket.Dispose();
 
             while (m_WrapperChannels.TryDequeue(out WrapperChannel channel))
             {
@@ -45,7 +45,7 @@ namespace Nice.Game.Base
             }
 
             m_Callback = callback;
-            m_serverKcp.Bind(port, new KcpConnect(OnKcpConnect, OnKcpDisconnect));
+            m_Socket.Bind(port, new KcpConnect(OnKcpConnect, OnKcpDisconnect));
         }
 
         public void CloseChannel(uint channelId)

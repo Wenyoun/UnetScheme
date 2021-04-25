@@ -58,7 +58,7 @@ namespace Nice.Game.Base
 
             if (m_RecvPacketQueue.TryDequeue(out Packet packet))
             {
-                Call(packet);
+                Invoke(packet);
             }
         }
 
@@ -79,7 +79,6 @@ namespace Nice.Game.Base
                 {
                     return;
                 }
-
                 m_Dispose = true;
             }
 

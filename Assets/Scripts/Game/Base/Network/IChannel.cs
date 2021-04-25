@@ -7,8 +7,8 @@ namespace Nice.Game.Base
 
     public struct ChannelMessage
     {
-        public ushort Cmd;
-        public ByteBuffer Buffer;
+        public readonly ushort Cmd;
+        public readonly ByteBuffer Buffer;
 
         public ChannelMessage(ushort cmd, ByteBuffer buffer)
         {
@@ -79,7 +79,7 @@ namespace Nice.Game.Base
             m_Handlers.Clear();
         }
 
-        protected void Call(Packet packet)
+        protected void Invoke(Packet packet)
         {
             if (m_Handlers.TryGetValue(packet.Cmd, out ChannelMessageDelegate handler))
             {

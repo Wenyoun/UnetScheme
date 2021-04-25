@@ -82,7 +82,7 @@ namespace Nice.Game.Base
             {
                 while (m_SocketSocket.Recv(out Packet packet))
                 {
-                    Call(packet);
+                    Invoke(packet);
                 }
             }
             catch (Exception e)

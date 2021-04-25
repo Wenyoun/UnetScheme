@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using UnityEngine;
 
 namespace Nice.Game.Base
 {
@@ -15,7 +14,7 @@ namespace Nice.Game.Base
         void OnKcpDisconnect(IChannel channel);
     }
 
-    public class ServerKcp : IDisposable
+    public class ServerSocket : IDisposable
     {
         private bool m_Dispose;
         private Socket m_Socket;
@@ -23,11 +22,12 @@ namespace Nice.Game.Base
         private ConcurrentDictionary<uint, ServerChannel> m_Channels;
         private ServerDataProcessingCenter m_Process;
 
-        public ServerKcp()
+        public ServerSocket()
         {
             m_Dispose = false;
+            m_Socket = null;
+            m_Connect = null;
             m_Channels = new ConcurrentDictionary<uint, ServerChannel>();
-            m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             m_Process = new ServerDataProcessingCenter();
         }
 
@@ -36,6 +36,7 @@ namespace Nice.Game.Base
             CheckDispose();
 
             m_Connect = connect;
+            m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             m_Socket.Bind(new IPEndPoint(IPAddress.Any, port));
 
             KcpHelper.CreateThread(UpdateKcpLooper);
@@ -49,7 +50,6 @@ namespace Nice.Game.Base
             {
                 return;
             }
-
             m_Dispose = true;
 
             using (IEnumerator<KeyValuePair<uint, ServerChannel>> its = m_Channels.GetEnumerator())
@@ -84,14 +84,14 @@ namespace Nice.Game.Base
                         continue;
                     }
 
-                    if (m_Dispose)
-                    {
+                    if (m_Dispose) {
+                        Logger.Error("ServerSocket已经被Dispose!");
                         break;
                     }
 
                     int count = m_Socket.ReceiveFrom(rawBuffer, SocketFlags.None, ref remote);
+                    
                     uint cid = (uint) remote.GetHashCode();
-
                     if (!m_Channels.TryGetValue(cid, out ServerChannel channel))
                     {
                         if (count == 4)
@@ -111,6 +111,8 @@ namespace Nice.Game.Base
                                     channel.Flush();
                                 }
                             }
+                        } else {
+                            Logger.Error($"未建立连接时收到不合法的包:size={count}");
                         }
                     }
                     else if (count > KcpConstants.Head_Size)
@@ -127,13 +129,15 @@ namespace Nice.Game.Base
                             {
                                 channel.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size, m_Process, packets);
                             }
+                        } else {
+                            Logger.Error($"client cid:{remoteCid} != server cid:{cid}");
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError(e.ToString());
+                Logger.Error(e.ToString());
             }
         }
 
@@ -181,7 +185,7 @@ namespace Nice.Game.Base
             }
             catch (Exception e)
             {
-                Debug.LogError(e.ToString());
+                Logger.Error(e.ToString());
             }
         }
 
@@ -211,7 +215,7 @@ namespace Nice.Game.Base
             }
             catch (Exception e)
             {
-                Debug.LogError(e.ToString());
+                Logger.Error(e.ToString());
             }
         }
 
