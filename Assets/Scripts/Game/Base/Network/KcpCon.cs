@@ -197,8 +197,8 @@ namespace Nice.Game.Base
             for (int i = 0; i < 5; ++i)
             {
                 Send(buffer, 0, 8);
-                Flush();
             }
+            Flush();
         }
         
         protected abstract void OnSendData(byte[] data, int offset, int size);

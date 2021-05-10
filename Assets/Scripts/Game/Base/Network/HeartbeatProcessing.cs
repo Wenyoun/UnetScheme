@@ -55,11 +55,6 @@
             m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
-        public void UpdateHeartbeat()
-        {
-            m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
-        }
-
         public void UpdateHeartbeat(ServerChannel channel, byte[] rawBuffer, int offset, int length)
         {
             m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();

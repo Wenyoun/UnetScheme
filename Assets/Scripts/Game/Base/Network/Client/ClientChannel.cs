@@ -1,110 +1,100 @@
 ﻿using System;
-using UnityEngine;
 
-namespace Nice.Game.Base
-{
-    public class ClientChannel : AbsChannel
-    {
+namespace Nice.Game.Base {
+    public class ClientChannel : AbsChannel {
         private bool m_Dispose;
-        private IClientCallback m_Callback;
-        private ClientSocket m_SocketSocket;
+        private ClientSocket m_Socket;
+        private IClientConnect m_Connect;
 
-        public override uint ChannelId
-        {
-            get { return !m_Dispose ? m_SocketSocket.ConId : 0; }
+        public override uint ChannelId {
+            get { return !m_Dispose ? m_Socket.ConId : 0; }
         }
 
-        public override bool IsConnected
-        {
-            get { return !m_Dispose && m_SocketSocket.IsConnected; }
+        public override bool IsConnected {
+            get { return !m_Dispose && m_Socket.IsConnected; }
         }
 
-        public override void Send(ushort cmd, ByteBuffer buffer, byte channel)
-        {
-            if (m_Dispose)
-            {
+        public override void Send(ushort cmd, ByteBuffer buffer, byte channel) {
+            if (m_Dispose || !m_Socket.IsConnected) {
                 return;
             }
-            m_SocketSocket.Send(new Packet(cmd, buffer, channel));
+            m_Socket.Send(new Packet(cmd, buffer, channel));
         }
 
-        public override void Dispose()
-        {
-            if (m_Dispose)
-            {
+        public override void Dispose() {
+            if (m_Dispose) {
                 return;
             }
-
-            Disconnect();
             m_Dispose = true;
-            base.Dispose();
+            Disconnect();
+            m_Connect = null;
+            m_Socket = null;
         }
 
-        public override void Disconnect()
-        {
+        public override void Disconnect() {
             ClearHandlers();
-            if (m_SocketSocket != null)
-            {
-                m_SocketSocket.Dispose();
-                m_SocketSocket = null;
+            if (m_Socket != null) {
+                m_Socket.Dispose();
             }
         }
 
-        public override void Dispatcher()
-        {
-            if (m_Dispose)
-            {
+        public override void OnUpdate() {
+            if (m_Dispose) {
                 return;
             }
-            HandlePackets();
+
+            m_Socket.OnUpdate();
+            while (m_Socket.Recv(out Packet packet)) {
+                try {
+                    Invoke(packet);
+                } catch (Exception e) {
+                    Logger.Error(e.ToString());
+                }
+            }
         }
 
-        public void Connect(string host, int port, IClientCallback callback)
-        {
-            if (m_Dispose)
-            {
+        public void SetConnect(IClientConnect connect) {
+            m_Connect = connect;
+        }
+
+        public void Connect(string host, int port) {
+            if (m_Dispose) {
                 return;
             }
-            m_Callback = callback;
-            m_SocketSocket = new ClientSocket();
-            m_SocketSocket.Connect(host, port);
+            m_Socket = new ClientSocket();
+            m_Socket.Connect(host, port);
             RegisterMessages();
         }
 
-        private void HandlePackets()
-        {
-            if (m_Dispose)
-            {
-                return;
-            }
+        private void RegisterMessages() {
+            m_Socket.Register(ClientSocket.Msg_Timeout, OnTimeout);
+            m_Socket.Register(ClientSocket.Msg_Error, OnError);
+            m_Socket.Register(ClientSocket.Msg_Success, OnSuccess);
+            m_Socket.Register(ClientSocket.Msg_Disconnect, OnDisconnect);
+        }
 
-            try
-            {
-                while (m_SocketSocket.Recv(out Packet packet))
-                {
-                    Invoke(packet);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e.ToString());
+        private void OnTimeout() {
+            if (m_Connect != null) {
+                m_Connect.OnTimeout(this);
             }
         }
 
-        private void RegisterMessages()
-        {
-            Register(ClientSocket.Success, OnConnectSuccess);
-            Register(ClientSocket.Error, OnConnectError);
+        private void OnError() {
+            if (m_Connect != null) {
+                m_Connect.OnError(this);
+            }
         }
 
-        private void OnConnectSuccess(ChannelMessage msg)
-        {
-            m_Callback.OnServerConnect(this);
+        private void OnSuccess() {
+            if (m_Connect != null) {
+                m_Connect.OnConnect(this);
+            }
         }
 
-        private void OnConnectError(ChannelMessage msg)
-        {
-            m_Callback.OnServerDisconnect(this);
+        private void OnDisconnect() {
+            if (m_Connect != null) {
+                m_Connect.OnDisconnect(this);
+            }
         }
     }
 }

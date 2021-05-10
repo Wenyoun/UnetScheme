@@ -4,12 +4,12 @@ using System.Collections.Concurrent;
 
 namespace Nice.Game.Base
 {
-    internal class ClientDataProcessingCenter
+    internal class ClientDataProcessing
     {
         private byte[] m_SendBuffer;
         private byte[] m_RecvBuffer;
 
-        public ClientDataProcessingCenter()
+        public ClientDataProcessing()
         {
             m_SendBuffer = new byte[ushort.MaxValue / 2];
             m_RecvBuffer = new byte[ushort.MaxValue / 2];
@@ -28,9 +28,10 @@ namespace Nice.Game.Base
 
                 if (size == 8)
                 {
-                    uint flag = KcpHelper.Decode32u(m_RecvBuffer, 0);
-                    uint conv = KcpHelper.Decode32u(m_RecvBuffer, 4);
-
+                    ByteReadMemory memory = new ByteReadMemory(m_RecvBuffer, 0, 8);
+                    uint flag = memory.ReadUInt();
+                    uint conv = memory.ReadUInt();
+                    
                     if (conv == kcp.Conv)
                     {
                         if (flag == KcpConstants.Flag_Heartbeat)
@@ -51,9 +52,8 @@ namespace Nice.Game.Base
             }
         }
 
-        public void RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, List<Packet> packets, ClientHeartbeatProcessing heartbeat)
+        public void RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, List<Packet> packets)
         {
-            heartbeat.UpdateHeartbeat();
             PacketHandler.HandleRecv(rawBuffer, offset, count, packets);
         }
 
@@ -77,12 +77,12 @@ namespace Nice.Game.Base
         }
     }
 
-    internal class ServerDataProcessingCenter
+    internal class ServerDataProcessing
     {
         private byte[] m_SendBuffer;
         private byte[] m_RecvBuffer;
 
-        public ServerDataProcessingCenter()
+        public ServerDataProcessing()
         {
             m_SendBuffer = new byte[ushort.MaxValue / 2];
             m_RecvBuffer = new byte[ushort.MaxValue / 2];
@@ -101,8 +101,9 @@ namespace Nice.Game.Base
 
                 if (size == 8)
                 {
-                    uint flag = KcpHelper.Decode32u(m_RecvBuffer, 0);
-                    uint conv = KcpHelper.Decode32u(m_RecvBuffer, 4);
+                    ByteReadMemory memory = new ByteReadMemory(m_RecvBuffer, 0, 8);
+                    uint flag = memory.ReadUInt();
+                    uint conv = memory.ReadUInt();
 
                     if (conv == channel.Conv)
                     {

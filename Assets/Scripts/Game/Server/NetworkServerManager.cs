@@ -50,7 +50,8 @@ namespace Nice.Game.Server
             {
                 return;
             }
-            m_Network.Bind(port, new ServerCallback());
+            m_Network.SetConnect(new ServerConnect());
+            m_Network.Bind(port);
         }
 
         public static void Send(Connection connection, ushort cmd, ByteBuffer buffer)
@@ -119,14 +120,14 @@ namespace Nice.Game.Server
             connection.RegisterProtocol<ServerProtocolHandler>();
         }
 
-        private class ServerCallback : IServerCallback
+        private class ServerConnect : IServerConnect
         {
-            public void OnClientConnect(IChannel channel)
+            public void OnConnect(IChannel channel)
             {
                 AddChannel(channel);
             }
 
-            public void OnClientDisconnect(IChannel channel)
+            public void OnDisconnect(IChannel channel)
             {
                 RemoveChannel(channel);
             }

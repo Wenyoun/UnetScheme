@@ -8,7 +8,7 @@ namespace Nice.Game.Base
     public class NetworkServer : IDisposable
     {
         private bool m_Dispose;
-        private IServerCallback m_Callback;
+        private IServerConnect m_Connect;
         private ServerSocket m_Socket;
         private Dictionary<uint, IChannel> m_Channels;
         private ConcurrentQueue<WrapperChannel> m_WrapperChannels;
@@ -37,14 +37,17 @@ namespace Nice.Game.Base
             }
         }
 
-        public void Bind(int port, IServerCallback callback)
+        public void SetConnect(IServerConnect connect) {
+            m_Connect = connect;
+        }
+
+        public void Bind(int port)
         {
             if (m_Dispose)
             {
                 return;
             }
 
-            m_Callback = callback;
             m_Socket.Bind(port, new KcpConnect(OnKcpConnect, OnKcpDisconnect));
         }
 
@@ -99,7 +102,7 @@ namespace Nice.Game.Base
             {
                 while (its.MoveNext())
                 {
-                    its.Current.Value.Dispatcher();
+                    its.Current.Value.OnUpdate();
                 }
             }
         }
@@ -115,7 +118,7 @@ namespace Nice.Game.Base
                     if (!m_Channels.ContainsKey(channel.ChannelId))
                     {
                         m_Channels.Add(channel.ChannelId, channel);
-                        m_Callback?.OnClientConnect(channel);
+                        m_Connect?.OnConnect(channel);
                     }
                 }
                 else if (wrapper.Status == Status.Remove)
@@ -123,7 +126,7 @@ namespace Nice.Game.Base
                     if (m_Channels.ContainsKey(channel.ChannelId))
                     {
                         m_Channels.Remove(channel.ChannelId);
-                        m_Callback?.OnClientDisconnect(channel);
+                        m_Connect?.OnDisconnect(channel);
                     }
                 }
             }

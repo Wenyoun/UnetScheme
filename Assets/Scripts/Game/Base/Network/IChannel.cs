@@ -7,12 +7,10 @@ namespace Nice.Game.Base
 
     public struct ChannelMessage
     {
-        public readonly ushort Cmd;
         public readonly ByteBuffer Buffer;
 
-        public ChannelMessage(ushort cmd, ByteBuffer buffer)
+        public ChannelMessage(ByteBuffer buffer)
         {
-            Cmd = cmd;
             Buffer = buffer;
         }
     }
@@ -25,7 +23,7 @@ namespace Nice.Game.Base
 
         void Send(ushort cmd, ByteBuffer buffer, byte channel);
 
-        void Dispatcher();
+        void OnUpdate();
 
         void Disconnect();
 
@@ -64,7 +62,7 @@ namespace Nice.Game.Base
             ClearHandlers();
         }
 
-        public abstract void Dispatcher();
+        public abstract void OnUpdate();
 
         public abstract void Disconnect();
 
@@ -83,7 +81,7 @@ namespace Nice.Game.Base
         {
             if (m_Handlers.TryGetValue(packet.Cmd, out ChannelMessageDelegate handler))
             {
-                handler.Invoke(new ChannelMessage(packet.Cmd, packet.Buffer));
+                handler.Invoke(new ChannelMessage(packet.Buffer));
             }
         }
     }

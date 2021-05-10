@@ -1,18 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 namespace Nice.Game.Base
 {
     public class ServerChannel : AbsChannel
     {
-        private bool m_Close;
         private bool m_Dispose;
         private uint m_Conv;
         private uint m_ConId;
 
         private KcpCon m_Con;
         private ServerHeartbeatProcessing m_Heartbeat;
-        private ConcurrentQueue<Packet> m_RecvPacketQueue;
+        private ConcurrentQueue<Packet> m_RecvPackets;
         private ConcurrentQueue<Packet> m_SendPackets;
 
         public ServerChannel(KcpCon con)
@@ -21,11 +21,10 @@ namespace Nice.Game.Base
             m_Conv = con.Conv;
             m_ConId = con.ConId;
 
-            m_Close = false;
             m_Dispose = false;
 
             m_Heartbeat = new ServerHeartbeatProcessing();
-            m_RecvPacketQueue = new ConcurrentQueue<Packet>();
+            m_RecvPackets = new ConcurrentQueue<Packet>();
             m_SendPackets = new ConcurrentQueue<Packet>();
         }
 
@@ -41,24 +40,23 @@ namespace Nice.Game.Base
 
         public override void Disconnect()
         {
-            if (m_Dispose)
-            {
-                return;
-            }
-
-            m_Close = true;
+            Dispose();
         }
 
-        public override void Dispatcher()
+        public override void OnUpdate()
         {
             if (m_Dispose)
             {
                 return;
             }
 
-            if (m_RecvPacketQueue.TryDequeue(out Packet packet))
+            if (m_RecvPackets.TryDequeue(out Packet packet))
             {
-                Invoke(packet);
+                try {
+                    Invoke(packet);
+                } catch (Exception e) {
+                    Logger.Error(e.ToString());
+                }
             }
         }
 
@@ -88,7 +86,7 @@ namespace Nice.Game.Base
             m_Con.Dispose();
 
             m_SendPackets.Clear();
-            m_RecvPacketQueue.Clear();
+            m_RecvPackets.Clear();
         }
 
         #region internal method
@@ -140,19 +138,16 @@ namespace Nice.Game.Base
             m_Con.Flush();
         }
 
-        internal void ProcessSendPackets(ServerDataProcessingCenter process)
-        {
-            if (m_Dispose)
-            {
+        internal void OnUpdate(ServerDataProcessing process) {
+            if (m_Dispose) {
                 return;
             }
-
             process.SendPackets(this, m_SendPackets);
-
             m_Con.Update(TimeUtil.Get1970ToNowMilliseconds());
+            m_Heartbeat.OnUpdate(this);
         }
-
-        internal void RecvReliablePackets(ServerDataProcessingCenter process, List<Packet> packets, IKcpConnect connect)
+        
+        internal void RecvReliablePackets(ServerDataProcessing process, List<Packet> packets, IKcpConnect connect)
         {
             if (m_Dispose)
             {
@@ -165,7 +160,7 @@ namespace Nice.Game.Base
             }
         }
 
-        internal void RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, ServerDataProcessingCenter process, List<Packet> packets)
+        internal void RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, ServerDataProcessing process, List<Packet> packets)
         {
             if (m_Dispose)
             {
@@ -187,29 +182,27 @@ namespace Nice.Game.Base
 
             m_Con.IsConnected = status;
         }
-
+        
         internal uint Conv
         {
             get { return m_Conv; }
         }
 
-        internal bool IsClose
+        internal bool IsDispose 
         {
-            get { return m_Dispose || m_Close; }
+            get { return m_Dispose; }
         }
         #endregion
 
-        private void HandlePackets(List<Packet> packets)
-        {
-            if (packets.Count > 0)
+        private void HandlePackets(List<Packet> packets) {
+            int length = packets.Count;
+            if (length > 0)
             {
-                m_Heartbeat.UpdateHeartbeat();
-                for (int i = 0; i < packets.Count; ++i)
+                for (int i = 0; i < length; ++i)
                 {
-                    m_RecvPacketQueue.Enqueue(packets[i]);
+                    m_RecvPackets.Enqueue(packets[i]);
                 }
                 packets.Clear();
-                m_Heartbeat.OnUpdate(this);
             }
         }
     }
