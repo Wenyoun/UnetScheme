@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Threading;
 
 namespace Nice.Game.Base {
-    public class ClientSocket : IDisposable {
+    public class ClientSocket {
         internal const byte Msg_Timeout = 0;
         internal const byte Msg_Error = 1;
         internal const byte Msg_Success = 2;
@@ -17,19 +17,16 @@ namespace Nice.Game.Base {
         private const byte Connecting = 2;
 
         private uint m_ConId;
-        private byte m_Status;
         private bool m_Dispose;
+        private volatile byte m_Status;
 
         private KcpCon m_Kcp;
         private Socket m_Socket;
 
+        private SimpleRegister m_Register;
         private ConcurrentQueue<Packet> m_SendPackets;
         private ConcurrentQueue<Packet> m_RecvPackets;
 
-        private ClientDataProcessing m_DataProcess;
-        private ClientHeartbeatProcessing m_Heartbeat;
-
-        private SimpleRegister m_Register;
 
         public ClientSocket() {
             m_ConId = 0;
@@ -39,13 +36,9 @@ namespace Nice.Game.Base {
             m_Kcp = null;
             m_Socket = null;
 
+            m_Register = new SimpleRegister();
             m_SendPackets = new ConcurrentQueue<Packet>();
             m_RecvPackets = new ConcurrentQueue<Packet>();
-
-            m_DataProcess = new ClientDataProcessing();
-            m_Heartbeat = new ClientHeartbeatProcessing();
-
-            m_Register = new SimpleRegister();
         }
 
         public void Dispose() {
@@ -56,21 +49,38 @@ namespace Nice.Game.Base {
                 m_Dispose = true;
             }
 
-            if (m_Kcp != null) {
-                m_Kcp.SendDisconnect();
-            }
-
             m_ConId = 0;
             m_Status = None;
             m_SendPackets.Clear();
             m_RecvPackets.Clear();
 
-            KcpDispose();
-            SocketDispose();
-            RegisterDispose();
+            if (m_Kcp != null) {
+                m_Kcp.Dispose();
+            }
+
+            if (m_Socket != null) {
+                m_Socket.Close();
+            }
+
+            if (m_Register != null) {
+                m_Register.Dispose();
+            }
+        }
+
+        public void Disconnect() {
+            if (m_Dispose || m_Status != Success) {
+                return;
+            }
+
+            m_Status = None;
+            m_Kcp.SendDisconnect();
         }
 
         public void Connect(string host, int port) {
+            if (m_Dispose) {
+                throw new ObjectDisposedException("ClientSocket already dispose!");
+            }
+
             if (IsConnected) {
                 Logger.Error($"已连接 {host}:{port}");
                 return;
@@ -135,7 +145,7 @@ namespace Nice.Game.Base {
                         time += tick;
                         if (time >= timeout) {
                             m_Register.Notify(Msg_Timeout);
-                            Logger.Error($"connect timeout host={obj.ToString()}");
+                            Logger.Error($"connect timeout host={obj}");
                             break;
                         }
                         continue;
@@ -167,103 +177,66 @@ namespace Nice.Game.Base {
                                 m_Status = Success;
                                 m_Register.Notify(Msg_Success);
 
-                                KcpHelper.CreateThread(UpdateKcpLooper);
-                                KcpHelper.CreateThread(RecvUdpDataLooper);
+                                KcpHelper.CreateThread(OnHandleLooper);
                                 break;
                             }
                         }
                     }
                 }
             } catch (Exception e) {
+                Logger.Error("OnConnectLooper: " + e);
                 m_Register.Notify(Msg_Error);
             }
         }
 
-        private void RecvUdpDataLooper(object obj) {
+        private void OnHandleLooper(object obj) {
             try {
-                const int pollTimeout = 10000;
                 List<Packet> packets = new List<Packet>();
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
+                ClientDataProcessing dataProcess = new ClientDataProcessing();
+                ClientHeartbeatProcessing heartbeat = new ClientHeartbeatProcessing();
 
                 while (!m_Dispose && m_Status == Success) {
-                    if (!m_Socket.Poll(pollTimeout, SelectMode.SelectRead)) {
-                        continue;
-                    }
+                    dataProcess.SendPackets(m_Kcp, m_SendPackets);
+                    long time = TimeUtil.Get1970ToNowMilliseconds();
+                    m_Kcp.OnUpdate(time);
+                    heartbeat.OnUpdate(this, m_Kcp, time);
 
-                    if (m_Dispose || m_Status != Success) {
-                        break;
-                    }
+                    while (m_Socket.Poll(0, SelectMode.SelectRead)) {
+                        int count = m_Socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
 
-                    int count = m_Socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
+                        if (count > KcpConstants.Head_Size) {
+                            uint remoteCid = KcpHelper.Decode32u(rawBuffer, 0);
+                            if (remoteCid == m_Kcp.ConId) {
+                                byte msgChannel = rawBuffer[KcpConstants.Conv_Size];
 
-                    if (count > KcpConstants.Head_Size) {
-                        uint remoteCid = KcpHelper.Decode32u(rawBuffer, 0);
-                        if (remoteCid == m_Kcp.ConId) {
-                            byte msgChannel = rawBuffer[KcpConstants.Conv_Size];
-
-                            if (msgChannel == MsgChannel.Reliable) {
-                                m_Kcp.Input(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size);
-                                m_DataProcess.RecvReliablePackets(this, m_Kcp, packets, m_Heartbeat);
-                            } else if (msgChannel == MsgChannel.Unreliable) {
-                                m_DataProcess.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size, packets);
-                            }
-
-                            int length = packets.Count;
-                            if (length > 0) {
-                                for (int i = 0; i < length; ++i) {
-                                    m_RecvPackets.Enqueue(packets[i]);
+                                if (msgChannel == MsgChannel.Reliable) {
+                                    m_Kcp.Input(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size);
+                                    dataProcess.RecvReliablePackets(this, m_Kcp, packets, heartbeat);
+                                } else if (msgChannel == MsgChannel.Unreliable) {
+                                    dataProcess.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size, packets);
                                 }
-                                packets.Clear();
+
+                                int length = packets.Count;
+                                if (length > 0) {
+                                    for (int i = 0; i < length; ++i) {
+                                        m_RecvPackets.Enqueue(packets[i]);
+                                    }
+                                    packets.Clear();
+                                }
                             }
                         }
-                    }
-                }
-            } catch (Exception e) {
-                Logger.Error("RecvUdpDataLooper: " + e.ToString());
-                if (!m_Dispose && m_Status == Success) {
-                    m_Register.Notify(Msg_Disconnect);
-                }
-            }
-        }
-
-        private void UpdateKcpLooper(object obj) {
-            try {
-                while (!m_Dispose && m_Status == Success) {
-                    m_DataProcess.SendPackets(m_Kcp, m_SendPackets);
-
-                    long time = TimeUtil.Get1970ToNowMilliseconds();
-                    m_Kcp.Update(time);
-                    m_Heartbeat.OnUpdate(this, m_Kcp, time);
-
-                    if (m_Dispose || m_Status != Success) {
-                        break;
                     }
 
                     Thread.Sleep(5);
                 }
             } catch (Exception e) {
-                Logger.Error("UpdateKcpLooper: " + e.ToString());
-            }
-        }
-
-        private void KcpDispose() {
-            if (m_Kcp != null) {
-                m_Kcp.Dispose();
-                m_Kcp = null;
-            }
-        }
-
-        private void SocketDispose() {
-            if (m_Socket != null) {
-                m_Socket.Close();
-                m_Socket = null;
-            }
-        }
-
-        private void RegisterDispose() {
-            if (m_Register != null) {
-                m_Register.Dispose();
-                m_Register = null;
+                Logger.Error("RecvUdpDataLooper: " + e);
+                if (!m_Dispose && m_Status == Success) {
+                    m_Register.Notify(Msg_Disconnect);
+                }
+            } finally {
+                Dispose();
             }
         }
 
@@ -288,20 +261,20 @@ namespace Nice.Game.Base {
 
         private class SimpleRegister : IDisposable {
             private Action[] m_Handlers;
-            private ConcurrentQueue<byte> m_Msg;
+            private ConcurrentQueue<byte> m_Queue;
 
             public SimpleRegister() {
                 m_Handlers = new Action[4];
-                m_Msg = new ConcurrentQueue<byte>();
+                m_Queue = new ConcurrentQueue<byte>();
             }
 
             public void Dispose() {
-                m_Msg = null;
+                m_Queue = null;
                 m_Handlers = null;
             }
 
             public void Notify(byte id) {
-                m_Msg.Enqueue(id);
+                m_Queue.Enqueue(id);
             }
 
             public void Register(byte id, Action handler) {
@@ -312,7 +285,7 @@ namespace Nice.Game.Base {
             }
 
             public void OnUpdate() {
-                while (m_Msg.TryDequeue(out byte id)) {
+                while (m_Queue.TryDequeue(out byte id)) {
                     if (id >= m_Handlers.Length) {
                         continue;
                     }

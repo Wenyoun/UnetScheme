@@ -42,26 +42,26 @@ namespace Nice.Game.Base
 
                         if (flag == KcpConstants.Flag_Disconnect)
                         {
-                            socket.Dispose();
+                            socket.Disconnect();
                             continue;
                         }
                     }
                 }
 
-                PacketHandler.HandleRecv(m_RecvBuffer, 0, size, packets);
+                PacketHandler.Recv(m_RecvBuffer, 0, size, packets);
             }
         }
 
         public void RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, List<Packet> packets)
         {
-            PacketHandler.HandleRecv(rawBuffer, offset, count, packets);
+            PacketHandler.Recv(rawBuffer, offset, count, packets);
         }
 
         public void SendPackets(KcpCon kcp, ConcurrentQueue<Packet> packets)
         {
             while (packets.TryDequeue(out Packet packet))
             {
-                int size = PacketHandler.HandleSend(m_SendBuffer, packet);
+                int size = PacketHandler.Send(m_SendBuffer, packet);
                 if (size > 0)
                 {
                     if (packet.Channel == MsgChannel.Reliable)
@@ -130,7 +130,7 @@ namespace Nice.Game.Base
                     }
                 }
 
-                PacketHandler.HandleRecv(m_RecvBuffer, 0, size, packets);
+                PacketHandler.Recv(m_RecvBuffer, 0, size, packets);
             }
 
             return packets.Count > 0;
@@ -138,7 +138,7 @@ namespace Nice.Game.Base
 
         public bool RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, List<Packet> packets)
         {
-            PacketHandler.HandleRecv(rawBuffer, offset, count, packets);
+            PacketHandler.Recv(rawBuffer, offset, count, packets);
             return packets.Count > 0;
         }
 
@@ -146,7 +146,7 @@ namespace Nice.Game.Base
         {
             while (packets.TryDequeue(out Packet packet))
             {
-                int size = PacketHandler.HandleSend(m_SendBuffer, packet);
+                int size = PacketHandler.Send(m_SendBuffer, packet);
                 if (size > 0)
                 {
                     if (packet.Channel == MsgChannel.Reliable)
@@ -168,7 +168,7 @@ namespace Nice.Game.Base
         private const int MsgLength = 2;
         private const int CmdMsgLength = CmdLength + MsgLength;
 
-        public static int HandleSend(byte[] buffer, Packet packet)
+        public static int Send(byte[] buffer, Packet packet)
         {
             //消息格式
             //2字节消息类型，2字节消息长度，N字节消数据
@@ -195,7 +195,7 @@ namespace Nice.Game.Base
         }
 
 
-        public static void HandleRecv(byte[] data, int offset, int size, List<Packet> packets)
+        public static void Recv(byte[] data, int offset, int size, List<Packet> packets)
         {
             //消息格式
             //2字节消息类型，2字节消息长度，N字节消息数据

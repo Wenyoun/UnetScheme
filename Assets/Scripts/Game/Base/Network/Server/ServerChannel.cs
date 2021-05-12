@@ -143,7 +143,7 @@ namespace Nice.Game.Base
                 return;
             }
             process.SendPackets(this, m_SendPackets);
-            m_Con.Update(TimeUtil.Get1970ToNowMilliseconds());
+            m_Con.OnUpdate(TimeUtil.Get1970ToNowMilliseconds());
             m_Heartbeat.OnUpdate(this);
         }
         

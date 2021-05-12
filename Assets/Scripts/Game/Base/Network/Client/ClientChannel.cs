@@ -25,17 +25,18 @@ namespace Nice.Game.Base {
             if (m_Dispose) {
                 return;
             }
+            ClearHandlers();
+            m_Socket.Dispose();
             m_Dispose = true;
-            Disconnect();
-            m_Connect = null;
             m_Socket = null;
+            m_Connect = null;
         }
 
         public override void Disconnect() {
-            ClearHandlers();
-            if (m_Socket != null) {
-                m_Socket.Dispose();
+            if (m_Dispose) {
+                return;
             }
+            m_Socket.Disconnect();
         }
 
         public override void OnUpdate() {
@@ -54,6 +55,9 @@ namespace Nice.Game.Base {
         }
 
         public void SetConnect(IClientConnect connect) {
+            if (m_Dispose) {
+                return;
+            }
             m_Connect = connect;
         }
 

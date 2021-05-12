@@ -31,7 +31,7 @@
 
             if (current - m_RecvMills >= HeartbaetConstants.Timeout_Interval_Mills)
             {
-                socket.Dispose();
+                socket.Disconnect();
                 return;
             }
 
