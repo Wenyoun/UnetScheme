@@ -4,53 +4,115 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using UnityEngine;
 
 namespace Nice.Game.Base {
-    public class ClientSocket {
-        internal const byte Msg_Timeout = 0;
-        internal const byte Msg_Error = 1;
-        internal const byte Msg_Success = 2;
-        internal const byte Msg_Disconnect = 3;
+    internal enum Msg {
+        Timeout = 0,
+        Error = 1,
+        Success = 2,
+        Disconnect = 3,
+    }
 
-        private const byte None = 0;
-        private const byte Success = 1;
-        private const byte Connecting = 2;
+    internal enum Status {
+        None = 0,
+        Error = 1,
+        Timeout = 2,
+        Success = 3,
+        Disconnect = 4,
+        Connecting = 5
+    }
 
+    internal class CRegister : IDisposable {
+        private bool m_Dispose;
+        private Action[] m_Handlers;
+        private ConcurrentQueue<byte> m_Queue;
+
+        public CRegister() {
+            m_Dispose = false;
+            m_Handlers = new Action[4];
+            m_Queue = new ConcurrentQueue<byte>();
+        }
+
+        public void Dispose() {
+            m_Dispose = true;
+            m_Queue = null;
+            m_Handlers = null;
+        }
+
+        public void Notify(Msg msg) {
+            if (m_Dispose) {
+                return;
+            }
+            byte id = (byte) msg;
+            m_Queue.Enqueue(id);
+        }
+
+        public void Register(Msg msg, Action handler) {
+            if (m_Dispose) {
+                return;
+            }
+            byte id = (byte) msg;
+            if (id >= m_Handlers.Length) {
+                return;
+            }
+            m_Handlers[id] = handler;
+        }
+
+        public void OnUpdate() {
+            if (m_Dispose) {
+                return;
+            }
+
+            if (m_Queue.TryDequeue(out byte id)) {
+                if (id >= m_Handlers.Length) {
+                    return;
+                }
+                try {
+                    Action handler = m_Handlers[id];
+                    if (handler != null) {
+                        handler.Invoke();
+                    }
+                } catch (Exception e) {
+                    Logger.Error(e.ToString());
+                }
+            }
+        }
+    }
+
+    public class ClientTransport {
         private uint m_ConId;
         private bool m_Dispose;
-        private volatile byte m_Status;
+        private volatile Status m_Status;
 
         private KcpCon m_Kcp;
         private Socket m_Socket;
 
-        private SimpleRegister m_Register;
+        private CRegister m_Register;
         private ConcurrentQueue<Packet> m_SendPackets;
         private ConcurrentQueue<Packet> m_RecvPackets;
 
-
-        public ClientSocket() {
+        public ClientTransport() {
             m_ConId = 0;
-            m_Status = None;
+            m_Status = Status.None;
             m_Dispose = false;
 
             m_Kcp = null;
             m_Socket = null;
 
-            m_Register = new SimpleRegister();
+            m_Register = new CRegister();
             m_SendPackets = new ConcurrentQueue<Packet>();
             m_RecvPackets = new ConcurrentQueue<Packet>();
         }
 
         public void Dispose() {
-            lock (this) {
-                if (m_Dispose) {
-                    return;
-                }
-                m_Dispose = true;
+            if (m_Dispose) {
+                return;
             }
 
+            m_Dispose = true;
             m_ConId = 0;
-            m_Status = None;
+            m_Status = Status.None;
             m_SendPackets.Clear();
             m_RecvPackets.Clear();
 
@@ -67,13 +129,15 @@ namespace Nice.Game.Base {
             }
         }
 
-        public void Disconnect() {
-            if (m_Dispose || m_Status != Success) {
+        public void Disconnect(bool send, bool force) {
+            if (m_Dispose) {
                 return;
             }
 
-            m_Status = None;
-            m_Kcp.SendDisconnect();
+            m_Status = force ? Status.Disconnect : Status.None;
+            if (send) {
+                m_Kcp.SendDisconnect();
+            }
         }
 
         public void Connect(string host, int port) {
@@ -86,17 +150,17 @@ namespace Nice.Game.Base {
                 return;
             }
 
-            if (m_Status == Connecting) {
+            if (m_Status == Status.Connecting) {
                 Logger.Error($"正在连接中 {host}:{port}");
                 return;
             }
 
-            m_Status = Connecting;
+            m_Status = Status.Connecting;
 
             IPAddress[] addresses = Dns.GetHostAddresses(host);
 
             if (addresses.Length < 1) {
-                throw new KcpClientException($"不能解析的地址:{host}");
+                throw new ArgumentException($"不能解析的地址:{host}");
             }
 
             IPEndPoint point = new IPEndPoint(addresses[0], port);
@@ -124,28 +188,41 @@ namespace Nice.Game.Base {
         }
 
         public bool IsConnected {
-            get { return m_Status == Success; }
+            get { return m_Status == Status.Success; }
         }
 
-        private void OnConnectLooper(object obj) {
+        internal void OnUpdate() {
+            if (m_Dispose) {
+                return;
+            }
+            m_Register.OnUpdate();
+        }
+
+        internal void Register(Msg id, Action handler) {
+            if (m_Dispose) {
+                return;
+            }
+            m_Register.Register(id, handler);
+        }
+
+        private void OnConnectLooper(object point) {
             try {
                 int time = 0;
                 const int tick = 100;
                 const int timeout = 5000;
-                const int pollTimeout = 10000;
+                const int pollTimeout = 100000;
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
 
-                m_Socket.Connect((EndPoint) obj);
+                m_Socket.Connect((EndPoint) point);
 
-                while (!m_Dispose && m_Status == Connecting) {
+                while (!m_Dispose && m_Status == Status.Connecting) {
                     int size = KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
                     m_Socket.Send(rawBuffer, 0, size, SocketFlags.None);
 
                     if (!m_Socket.Poll(pollTimeout, SelectMode.SelectRead)) {
                         time += tick;
                         if (time >= timeout) {
-                            m_Register.Notify(Msg_Timeout);
-                            Logger.Error($"connect timeout host={obj}");
+                            m_Status = Status.Timeout;
                             break;
                         }
                         continue;
@@ -174,8 +251,8 @@ namespace Nice.Game.Base {
                                 m_Kcp.Flush();
 
                                 m_ConId = cid;
-                                m_Status = Success;
-                                m_Register.Notify(Msg_Success);
+                                m_Status = Status.Success;
+                                m_Register.Notify(Msg.Success);
 
                                 KcpHelper.CreateThread(OnHandleLooper);
                                 break;
@@ -184,8 +261,16 @@ namespace Nice.Game.Base {
                     }
                 }
             } catch (Exception e) {
-                Logger.Error("OnConnectLooper: " + e);
-                m_Register.Notify(Msg_Error);
+                Logger.Error(e.ToString());
+                m_Status = Status.Error;
+            } finally {
+                if (!m_Dispose) {
+                    if (m_Status == Status.Error) {
+                        m_Register.Notify(Msg.Error);
+                    } else if (m_Status == Status.Timeout) {
+                        m_Register.Notify(Msg.Timeout);
+                    }
+                }
             }
         }
 
@@ -196,7 +281,7 @@ namespace Nice.Game.Base {
                 ClientDataProcessing dataProcess = new ClientDataProcessing();
                 ClientHeartbeatProcessing heartbeat = new ClientHeartbeatProcessing();
 
-                while (!m_Dispose && m_Status == Success) {
+                while (!m_Dispose && m_Status == Status.Success) {
                     dataProcess.SendPackets(m_Kcp, m_SendPackets);
                     long time = TimeUtil.Get1970ToNowMilliseconds();
                     m_Kcp.OnUpdate(time);
@@ -231,71 +316,14 @@ namespace Nice.Game.Base {
                     Thread.Sleep(5);
                 }
             } catch (Exception e) {
-                Logger.Error("RecvUdpDataLooper: " + e);
-                if (!m_Dispose && m_Status == Success) {
-                    m_Register.Notify(Msg_Disconnect);
+                Logger.Error(e.ToString());
+                if (m_Status == Status.Success) {
+                    m_Status = Status.Disconnect;
                 }
             } finally {
-                Dispose();
-            }
-        }
-
-        internal void OnUpdate() {
-            if (m_Dispose) {
-                return;
-            }
-            m_Register.OnUpdate();
-        }
-
-        internal void Register(byte id, Action handler) {
-            if (m_Dispose) {
-                return;
-            }
-            m_Register.Register(id, handler);
-        }
-
-        private class KcpClientException : Exception {
-            public KcpClientException(string message) : base(message) {
-            }
-        }
-
-        private class SimpleRegister : IDisposable {
-            private Action[] m_Handlers;
-            private ConcurrentQueue<byte> m_Queue;
-
-            public SimpleRegister() {
-                m_Handlers = new Action[4];
-                m_Queue = new ConcurrentQueue<byte>();
-            }
-
-            public void Dispose() {
-                m_Queue = null;
-                m_Handlers = null;
-            }
-
-            public void Notify(byte id) {
-                m_Queue.Enqueue(id);
-            }
-
-            public void Register(byte id, Action handler) {
-                if (id >= m_Handlers.Length) {
-                    return;
-                }
-                m_Handlers[id] = handler;
-            }
-
-            public void OnUpdate() {
-                while (m_Queue.TryDequeue(out byte id)) {
-                    if (id >= m_Handlers.Length) {
-                        continue;
-                    }
-                    try {
-                        Action handler = m_Handlers[id];
-                        if (handler != null) {
-                            handler.Invoke();
-                        }
-                    } catch (Exception e) {
-                        Logger.Error(e.ToString());
+                if (!m_Dispose) {
+                    if (m_Status == Status.Disconnect) {
+                        m_Register.Notify(Msg.Disconnect);
                     }
                 }
             }
