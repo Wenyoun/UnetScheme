@@ -278,14 +278,17 @@ namespace Nice.Game.Base {
             try {
                 List<Packet> packets = new List<Packet>();
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
-                ClientDataProcessing dataProcess = new ClientDataProcessing();
+                ClientDataProcessing process = new ClientDataProcessing();
                 ClientHeartbeatProcessing heartbeat = new ClientHeartbeatProcessing();
 
                 while (!m_Dispose && m_Status == Status.Success) {
-                    dataProcess.SendPackets(m_Kcp, m_SendPackets);
+                    if (m_SendPackets.Count > 0) {
+                        process.SendPackets(m_Kcp, m_SendPackets);
+                    }
+
                     long time = TimeUtil.Get1970ToNowMilliseconds();
                     m_Kcp.OnUpdate(time);
-                    heartbeat.OnUpdate(this, m_Kcp, time);
+                    heartbeat.UpdateHeartbeat(this, m_Kcp, time);
 
                     while (m_Socket.Poll(0, SelectMode.SelectRead)) {
                         int count = m_Socket.Receive(rawBuffer, 0, rawBuffer.Length, SocketFlags.None);
@@ -297,9 +300,9 @@ namespace Nice.Game.Base {
 
                                 if (msgChannel == MsgChannel.Reliable) {
                                     m_Kcp.Input(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size);
-                                    dataProcess.RecvReliablePackets(this, m_Kcp, packets, heartbeat);
+                                    process.RecvReliablePackets(this, m_Kcp, packets, heartbeat);
                                 } else if (msgChannel == MsgChannel.Unreliable) {
-                                    dataProcess.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size, packets);
+                                    process.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size, packets);
                                 }
 
                                 int length = packets.Count;

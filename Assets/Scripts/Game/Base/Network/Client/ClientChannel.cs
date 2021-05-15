@@ -49,21 +49,15 @@ namespace Nice.Game.Base {
                     Logger.Error(e.ToString());
                 }
             }
-            
+
             m_Transport.OnUpdate();
         }
 
-        public void SetConnect(IClientConnect connect) {
+        public void Connect(string host, int port, IClientConnect connect) {
             if (m_Dispose) {
                 return;
             }
             m_Connect = connect;
-        }
-
-        public void Connect(string host, int port) {
-            if (m_Dispose) {
-                return;
-            }
             m_Transport = new ClientTransport();
             m_Transport.Connect(host, port);
             RegisterMessages();

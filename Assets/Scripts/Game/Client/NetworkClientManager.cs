@@ -3,16 +3,11 @@
 namespace Nice.Game.Client {
     public class NetworkClientManager {
         private static bool m_Dispose;
-        private static ClientChannel m_Channel;
         private static Connection m_Connection;
+        private static ClientChannel m_Channel;
 
         public static void Init() {
-            if (m_Dispose) {
-                return;
-            }
-
             m_Dispose = false;
-            m_Channel = new ClientChannel();
             SystemLoop.AddUpdate(OnUpdate);
         }
 
@@ -20,43 +15,33 @@ namespace Nice.Game.Client {
             if (m_Dispose) {
                 return;
             }
-
-            m_Dispose = false;
+            m_Dispose = true;
             SystemLoop.RemoveUpdate(OnUpdate);
-
-            if (m_Channel != null) {
-                m_Channel.Dispose();
-                m_Channel = null;
-            }
-
-            if (m_Connection != null) {
-                m_Connection.Dispose();
-                m_Connection = null;
-            }
+            m_Connection.Dispose();
+            m_Channel = null;
+            m_Connection = null;
         }
 
         public static void Connect(string host, int port) {
             if (m_Dispose) {
                 return;
             }
-
-            m_Channel.SetConnect(new ClientConnect());
-            m_Channel.Connect(host, port);
+            m_Channel = new ClientChannel();
+            m_Channel.Connect(host, port, new ClientConnect());
         }
 
         public static void Disconnect() {
             if (m_Dispose) {
                 return;
             }
-
-            m_Channel.Disconnect();
+            m_Connection.Disconnect();
         }
 
         public static void Send(ushort cmd, ByteBuffer buffer) {
             if (m_Dispose) {
                 return;
             }
-            m_Channel.Send(cmd, buffer, MsgChannel.Unreliable);
+            m_Connection.Send(cmd, buffer);
         }
 
         public static Connection Connection {
@@ -103,6 +88,7 @@ namespace Nice.Game.Client {
             }
 
             public void OnError(IChannel channel) {
+                RemoveChannel(channel);
             }
 
             public void OnConnect(IChannel channel) {

@@ -11,11 +11,11 @@ namespace Nice.Game.Base {
             m_RawBuffer = new byte[32];
         }
 
-        public void UpdateHeartbeat() {
+        public void RecvHeartbeat() {
             m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
         }
 
-        public void OnUpdate(ClientTransport transport, KcpCon kcp, long time) {
+        public void UpdateHeartbeat(ClientTransport transport, KcpCon kcp, long time) {
             long current = time;
 
             if (current - m_RecvMills >= HeartbaetConstants.Timeout_Interval_Mills) {
