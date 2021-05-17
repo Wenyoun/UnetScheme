@@ -8,11 +8,12 @@ namespace Zyq.Weaver
 {
     public static class ServerBroadcastProcessor
     {
-        public static void Weave(ModuleDefinition module, Dictionary<ushort, MethodDefinition> methods)
+        public static void Weave(ModuleDefinition module, Dictionary<ushort, MethodData> methods)
         {
-            foreach (ushort msgId in methods.Keys)
-            {
-                MethodDefinition method = methods[msgId];
+            foreach (ushort msgId in methods.Keys) {
+                MethodData methodData = methods[msgId];
+                ushort channel = methodData.Channel;
+                MethodDefinition method = methodData.MethodDef;
 
                 if (!CheckHelper.CheckMethodParams(WeaverProgram.Server, method))
                 {
@@ -77,6 +78,7 @@ namespace Zyq.Weaver
 
                 processor.Append(processor.Create(OpCodes.Ldc_I4, msgId));
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
+                processor.Append(processor.Create(OpCodes.Ldc_I4, channel));
                 processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.NetworkServerManagerBroadcastMethod)));
                 processor.Append(processor.Create(OpCodes.Nop));
                 processor.Append(processor.Create(OpCodes.Ret));

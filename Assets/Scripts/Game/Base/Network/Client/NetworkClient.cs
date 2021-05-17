@@ -27,11 +27,11 @@
             }
         }
 
-        public void Send(ushort cmd, ByteBuffer buffer) {
+        public void Send(ushort cmd, ByteBuffer buffer, byte channel) {
             if (m_Connection == null) {
                 return;
             }
-            m_Connection.Send(cmd, buffer);
+            m_Connection.Send(cmd, buffer, channel);
         }
 
         private void OnUpdate() {

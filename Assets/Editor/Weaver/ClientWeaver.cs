@@ -8,9 +8,9 @@ namespace Zyq.Weaver
         public static bool Weave(ModuleDefinition module)
         {
             TypeDefinition protocol = null;
-            Dictionary<ushort, MethodDefinition> sendAttributeMethods;
+            Dictionary<ushort, MethodData> sendAttributeMethods;
             Dictionary<ushort, MethodDefinition> recvAttributeMethods;
-            Dictionary<ushort, MethodDefinition> broadcastAttributeMethods;
+            Dictionary<ushort, MethodData> broadcastAttributeMethods;
             List<TypeDefinition> copTypes;
             List<TypeDefinition> syncTypes;
 

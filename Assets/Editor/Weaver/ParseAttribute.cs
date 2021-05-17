@@ -4,19 +4,29 @@ using System.Collections.Generic;
 
 namespace Zyq.Weaver
 {
+    public struct MethodData {
+        public byte Channel;
+        public MethodDefinition MethodDef;
+
+        public MethodData(byte channel, MethodDefinition methodDef) {
+            Channel = channel;
+            MethodDef = methodDef;
+        }
+    }
+    
     public static class ParseAttribute
     {
         public static void Parse(ModuleDefinition module,
                                 ref TypeDefinition protocol,
-                                out Dictionary<ushort, MethodDefinition> send,
+                                out Dictionary<ushort, MethodData> send,
                                 out Dictionary<ushort, MethodDefinition> recv,
-                                out Dictionary<ushort, MethodDefinition> broadcast,
+                                out Dictionary<ushort, MethodData> broadcast,
                                 out List<TypeDefinition> cops,
                                 out List<TypeDefinition> syncs)
         {
-            send = new Dictionary<ushort, MethodDefinition>();
+            send = new Dictionary<ushort, MethodData>();
             recv = new Dictionary<ushort, MethodDefinition>();
-            broadcast = new Dictionary<ushort, MethodDefinition>();
+            broadcast = new Dictionary<ushort, MethodData>();
             cops = new List<TypeDefinition>();
             syncs = new List<TypeDefinition>();
 
@@ -57,7 +67,8 @@ namespace Zyq.Weaver
                             ushort msgId = (ushort)methodAttr.ConstructorArguments[0].Value;
                             if (methodAttr.AttributeType.FullName == WeaverProgram.SendType.FullName)
                             {
-                                send.Add(msgId, method);
+                                byte channel = (byte) methodAttr.ConstructorArguments[1].Value;
+                                send.Add(msgId, new MethodData(channel, method));
                             }
                             else if (methodAttr.AttributeType.FullName == WeaverProgram.RecvType.FullName)
                             {
@@ -72,7 +83,8 @@ namespace Zyq.Weaver
                             }
                             else if (methodAttr.AttributeType.FullName == WeaverProgram.BroadcastType.FullName)
                             {
-                                broadcast.Add(msgId, method);
+                                byte channel = (byte) methodAttr.ConstructorArguments[1].Value;
+                                broadcast.Add(msgId, new MethodData(channel, method));
                             }
                         }
                     }

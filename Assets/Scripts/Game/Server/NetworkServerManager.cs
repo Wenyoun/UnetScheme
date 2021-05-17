@@ -54,7 +54,7 @@ namespace Nice.Game.Server
             m_Network.Bind(port);
         }
 
-        public static void Send(Connection connection, ushort cmd, ByteBuffer buffer)
+        public static void Send(Connection connection, ushort cmd, ByteBuffer buffer, byte channel)
         {
             if (m_Dispose)
             {
@@ -64,11 +64,11 @@ namespace Nice.Game.Server
             uint connectionId = connection.ConnectionId;
             if (m_Connections.ContainsKey(connectionId))
             {
-                connection.Send(cmd, buffer);
+                connection.Send(cmd, buffer, channel);
             }
         }
 
-        public static void Broadcast(ushort cmd, ByteBuffer buffer)
+        public static void Broadcast(ushort cmd, ByteBuffer buffer, byte channel)
         {
             if (m_Dispose)
             {
@@ -79,7 +79,7 @@ namespace Nice.Game.Server
             {
                 while (its.MoveNext())
                 {
-                    its.Current.Value.Send(cmd, buffer);
+                    its.Current.Value.Send(cmd, buffer, channel);
                 }
             }
         }

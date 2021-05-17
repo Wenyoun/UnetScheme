@@ -37,8 +37,8 @@ namespace Nice.Game.Base {
             m_Channel.UnRegister(cmd);
         }
 
-        public void Send(ushort cmd, ByteBuffer buffer) {
-            m_Channel.Send(cmd, buffer, MsgChannel.Reliable);
+        public void Send(ushort cmd, ByteBuffer buffer, byte channel) {
+            m_Channel.Send(cmd, buffer, channel);
         }
 
         public uint ConnectionId {
