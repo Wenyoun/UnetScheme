@@ -60,9 +60,9 @@ namespace Nice.Game.Base {
             while (packets.TryDequeue(out Packet packet)) {
                 int size = PacketProcessing.Send(m_SendBuffer, packet);
                 if (size > 0) {
-                    if (packet.Channel == MsgChannel.Reliable) {
+                    if (packet.Channel == ChannelType.Reliable) {
                         channel.Send(m_SendBuffer, 0, size);
-                    } else if (packet.Channel == MsgChannel.Unreliable) {
+                    } else if (packet.Channel == ChannelType.Unreliable) {
                         channel.RawSend(m_SendBuffer, 0, size);
                     }
                 }

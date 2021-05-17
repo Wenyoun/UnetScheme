@@ -14,7 +14,7 @@ namespace Nice.Game.Base {
             get { return !m_Dispose && m_Transport.IsConnected; }
         }
 
-        public override void Send(ushort cmd, ByteBuffer buffer, byte channel) {
+        public override void Send(ushort cmd, ByteBuffer buffer, ChannelType channel) {
             if (m_Dispose || !m_Transport.IsConnected) {
                 return;
             }
@@ -43,9 +43,9 @@ namespace Nice.Game.Base {
                 return;
             }
 
-            while (m_Transport.Recv(out Packet packet)) {
+            while (m_Transport.Recv(out Packet p)) {
                 try {
-                    Invoke(packet);
+                    CallMsgHandler(p.Cmd, p.Buffer);
                 } catch (Exception e) {
                     Logger.Error(e.ToString());
                 }

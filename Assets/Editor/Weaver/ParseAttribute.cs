@@ -1,14 +1,15 @@
 ﻿using Mono.CecilX;
 using UnityEngine;
 using System.Collections.Generic;
+using Nice.Game.Base;
 
 namespace Zyq.Weaver
 {
     public struct MethodData {
-        public byte Channel;
+        public ChannelType Channel;
         public MethodDefinition MethodDef;
 
-        public MethodData(byte channel, MethodDefinition methodDef) {
+        public MethodData(ChannelType channel, MethodDefinition methodDef) {
             Channel = channel;
             MethodDef = methodDef;
         }
@@ -67,7 +68,7 @@ namespace Zyq.Weaver
                             ushort msgId = (ushort)methodAttr.ConstructorArguments[0].Value;
                             if (methodAttr.AttributeType.FullName == WeaverProgram.SendType.FullName)
                             {
-                                byte channel = (byte) methodAttr.ConstructorArguments[1].Value;
+                                ChannelType channel = (ChannelType) methodAttr.ConstructorArguments[1].Value;
                                 send.Add(msgId, new MethodData(channel, method));
                             }
                             else if (methodAttr.AttributeType.FullName == WeaverProgram.RecvType.FullName)
@@ -83,7 +84,7 @@ namespace Zyq.Weaver
                             }
                             else if (methodAttr.AttributeType.FullName == WeaverProgram.BroadcastType.FullName)
                             {
-                                byte channel = (byte) methodAttr.ConstructorArguments[1].Value;
+                                ChannelType channel = (ChannelType) methodAttr.ConstructorArguments[1].Value;
                                 broadcast.Add(msgId, new MethodData(channel, method));
                             }
                         }

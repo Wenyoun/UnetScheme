@@ -13,9 +13,9 @@ namespace Nice.Game.Base {
             while (packets.TryDequeue(out Packet packet)) {
                 int size = PacketProcessing.Send(m_Buffer, packet);
                 if (size > 0) {
-                    if (packet.Channel == MsgChannel.Reliable) {
+                    if (packet.Channel == ChannelType.Reliable) {
                         kcp.Send(m_Buffer, 0, size);
-                    } else if (packet.Channel == MsgChannel.Unreliable) {
+                    } else if (packet.Channel == ChannelType.Unreliable) {
                         kcp.RawSend(m_Buffer, 0, size);
                     }
                 }

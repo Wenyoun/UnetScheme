@@ -54,7 +54,7 @@ namespace Nice.Game.Server
             m_Network.Bind(port);
         }
 
-        public static void Send(Connection connection, ushort cmd, ByteBuffer buffer, byte channel)
+        public static void Send(Connection connection, ushort cmd, ByteBuffer buffer, ChannelType channel)
         {
             if (m_Dispose)
             {
@@ -68,7 +68,7 @@ namespace Nice.Game.Server
             }
         }
 
-        public static void Broadcast(ushort cmd, ByteBuffer buffer, byte channel)
+        public static void Broadcast(ushort cmd, ByteBuffer buffer, ChannelType channel)
         {
             if (m_Dispose)
             {

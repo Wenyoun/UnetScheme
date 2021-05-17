@@ -5,7 +5,7 @@ namespace Nice.Game.Client
 {
     public static class Sender
     {
-        [Send(MsgID.Login)]
+        [Send(MsgID.Login, ChannelType.Unreliable)]
         public static void Login(SLogin login, ByteBuffer buffer, byte[] data, int k)
         {
         }

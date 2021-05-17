@@ -27,7 +27,7 @@
             }
         }
 
-        public void Send(ushort cmd, ByteBuffer buffer, byte channel) {
+        public void Send(ushort cmd, ByteBuffer buffer, ChannelType channel) {
             if (m_Connection == null) {
                 return;
             }

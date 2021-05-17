@@ -12,7 +12,7 @@ namespace Zyq.Weaver
         {
             foreach (ushort msgId in methods.Keys) {
                 MethodData methodData = methods[msgId];
-                ushort channel = methodData.Channel;
+                ChannelType channel = methodData.Channel;
                 MethodDefinition method = methodData.MethodDef;
 
                 if (!CheckHelper.CheckMethodFirstParams(WeaverProgram.Server, method))
@@ -83,7 +83,7 @@ namespace Zyq.Weaver
                 processor.Append(processor.Create(method.IsStatic ? OpCodes.Ldarg_0 : OpCodes.Ldarg_1));
                 processor.Append(processor.Create(OpCodes.Ldc_I4, msgId));
                 processor.Append(processor.Create(OpCodes.Ldloc_0));
-                processor.Append(processor.Create(OpCodes.Ldc_I4, channel));
+                processor.Append(processor.Create(OpCodes.Ldc_I4, (int) channel));
                 processor.Append(processor.Create(OpCodes.Call, module.ImportReference(WeaverProgram.NetworkServerManagerSendMethod)));
                 processor.Append(processor.Create(OpCodes.Nop));
                 processor.Append(processor.Create(OpCodes.Ret));

@@ -21,7 +21,7 @@ namespace Nice.Game.Base
 
         bool IsConnected { get; }
 
-        void Send(ushort cmd, ByteBuffer buffer, byte channel);
+        void Send(ushort cmd, ByteBuffer buffer, ChannelType channel);
 
         void OnUpdate();
 
@@ -59,7 +59,7 @@ namespace Nice.Game.Base
 
         public virtual void Dispose()
         {
-            ClearHandlers();
+            m_Handlers.Clear();
         }
 
         public abstract void OnUpdate();
@@ -70,18 +70,13 @@ namespace Nice.Game.Base
 
         public abstract bool IsConnected { get; }
 
-        public abstract void Send(ushort cmd, ByteBuffer buffer, byte channel);
+        public abstract void Send(ushort cmd, ByteBuffer buffer, ChannelType channel);
 
-        protected void ClearHandlers()
+        protected void CallMsgHandler(ushort cmd, ByteBuffer buffer)
         {
-            m_Handlers.Clear();
-        }
-
-        protected void Invoke(Packet packet)
-        {
-            if (m_Handlers.TryGetValue(packet.Cmd, out ChannelMessageDelegate handler))
+            if (m_Handlers.TryGetValue(cmd, out ChannelMessageDelegate handler))
             {
-                handler.Invoke(new ChannelMessage(packet.Buffer));
+                handler.Invoke(new ChannelMessage(buffer));
             }
         }
     }

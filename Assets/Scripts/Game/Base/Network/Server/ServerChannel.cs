@@ -42,16 +42,16 @@ namespace Nice.Game.Base {
                 return;
             }
 
-            if (m_RecvPackets.TryDequeue(out Packet packet)) {
+            if (m_RecvPackets.TryDequeue(out Packet p)) {
                 try {
-                    Invoke(packet);
+                    CallMsgHandler(p.Cmd, p.Buffer);
                 } catch (Exception e) {
                     Logger.Error(e.ToString());
                 }
             }
         }
 
-        public override void Send(ushort cmd, ByteBuffer buffer, byte channel) {
+        public override void Send(ushort cmd, ByteBuffer buffer, ChannelType channel) {
             if (m_Dispose) {
                 return;
             }

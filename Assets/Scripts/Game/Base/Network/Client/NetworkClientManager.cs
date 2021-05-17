@@ -18,7 +18,7 @@
             m_Network = null;
         }
 
-        public static void Send(ushort cmd, ByteBuffer buffer, byte channel) {
+        public static void Send(ushort cmd, ByteBuffer buffer, ChannelType channel) {
             if (m_Network != null) {
                 m_Network.Send(cmd, buffer, channel);
             }

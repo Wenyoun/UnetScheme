@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using UnityEngine;
 
 namespace Nice.Game.Base {
     internal enum Msg {
@@ -80,7 +79,7 @@ namespace Nice.Game.Base {
         }
     }
 
-    public class ClientTransport {
+    internal class ClientTransport {
         private uint m_ConId;
         private bool m_Dispose;
         private volatile Status m_Status;
