@@ -1,5 +1,5 @@
 ﻿namespace Nice.Game.Base {
-    public interface IClientConnect {
+    internal interface IClientConnect {
         void OnTimeout(IChannel channel);
 
         void OnError(IChannel channel);

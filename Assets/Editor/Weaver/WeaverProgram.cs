@@ -55,7 +55,7 @@ namespace Zyq.Weaver
         public static MethodReference ConnectionUnregisterHandlerMethod;
         #endregion
 
-        #region Nice.Game.Client.Client
+        #region Nice.Game.Base
         public static TypeReference NetworkClientManagerType;
         public static MethodReference NetworkClientManagerSendMethod;
         #endregion
@@ -137,7 +137,6 @@ namespace Zyq.Weaver
             {
                 BaseAssembly = AssemblyDefinition.ReadAssembly(baseModuleRuntimeDLL);
                 SetupBaseModuleTypes();
-                SetupClientModuleTypes();
                 return ClientWeaver.Weave(module);
             }
 
@@ -179,11 +178,8 @@ namespace Zyq.Weaver
             ConnectionType = BaseAssembly.MainModule.GetType("Nice.Game.Base.Connection");
             ConnectionRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "RegisterHandler");
             ConnectionUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "UnRegisterHandler");
-        }
-
-        private static void SetupClientModuleTypes()
-        {
-            NetworkClientManagerType = CurrentAssembly.MainModule.GetType("Nice.Game.Client.NetworkClientManager");
+            
+            NetworkClientManagerType = BaseAssembly.MainModule.GetType("Nice.Game.Base.NetworkClientManager");
             NetworkClientManagerSendMethod = ResolveHelper.ResolveMethod(NetworkClientManagerType, "Send");
         }
 

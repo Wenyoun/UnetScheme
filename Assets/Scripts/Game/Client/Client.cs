@@ -1,53 +1,42 @@
 ﻿using Nice.Game.Base;
-using UnityEngine;
 
-namespace Nice.Game.Client
-{
-    public class Client : ICompose
-    {
+namespace Nice.Game.Client {
+    public class Client : ICompose {
         #region single instance
         public static Client Ins;
         #endregion
 
-        private World m_World;
+        private ClientWorld m_World;
 
-        public Client()
-        {
+        public Client() {
             Ins = this;
             m_World = new ClientWorld();
-            NetworkClientManager.Init();
         }
 
-        public void OnInit()
-        {
+        public void OnInit() {
             m_World.OnInit();
-            NetworkClientManager.Connect("127.0.0.1", 50000);
+            NetworkClientManager.Start("127.0.0.1", 50000, m_World);
         }
 
-        public void OnRemove()
-        {
-            NetworkClientManager.Dispose();
+        public void OnRemove() {
+            NetworkClientManager.Disconnect();
             m_World.Dispose();
             Ins = null;
         }
 
-        public void OnUpdate(float delta)
-        {
+        public void OnUpdate(float delta) {
             m_World.OnUpdate(delta);
         }
 
-        public void OnFixedUpdate(float delta)
-        {
+        public void OnFixedUpdate(float delta) {
             m_World.OnFixedUpdate(delta);
         }
 
-        public void OnLateUpdate(float delta)
-        {
+        public void OnLateUpdate(float delta) {
             m_World.OnLateUpdate(delta);
         }
 
-        public World World
-        {
+        public World World {
             get { return m_World; }
         }
     }

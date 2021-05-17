@@ -1,24 +1,22 @@
 ﻿using System.Text;
 using Nice.Game.Base;
 
-namespace Nice.Game.Client
-{
-    public class ConnectFeature : AbsWorldFeature
-    {
-        protected override void Init()
-        {
-            m_World.RegisterMessage(MessageConstants.Connect_Success, OnConnectSuccess);
-            m_World.RegisterMessage(MessageConstants.Connect_Error, OnConnectError);
+namespace Nice.Game.Client {
+    public class ConnectFeature : AbsWorldFeature {
+        protected override void Init() {
+            m_World.RegisterMessage<Connection>(MessageConstants.Connect, OnConnect);
+            m_World.RegisterMessage<Connection>(MessageConstants.Disconnect, OnDisconnect);
         }
 
-        protected override void Clear()
-        {
-            m_World.UnRegisterMessage(MessageConstants.Connect_Success, OnConnectSuccess);
-            m_World.UnRegisterMessage(MessageConstants.Connect_Error, OnConnectError);
+        protected override void Clear() {
+            m_World.UnRegisterMessage<Connection>(MessageConstants.Connect, OnConnect);
+            m_World.UnRegisterMessage<Connection>(MessageConstants.Disconnect, OnDisconnect);
         }
 
-        private void OnConnectSuccess(Body body)
-        {
+        private void OnConnect(Body body, Connection connection) {
+            connection.RegisterProtocol<AutoProtocolHandler>();
+            connection.RegisterProtocol<ClientProtocolHandler>();
+
             SLogin login = new SLogin();
             login.PlayerID = 567;
             login.Token = "yinhuayong";
@@ -29,8 +27,8 @@ namespace Nice.Game.Client
             Sender.Login(login, buffer, Encoding.UTF8.GetBytes("11"), 567);
         }
 
-        private void OnConnectError(Body body)
-        {
+        private void OnDisconnect(Body body, Connection connection) {
+            connection.Dispose();
         }
     }
 }

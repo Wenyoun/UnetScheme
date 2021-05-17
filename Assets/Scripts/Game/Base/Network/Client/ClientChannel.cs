@@ -25,6 +25,7 @@ namespace Nice.Game.Base {
             if (m_Dispose) {
                 return;
             }
+            m_Connect = null;
             m_Dispose = true;
             m_Transport.Dispose();
             base.Dispose();
@@ -34,7 +35,7 @@ namespace Nice.Game.Base {
             if (m_Dispose) {
                 return;
             }
-            m_Transport.Disconnect(false, false);
+            m_Transport.Disconnect(true, false);
         }
 
         public override void OnUpdate() {
@@ -53,7 +54,7 @@ namespace Nice.Game.Base {
             m_Transport.OnUpdate();
         }
 
-        public void Connect(string host, int port, IClientConnect connect) {
+        internal void Connect(string host, int port, IClientConnect connect) {
             if (m_Dispose) {
                 return;
             }

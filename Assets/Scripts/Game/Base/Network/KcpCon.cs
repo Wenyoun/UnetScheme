@@ -24,10 +24,10 @@ namespace Nice.Game.Base {
         }
         #endregion
 
-        private Kcp m_Kcp;
         protected Socket m_Socket;
         protected EndPoint m_Point;
 
+        private Kcp m_Kcp;
         private uint m_Conv;
         private uint m_ConId;
 
@@ -35,12 +35,10 @@ namespace Nice.Game.Base {
         private bool m_IsConnected;
         private byte[] m_OutputBuffer;
 
-        protected KcpCon(uint conId, uint conv, Socket socket) : this(conId, conv, socket, null) {
-        }
-
         protected KcpCon(uint conId, uint conv, Socket socket, EndPoint point) {
             m_Point = point;
             m_Socket = socket;
+            
             m_Kcp = new Kcp(conv, this, this);
             m_Kcp.NoDelay(1, 10, 2, 1);
 
@@ -163,7 +161,7 @@ namespace Nice.Game.Base {
             ByteWriteMemory write = new ByteWriteMemory(buffer);
             write.Write(KcpConstants.Flag_Disconnect);
             write.Write(m_Conv);
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < 3; ++i) {
                 Send(buffer, 0, 8);
             }
             Flush();
