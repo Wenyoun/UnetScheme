@@ -2,26 +2,18 @@
 
 namespace Nice.Game.Client {
     public class Client : ICompose {
-        #region single instance
-        public static Client Ins;
-        #endregion
-
         private ClientWorld m_World;
 
         public Client() {
-            Ins = this;
-            m_World = new ClientWorld();
+            m_World = new ClientWorld(1);
         }
 
         public void OnInit() {
             m_World.OnInit();
-            NetworkClientManager.Start("127.0.0.1", 50000, m_World);
         }
 
         public void OnRemove() {
-            NetworkClientManager.Disconnect();
             m_World.Dispose();
-            Ins = null;
         }
 
         public void OnUpdate(float delta) {
@@ -34,10 +26,6 @@ namespace Nice.Game.Client {
 
         public void OnLateUpdate(float delta) {
             m_World.OnLateUpdate(delta);
-        }
-
-        public World World {
-            get { return m_World; }
         }
     }
 }

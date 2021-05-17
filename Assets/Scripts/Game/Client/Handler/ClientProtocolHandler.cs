@@ -1,33 +1,32 @@
-﻿using UnityEngine;
-using Nice.Game.Base;
+﻿using Nice.Game.Base;
 
-namespace Nice.Game.Client
-{
-    public class ClientProtocolHandler : IProtocolHandler
-    {
-        public Connection Connection { get; set; }
+namespace Nice.Game.Client {
+    public class ClientProtocolHandler : IProtocolHandler {
+        private World m_World;
 
-        public void Register()
-        {
+        public void SetWorld(World world) {
+            m_World = world;
+        }
+
+
+        public void Register() {
             Connection.RegisterHandler(MsgID.Sync_Attribute, OnSyncAttribute);
         }
 
-        public void UnRegister()
-        {
+        public void UnRegister() {
             Connection.UnRegisterHandler(MsgID.Sync_Attribute);
         }
 
-        private void OnSyncAttribute(ChannelMessage msg)
-        {
+        public Connection Connection { get; set; }
+
+        private void OnSyncAttribute(ChannelMessage msg) {
             ByteBuffer buffer = msg.Buffer;
             uint eid = buffer.ReadUInt();
             uint syncId = buffer.ReadUInt();
-            Entity entity = Client.Ins.World.GetEntity(eid);
-            if (entity != null)
-            {
+            Entity entity = m_World.GetEntity(eid);
+            if (entity != null) {
                 ISyncAttribute attribute = entity.GetSyncAttribute(syncId);
-                if (attribute != null)
-                {
+                if (attribute != null) {
                     attribute.Deserialize(buffer);
                 }
             }

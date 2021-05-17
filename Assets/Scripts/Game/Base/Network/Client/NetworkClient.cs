@@ -1,7 +1,7 @@
 ﻿namespace Nice.Game.Base {
     internal class NetworkClient : IClientConnect {
-        private Connection m_Connection;
         private ClientChannel m_Channel;
+        private Connection m_Connection;
         private IClientHandler m_Handler;
 
         public NetworkClient(IClientHandler handler) {
@@ -20,11 +20,11 @@
 
         public void Disconnect() {
             SystemLoop.RemoveUpdate(OnUpdate);
-            m_Channel = null;
             if (m_Connection != null) {
-                m_Connection.Dispose();
+                m_Connection.Disconnect();
                 m_Connection = null;
             }
+            m_Channel = null;
         }
 
         public void Send(ushort cmd, ByteBuffer buffer, ChannelType channel) {

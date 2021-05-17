@@ -110,7 +110,7 @@ namespace Nice.Game.Server
             if (m_Connections.TryGetValue(connectionId, out Connection connection))
             {
                 m_Connections.Remove(connectionId);
-                connection.Dispose();
+                connection.Disconnect();
             }
         }
 

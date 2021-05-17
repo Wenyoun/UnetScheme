@@ -25,10 +25,11 @@ namespace Nice.Game.Base {
             if (m_Dispose) {
                 return;
             }
-            m_Connect = null;
             m_Dispose = true;
             m_Transport.Dispose();
-            base.Dispose();
+            ClearMsgHandlers();
+            m_Connect = null;
+            m_Transport = null;
         }
 
         public override void Disconnect() {

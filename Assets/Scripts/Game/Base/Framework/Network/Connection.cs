@@ -17,16 +17,19 @@ namespace Nice.Game.Base {
         }
 
         public void Disconnect() {
+            ClearRegisterProtocols();
             m_Channel.Disconnect();
         }
 
-        public void RegisterProtocol<T>() where T : IProtocolHandler, new() {
+        public T RegisterProtocol<T>() where T : IProtocolHandler, new() {
             if (IsNotFind<T>()) {
                 T handler = new T();
                 handler.Connection = this;
                 handler.Register();
                 m_Handlers.Add(handler);
+                return handler;
             }
+            return default;
         }
 
         public void RegisterHandler(ushort cmd, ChannelMessageDelegate handler) {
@@ -38,6 +41,13 @@ namespace Nice.Game.Base {
         }
 
         public void Send(ushort cmd, ByteBuffer buffer, ChannelType channel) {
+            if (channel == ChannelType.Unreliable) {
+                const int length = KcpConstants.Packet_Length - 100;
+                if (buffer.ReadableLength > length) {
+                    throw new ArgumentException($"invalid length ChannelType = {channel}, ByteBuffer.ReadableLength > {length}");
+                }
+            }
+
             m_Channel.Send(cmd, buffer, channel);
         }
 
