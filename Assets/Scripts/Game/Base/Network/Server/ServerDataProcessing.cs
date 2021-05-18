@@ -20,26 +20,29 @@ namespace Nice.Game.Base {
                 }
 
                 if (size == 8) {
-                    ByteReadMemory memory = new ByteReadMemory(m_RecvBuffer, 0, 8);
+                    ByteReadMemory memory = new ByteReadMemory(m_RecvBuffer, 0, size);
                     uint flag = memory.ReadUInt();
                     uint conv = memory.ReadUInt();
 
                     if (conv == channel.Conv) {
                         if (flag == KcpConstants.Flag_Connect) {
                             channel.SetConnectedStatus(true);
-                            connect?.OnKcpConnect(channel);
+                            if (connect != null) {
+                                connect.OnKcpConnect(channel);
+                            }
                             continue;
                         }
 
                         if (flag == KcpConstants.Flag_Disconnect) {
                             channel.SetConnectedStatus(false);
-                            connect?.OnKcpDisconnect(channel);
-                            channel.Disconnect();
+                            if (connect != null) {
+                                connect.OnKcpDisconnect(channel);
+                            }
                             continue;
                         }
 
                         if (flag == KcpConstants.Flag_Heartbeat) {
-                            heartbeat.UpdateHeartbeat(channel, m_RecvBuffer, 0, 8);
+                            heartbeat.UpdateHeartbeat(channel, m_RecvBuffer, 0, size);
                             continue;
                         }
                     }

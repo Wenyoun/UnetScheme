@@ -6,20 +6,14 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 namespace Nice.Game.Base {
-    public interface IKcpConnect {
-        void OnKcpConnect(IChannel channel);
-
-        void OnKcpDisconnect(IChannel channel);
-    }
-
-    public class ServerSocket : IDisposable {
+    public class ServerTransport : IDisposable {
         private bool m_Dispose;
         private Socket m_Socket;
         private IKcpConnect m_Connect;
         private ServerDataProcessing m_Process;
         private ConcurrentDictionary<uint, ServerChannel> m_Channels;
 
-        public ServerSocket() {
+        public ServerTransport() {
             m_Dispose = false;
             m_Socket = null;
             m_Connect = null;
@@ -61,10 +55,10 @@ namespace Nice.Game.Base {
         private void RecvUdpDataLooper(object obj) {
             try {
                 uint startConvId = 10000;
-                const int pollTimeout = 10000;
+                const int pollTimeout = 100000;
+                List<Packet> packets = new List<Packet>();
                 byte[] rawBuffer = new byte[KcpConstants.Packet_Length];
                 EndPoint remote = new IPEndPoint(IPAddress.Any, 0);
-                List<Packet> packets = new List<Packet>();
 
                 while (!m_Dispose) {
                     if (!m_Socket.Poll(pollTimeout, SelectMode.SelectRead)) {
@@ -75,42 +69,43 @@ namespace Nice.Game.Base {
                         break;
                     }
 
-                    int count = m_Socket.ReceiveFrom(rawBuffer, SocketFlags.None, ref remote);
+                    int size = m_Socket.ReceiveFrom(rawBuffer, SocketFlags.None, ref remote);
+                    if (size > 0) {
+                        uint cid = (uint) remote.GetHashCode();
+                        if (!m_Channels.TryGetValue(cid, out ServerChannel channel)) {
+                            if (size == 4) {
+                                uint flag = KcpHelper.Decode32u(rawBuffer, 0);
+                                if (flag == KcpConstants.Flag_Connect) {
+                                    uint conv = startConvId++;
+                                    EndPoint point = remote.Create(remote.Serialize());
+                                    channel = new ServerChannel(new KcpConServer(cid, conv, m_Socket, point));
 
-                    uint cid = (uint) remote.GetHashCode();
-                    if (!m_Channels.TryGetValue(cid, out ServerChannel channel)) {
-                        if (count == 4) {
-                            uint flag = KcpHelper.Decode32u(rawBuffer, 0);
-                            if (flag == KcpConstants.Flag_Connect) {
-                                uint conv = startConvId++;
-                                EndPoint point = remote.Create(remote.Serialize());
-                                channel = new ServerChannel(new KcpConServer(cid, conv, m_Socket, point));
-
-                                if (m_Channels.TryAdd(cid, channel)) {
-                                    KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
-                                    KcpHelper.Encode32u(rawBuffer, 4, conv);
-                                    channel.Send(rawBuffer, 0, 8);
-                                    channel.Flush();
+                                    if (m_Channels.TryAdd(cid, channel)) {
+                                        KcpHelper.Encode32u(rawBuffer, 0, KcpConstants.Flag_Connect);
+                                        KcpHelper.Encode32u(rawBuffer, 4, conv);
+                                        channel.Send(rawBuffer, 0, 8);
+                                        channel.Flush();
+                                    }
                                 }
+                            } else {
+                                Logger.Error($"not connect size={size}");
+                            }
+                        } else if (size > KcpConstants.Head_Size) {
+                            uint remoteCid = KcpHelper.Decode32u(rawBuffer, 0);
+                            if (cid == remoteCid) {
+                                byte msgChannel = rawBuffer[KcpConstants.Conv_Size];
+                                if (msgChannel == MsgChannel.Reliable) {
+                                    channel.Input(rawBuffer, KcpConstants.Head_Size, size - KcpConstants.Head_Size);
+                                    channel.RecvReliablePackets(m_Process, packets, m_Connect);
+                                } else if (msgChannel == MsgChannel.Unreliable) {
+                                    channel.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size, size - KcpConstants.Head_Size, m_Process, packets);
+                                }
+                            } else {
+                                Logger.Error($"conv {cid} != {remoteCid}");
                             }
                         } else {
-                            Logger.Error($"not connect size={count}");
+                            Logger.Error($"size={size} < {KcpConstants.Head_Size}");
                         }
-                    } else if (count > KcpConstants.Head_Size) {
-                        uint remoteCid = KcpHelper.Decode32u(rawBuffer, 0);
-                        if (cid == remoteCid) {
-                            byte msgChannel = rawBuffer[KcpConstants.Conv_Size];
-                            if (msgChannel == MsgChannel.Reliable) {
-                                channel.Input(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size);
-                                channel.RecvReliablePackets(m_Process, packets, m_Connect);
-                            } else if (msgChannel == MsgChannel.Unreliable) {
-                                channel.RecvUnreliablePackets(rawBuffer, KcpConstants.Head_Size, count - KcpConstants.Head_Size, m_Process, packets);
-                            }
-                        } else {
-                            Logger.Error($"conv {cid} != {remoteCid}");
-                        }
-                    } else {
-                        Logger.Error($"size={count} < {KcpConstants.Head_Size}");
                     }
                 }
             } catch (Exception e) {
@@ -121,7 +116,6 @@ namespace Nice.Game.Base {
         private void UpdateKcpLooper(object obj) {
             try {
                 List<uint> removes = new List<uint>();
-
                 while (!m_Dispose) {
                     using (IEnumerator<KeyValuePair<uint, ServerChannel>> its = m_Channels.GetEnumerator()) {
                         while (its.MoveNext()) {
@@ -139,14 +133,13 @@ namespace Nice.Game.Base {
                         for (int i = 0; i < length; ++i) {
                             uint channelId = removes[i];
                             if (m_Channels.TryRemove(channelId, out ServerChannel channel)) {
-                                m_Connect?.OnKcpDisconnect(channel);
                                 channel.Dispose();
                             }
                         }
                         removes.Clear();
                     }
 
-                    Thread.Sleep(1);
+                    Thread.Sleep(5);
                 }
             } catch (Exception e) {
                 Logger.Error(e.ToString());

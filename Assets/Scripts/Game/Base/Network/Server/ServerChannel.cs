@@ -75,7 +75,6 @@ namespace Nice.Game.Base {
             m_RecvPackets.Clear();
         }
 
-        #region internal method
         internal int RawSend(byte[] buffer, int offset, int length) {
             if (m_Dispose) {
                 return -20;
@@ -147,7 +146,6 @@ namespace Nice.Game.Base {
             if (m_Dispose) {
                 return;
             }
-
             m_Con.IsConnected = status;
         }
 
@@ -158,7 +156,6 @@ namespace Nice.Game.Base {
         internal bool IsDispose {
             get { return m_Dispose; }
         }
-        #endregion
 
         private void HandlePackets(List<Packet> packets) {
             int length = packets.Count;

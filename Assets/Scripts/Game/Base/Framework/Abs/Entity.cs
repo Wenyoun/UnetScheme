@@ -121,7 +121,7 @@
         public bool IsDispose
         {
             get { return m_Dispose; }
-            internal set { m_Dispose = true; }
+            internal set { m_Dispose = value; }
         }
 
         public World World
