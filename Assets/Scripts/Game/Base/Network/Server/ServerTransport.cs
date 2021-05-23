@@ -22,6 +22,10 @@ namespace Nice.Game.Base {
         }
 
         public void Bind(int port, IKcpConnect connect) {
+            if (m_Dispose) {
+                return;
+            }
+            
             m_Connect = connect;
             m_Socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             m_Socket.Bind(new IPEndPoint(IPAddress.Any, port));
