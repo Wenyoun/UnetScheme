@@ -1,53 +1,69 @@
 ﻿using System;
 
-namespace Nice.Game.Base {
-    public class ClientChannel : AbsChannel {
+namespace Nice.Game.Base
+{
+    public class ClientChannel : AbsChannel
+    {
         private bool m_Dispose;
-        private IClientConnect m_Connect;
+        private IClientListener m_Listener;
         private ClientTransport m_Transport;
 
-        public override uint ChannelId {
+        public override uint ChannelId
+        {
             get { return !m_Dispose ? m_Transport.ConId : 0; }
         }
 
-        public override bool IsConnected {
+        public override bool IsConnected
+        {
             get { return !m_Dispose && m_Transport.IsConnected; }
         }
 
-        public override void Send(ushort cmd, ByteBuffer buffer, ChannelType channel) {
-            if (m_Dispose || !m_Transport.IsConnected) {
+        public override void Send(ushort cmd, ByteBuffer buffer, ChannelType channel)
+        {
+            if (m_Dispose || !m_Transport.IsConnected)
+            {
                 return;
             }
             m_Transport.Send(new Packet(cmd, buffer, channel));
         }
 
-        public override void Dispose() {
-            if (m_Dispose) {
+        public override void Dispose()
+        {
+            if (m_Dispose)
+            {
                 return;
             }
             m_Dispose = true;
             m_Transport.Dispose();
             ClearMsgHandlers();
-            m_Connect = null;
+            m_Listener = null;
             m_Transport = null;
         }
 
-        public override void Disconnect() {
-            if (m_Dispose) {
+        public override void Disconnect()
+        {
+            if (m_Dispose)
+            {
                 return;
             }
             m_Transport.Disconnect(true, false);
         }
 
-        public override void OnUpdate() {
-            if (m_Dispose) {
+        public override void OnUpdate()
+        {
+            if (m_Dispose)
+            {
                 return;
             }
 
-            while (m_Transport.Recv(out Packet p)) {
-                try {
+            while (m_Transport.Recv(out Packet p))
+            {
+                try
+                {
                     CallMsgHandler(p.Cmd, p.Buffer);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     Logger.Error(e.ToString());
                 }
             }
@@ -55,50 +71,61 @@ namespace Nice.Game.Base {
             m_Transport.OnUpdate();
         }
 
-        internal void Connect(string host, int port, IClientConnect connect) {
-            if (m_Dispose) {
-                return;
+        internal void Connect(string host, int port, IClientListener listener)
+        {
+            if (m_Dispose)
+            {
+                throw new ObjectDisposedException("ClientChannel already disposed!");
             }
-            m_Connect = connect;
+            m_Listener = listener;
             m_Transport = new ClientTransport();
             m_Transport.Connect(host, port);
             RegisterMessages();
         }
 
-        private void RegisterMessages() {
+        private void RegisterMessages()
+        {
             m_Transport.Register(Msg.Timeout, OnTimeout);
             m_Transport.Register(Msg.Error, OnError);
             m_Transport.Register(Msg.Success, OnSuccess);
             m_Transport.Register(Msg.Disconnect, OnDisconnect);
         }
 
-        private void OnTimeout() {
-            if (m_Connect != null) {
+        private void OnTimeout()
+        {
+            if (m_Listener != null)
+            {
                 Logger.Debug("OnTimeout");
-                m_Connect.OnTimeout(this);
+                m_Listener.OnTimeout(this);
             }
         }
 
-        private void OnError() {
-            if (m_Connect != null) {
+        private void OnError()
+        {
+            if (m_Listener != null)
+            {
                 Logger.Debug("OnError");
                 Dispose();
-                m_Connect.OnError(this);
+                m_Listener.OnError(this);
             }
         }
 
-        private void OnSuccess() {
-            if (m_Connect != null) {
+        private void OnSuccess()
+        {
+            if (m_Listener != null)
+            {
                 Logger.Debug("OnSuccess");
-                m_Connect.OnConnect(this);
+                m_Listener.OnConnect(this);
             }
         }
 
-        private void OnDisconnect() {
-            if (m_Connect != null) {
+        private void OnDisconnect()
+        {
+            if (m_Listener != null)
+            {
                 Logger.Debug("OnDisconnect");
                 Dispose();
-                m_Connect.OnDisconnect(this);
+                m_Listener.OnDisconnect(this);
             }
         }
     }

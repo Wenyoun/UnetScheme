@@ -1,47 +1,60 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Concurrent;
 
-namespace Nice.Game.Base {
-    internal class ServerDataProcessing {
+namespace Nice.Game.Base
+{
+    internal class ServerDataProcessing
+    {
         private byte[] m_SendBuffer;
         private byte[] m_RecvBuffer;
 
-        public ServerDataProcessing() {
+        public ServerDataProcessing()
+        {
             m_SendBuffer = new byte[ushort.MaxValue / 2];
             m_RecvBuffer = new byte[ushort.MaxValue / 2];
         }
 
-        public bool RecvReliablePackets(ServerChannel channel, List<Packet> packets, IKcpConnect connect, ServerHeartbeatProcessing heartbeat) {
-            while (true) {
+        public bool RecvReliablePackets(ServerChannel channel, List<Packet> packets, IChannelListener listener, ServerHeartbeatProcessing heartbeat)
+        {
+            while (true)
+            {
                 int size = channel.Recv(m_RecvBuffer, 0, m_RecvBuffer.Length);
 
-                if (size <= 0) {
+                if (size <= 0)
+                {
                     break;
                 }
 
-                if (size == 8) {
+                if (size == 8)
+                {
                     ByteReadMemory memory = new ByteReadMemory(m_RecvBuffer, 0, size);
                     uint flag = memory.ReadUInt();
                     uint conv = memory.ReadUInt();
 
-                    if (conv == channel.Conv) {
-                        if (flag == KcpConstants.Flag_Connect) {
+                    if (conv == channel.Conv)
+                    {
+                        if (flag == KcpConstants.Flag_Connect)
+                        {
                             channel.SetConnectedStatus(true);
-                            if (connect != null) {
-                                connect.OnKcpConnect(channel);
+                            if (listener != null)
+                            {
+                                listener.OnAddChannel(channel);
                             }
                             continue;
                         }
 
-                        if (flag == KcpConstants.Flag_Disconnect) {
+                        if (flag == KcpConstants.Flag_Disconnect)
+                        {
                             channel.SetConnectedStatus(false);
-                            if (connect != null) {
-                                connect.OnKcpDisconnect(channel);
+                            if (listener != null)
+                            {
+                                listener.OnRemoveChannel(channel);
                             }
                             continue;
                         }
 
-                        if (flag == KcpConstants.Flag_Heartbeat) {
+                        if (flag == KcpConstants.Flag_Heartbeat)
+                        {
                             heartbeat.UpdateHeartbeat(channel, m_RecvBuffer, 0, size);
                             continue;
                         }
@@ -54,18 +67,25 @@ namespace Nice.Game.Base {
             return packets.Count > 0;
         }
 
-        public bool RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, List<Packet> packets) {
+        public bool RecvUnreliablePackets(byte[] rawBuffer, int offset, int count, List<Packet> packets)
+        {
             PacketProcessing.Recv(rawBuffer, offset, count, packets);
             return packets.Count > 0;
         }
 
-        public void SendPackets(ServerChannel channel, ConcurrentQueue<Packet> packets) {
-            while (packets.TryDequeue(out Packet packet)) {
+        public void SendPackets(ServerChannel channel, ConcurrentQueue<Packet> packets)
+        {
+            while (packets.TryDequeue(out Packet packet))
+            {
                 int size = PacketProcessing.Send(m_SendBuffer, packet);
-                if (size > 0) {
-                    if (packet.Channel == ChannelType.Reliable) {
+                if (size > 0)
+                {
+                    if (packet.Channel == ChannelType.Reliable)
+                    {
                         channel.Send(m_SendBuffer, 0, size);
-                    } else if (packet.Channel == ChannelType.Unreliable) {
+                    }
+                    else if (packet.Channel == ChannelType.Unreliable)
+                    {
                         channel.RawSend(m_SendBuffer, 0, size);
                     }
                 }

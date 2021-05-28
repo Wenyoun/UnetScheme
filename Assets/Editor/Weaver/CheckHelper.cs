@@ -46,7 +46,7 @@ namespace Zyq.Weaver
                 ParameterDefinition parm = parms[i];
                 TypeDefinition parmType = parm.ParameterType.Resolve();
 
-                if (i == 0 && parmType.FullName == typeof(Connection).FullName)
+                if (i == 0 && parmType.FullName == typeof(IConnection).FullName)
                 {
                     Debug.LogError(module + ": 方法[" + method.FullName + "]中第一个参数不能为[" + parmType.FullName + "]");
                     return false;
@@ -80,9 +80,9 @@ namespace Zyq.Weaver
                 TypeDefinition parmType = parm.ParameterType.Resolve();
                 if (i == 0)
                 {
-                    if (parmType.FullName != typeof(Connection).FullName)
+                    if (parmType.FullName != typeof(IConnection).FullName)
                     {
-                        Debug.LogError(module + ": 方法[" + method.FullName + "]中第一个参数只能为[" + typeof(Connection).FullName + "]");
+                        Debug.LogError(module + ": 方法[" + method.FullName + "]中第一个参数只能为[" + typeof(IConnection).FullName + "]");
                         return false;
                     }
                 }

@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Nice.Game.Base {
+namespace Nice.Game.Base
+{
     public delegate void ChannelMessageDelegate(ChannelMessage channelMessage);
 
-    public struct ChannelMessage {
+    public struct ChannelMessage
+    {
         public readonly ByteBuffer Buffer;
 
-        public ChannelMessage(ByteBuffer buffer) {
+        public ChannelMessage(ByteBuffer buffer)
+        {
             Buffer = buffer;
         }
     }
 
-    public interface IChannel : IDisposable {
+    public interface IChannel : IDisposable
+    {
         uint ChannelId { get; }
 
         bool IsConnected { get; }
@@ -28,26 +32,33 @@ namespace Nice.Game.Base {
         void Register(ushort cmd, ChannelMessageDelegate handler);
     }
 
-    public abstract class AbsChannel : IChannel {
+    public abstract class AbsChannel : IChannel
+    {
         private Dictionary<ushort, ChannelMessageDelegate> m_Handlers;
 
-        protected AbsChannel() {
+        protected AbsChannel()
+        {
             m_Handlers = new Dictionary<ushort, ChannelMessageDelegate>();
         }
 
-        public void Register(ushort cmd, ChannelMessageDelegate handler) {
-            if (!m_Handlers.ContainsKey(cmd)) {
+        public void Register(ushort cmd, ChannelMessageDelegate handler)
+        {
+            if (!m_Handlers.ContainsKey(cmd))
+            {
                 m_Handlers.Add(cmd, handler);
             }
         }
 
-        public void UnRegister(ushort cmd) {
-            if (m_Handlers.ContainsKey(cmd)) {
+        public void UnRegister(ushort cmd)
+        {
+            if (m_Handlers.ContainsKey(cmd))
+            {
                 m_Handlers.Remove(cmd);
             }
         }
 
-        public virtual void Dispose() {
+        public virtual void Dispose()
+        {
         }
 
         public abstract void OnUpdate();
@@ -60,13 +71,16 @@ namespace Nice.Game.Base {
 
         public abstract void Send(ushort cmd, ByteBuffer buffer, ChannelType channel);
 
-        protected void CallMsgHandler(ushort cmd, ByteBuffer buffer) {
-            if (m_Handlers.TryGetValue(cmd, out ChannelMessageDelegate handler)) {
+        protected void CallMsgHandler(ushort cmd, ByteBuffer buffer)
+        {
+            if (m_Handlers.TryGetValue(cmd, out ChannelMessageDelegate handler))
+            {
                 handler.Invoke(new ChannelMessage(buffer));
             }
         }
 
-        protected void ClearMsgHandlers() {
+        protected void ClearMsgHandlers()
+        {
             m_Handlers.Clear();
         }
     }

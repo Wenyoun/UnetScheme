@@ -1,6 +1,8 @@
-﻿namespace Nice.Game.Base {
-    public interface IProtocolHandler {
-        Connection Connection { set; }
+﻿namespace Nice.Game.Base
+{
+    public interface IProtocolHandler
+    {
+        IConnection Connection { set; }
 
         void Register();
 

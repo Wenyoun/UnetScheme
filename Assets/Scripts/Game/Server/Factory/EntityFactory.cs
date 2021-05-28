@@ -5,7 +5,7 @@ namespace Nice.Game.Server
 {
     public sealed class EntityFactory
     {
-        public static Entity CreatePlayer(Connection connection, Vector3 position)
+        public static Entity CreatePlayer(IConnection connection, Vector3 position)
         {
             /**
             Entity entity = new Entity();

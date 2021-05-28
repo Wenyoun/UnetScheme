@@ -2,32 +2,25 @@
 
 namespace Nice.Game.Server
 {
-    public class Server : ICompose
+    public class Server : ICompose, IConnectionHandle
     {
-        #region single instance
-        public static Server Ins;
-        #endregion
-
         private World m_World;
 
         public Server()
         {
-            Ins = this;
-            NetworkServerManager.Init();
             m_World = new ServerWorld();
         }
 
         public void OnInit()
         {
-            NetworkServerManager.Bind(50000);
             m_World.OnInit();
+            NetworkServerManager.Bind(50000, this);
         }
 
         public void OnRemove()
         {
             NetworkServerManager.Dispose();
             m_World.Dispose();
-            Ins = null;
         }
 
         public void OnUpdate(float delta)
@@ -43,6 +36,16 @@ namespace Nice.Game.Server
         public void OnLateUpdate(float delta)
         {
             m_World.OnLateUpdate(delta);
+        }
+
+        public void OnAddConnection(IConnection connection)
+        {
+            connection.RegisterProtocol<AutoProtocolHandler>();
+            connection.RegisterProtocol<ServerProtocolHandler>();
+        }
+
+        public void OnRemoveConnection(IConnection connection)
+        {
         }
     }
 }

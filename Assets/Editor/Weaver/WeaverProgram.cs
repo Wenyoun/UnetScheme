@@ -50,9 +50,9 @@ namespace Zyq.Weaver
         #endregion
 
         #region Nice.Game.Base.Connection
-        public static TypeReference ConnectionType;
-        public static MethodReference ConnectionRegisterHandlerMethod;
-        public static MethodReference ConnectionUnregisterHandlerMethod;
+        public static TypeReference IConnectionType;
+        public static MethodReference IConnectionRegisterHandlerMethod;
+        public static MethodReference IConnectionUnregisterHandlerMethod;
         #endregion
 
         #region Nice.Game.Base
@@ -144,7 +144,6 @@ namespace Zyq.Weaver
             {
                 BaseAssembly = AssemblyDefinition.ReadAssembly(baseModuleRuntimeDLL);
                 SetupBaseModuleTypes();
-                SetupServerModuleTypes();
                 return ServerWeaver.Weave(module);
             }
 
@@ -175,17 +174,14 @@ namespace Zyq.Weaver
             AbsCopOnRemoveMethod = ResolveHelper.ResolveMethod(AbsCopType, "OnRemove");
             AbsCopGetEntityMethod = ResolveHelper.ResolveMethod(AbsCopType, "get_Entity");
 
-            ConnectionType = BaseAssembly.MainModule.GetType("Nice.Game.Base.Connection");
-            ConnectionRegisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "RegisterHandler");
-            ConnectionUnregisterHandlerMethod = ResolveHelper.ResolveMethod(ConnectionType, "UnRegisterHandler");
+            IConnectionType = BaseAssembly.MainModule.GetType("Nice.Game.Base.IConnection");
+            IConnectionRegisterHandlerMethod = ResolveHelper.ResolveMethod(IConnectionType, "RegisterHandler");
+            IConnectionUnregisterHandlerMethod = ResolveHelper.ResolveMethod(IConnectionType, "UnRegisterHandler");
             
             NetworkClientManagerType = BaseAssembly.MainModule.GetType("Nice.Game.Base.NetworkClientManager");
             NetworkClientManagerSendMethod = ResolveHelper.ResolveMethod(NetworkClientManagerType, "Send");
-        }
-
-        private static void SetupServerModuleTypes()
-        {
-            NetworkServerManagerType = CurrentAssembly.MainModule.GetType("Nice.Game.Server.NetworkServerManager");
+            
+            NetworkServerManagerType = BaseAssembly.MainModule.GetType("Nice.Game.Base.NetworkServerManager");
             NetworkServerManagerSendMethod = ResolveHelper.ResolveMethod(NetworkServerManagerType, "Send");
             NetworkServerManagerBroadcastMethod = ResolveHelper.ResolveMethod(NetworkServerManagerType, "Broadcast");
         }

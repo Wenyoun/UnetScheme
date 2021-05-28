@@ -113,7 +113,7 @@ namespace Zyq.Weaver
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldarg_0));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldftn, protoMethodImpl));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Newobj, module.ImportReference(typeof(ChannelMessageDelegate).GetConstructor(new Type[] {typeof(object), typeof(IntPtr)}))));
-                    registerProcessor.Append(registerProcessor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionRegisterHandlerMethod)));
+                    registerProcessor.Append(registerProcessor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IConnectionRegisterHandlerMethod)));
                 }
                 registerProcessor.Append(registerProcessor.Create(OpCodes.Ret));
             }
@@ -131,7 +131,7 @@ namespace Zyq.Weaver
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ldarg_0));
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Callvirt, getConnection));
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ldc_I4, key));
-                    unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.ConnectionUnregisterHandlerMethod)));
+                    unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IConnectionUnregisterHandlerMethod)));
                 }
                 unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ret));
             }
