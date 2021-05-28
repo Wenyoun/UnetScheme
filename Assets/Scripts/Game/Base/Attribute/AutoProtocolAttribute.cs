@@ -3,5 +3,5 @@
 namespace Nice.Game.Base
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class ProtocolAttribute : Attribute { }
+    public class AutoProtocolAttribute : Attribute { }
 }

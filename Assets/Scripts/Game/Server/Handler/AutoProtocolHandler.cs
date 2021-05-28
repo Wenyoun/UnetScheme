@@ -2,7 +2,7 @@
 
 namespace Nice.Game.Server
 {
-    [Protocol]
+    [AutoProtocol]
     public class AutoProtocolHandler : AbsProtocolHandler
     {
         public override void Register()

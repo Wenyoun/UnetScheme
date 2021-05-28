@@ -165,7 +165,7 @@ namespace Zyq.Weaver
 
             SendType = BaseAssembly.MainModule.GetType("Nice.Game.Base.SendAttribute");
             RecvType = BaseAssembly.MainModule.GetType("Nice.Game.Base.RecvAttribute");
-            ProtocolType = BaseAssembly.MainModule.GetType("Nice.Game.Base.ProtocolAttribute");
+            ProtocolType = BaseAssembly.MainModule.GetType("Nice.Game.Base.AutoProtocolAttribute");
             BroadcastType = BaseAssembly.MainModule.GetType("Nice.Game.Base.BroadcastAttribute");
             SyncClassType = BaseAssembly.MainModule.GetType("Nice.Game.Base.SyncClassAttribute");
             SyncFieldType = BaseAssembly.MainModule.GetType("Nice.Game.Base.SyncFieldAttribute");

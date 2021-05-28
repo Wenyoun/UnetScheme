@@ -2,12 +2,13 @@
 
 namespace Nice.Game.Client
 {
-    [Protocol]
+    [AutoProtocol]
     public class AutoProtocolHandler : AbsProtocolHandler
     {
         public override void Register()
         {
         }
+        
         public override void UnRegister()
         {
         }
