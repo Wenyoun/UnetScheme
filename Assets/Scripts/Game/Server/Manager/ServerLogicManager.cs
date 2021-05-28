@@ -41,5 +41,15 @@ namespace Nice.Game.Server
                 logic.OnRemove();
             }
         }
+
+        public T GetServerLogic<T>() where T : IServerLogic
+        {
+            Type t = typeof(T);
+            if (m_Logics.TryGetValue(t, out IServerLogic logic))
+            {
+                return (T) logic;
+            }
+            return default;
+        }
     }
 }

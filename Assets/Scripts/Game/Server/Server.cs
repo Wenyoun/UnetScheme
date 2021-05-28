@@ -2,7 +2,7 @@
 
 namespace Nice.Game.Server
 {
-    public partial class Server : ICompose, IConnectionHandler
+    public partial class Server : ICompose
     {
         private UpdaterRegister m_UpdateManager;
         private ServerLogicManager m_LogicManager;
@@ -17,7 +17,7 @@ namespace Nice.Game.Server
 
         public void OnInit()
         {
-            NetworkServerManager.Bind(50000, this);
+            AddServerLogic<InitServerLogic>();
         }
 
         public void OnRemove()
@@ -25,7 +25,6 @@ namespace Nice.Game.Server
             m_WorldManager.Dispose();
             m_LogicManager.Dispose();
             m_UpdateManager.Dispose();
-            NetworkServerManager.Dispose();
         }
 
         public void OnUpdate(float delta)
@@ -42,17 +41,6 @@ namespace Nice.Game.Server
         public void OnLateUpdate(float delta)
         {
             OnLateUpdateWorld(delta);
-        }
-
-        public void OnAddConnection(IConnection connection)
-        {
-            connection.RegisterProtocol<AutoProtocolHandler>();
-            connection.RegisterProtocol<ServerProtocolHandler>();
-        }
-
-        public void OnRemoveConnection(IConnection connection)
-        {
-            connection.Disconnect();
         }
     }
 }

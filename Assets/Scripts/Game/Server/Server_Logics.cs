@@ -11,5 +11,10 @@ namespace Nice.Game.Server
         {
             m_LogicManager.RemoveServerLogic<T>();
         }
+
+        public T GetServerLogic<T>() where T : IServerLogic
+        {
+            return m_LogicManager.GetServerLogic<T>();
+        }
     }
 }
