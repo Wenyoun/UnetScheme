@@ -2,7 +2,7 @@
 
 namespace Nice.Game.Client
 {
-    public class ClientProtocolHandler : IProtocolHandler
+    public class ClientProtocolHandler : AbsProtocolHandler
     {
         private World m_World;
 
@@ -12,17 +12,15 @@ namespace Nice.Game.Client
         }
 
 
-        public void Register()
+        public override void Register()
         {
-            Connection.RegisterHandler(MsgID.Sync_Attribute, OnSyncAttribute);
+            m_Connection.RegisterHandler(MsgID.Sync_Attribute, OnSyncAttribute);
         }
 
-        public void UnRegister()
+        public override void UnRegister()
         {
-            Connection.UnRegisterHandler(MsgID.Sync_Attribute);
+            m_Connection.UnRegisterHandler(MsgID.Sync_Attribute);
         }
-
-        public IConnection Connection { get; set; }
 
         private void OnSyncAttribute(ChannelMessage msg)
         {

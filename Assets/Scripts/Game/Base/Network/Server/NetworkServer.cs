@@ -31,8 +31,9 @@ namespace Nice.Game.Base
                 connection.Dispose();
             }
 
-            m_Transport.Dispose();
+            m_Connections.Clear();
             m_WrapChannels.Clear();
+            m_Transport.Dispose();
             m_Handle = null;
         }
 
@@ -82,7 +83,7 @@ namespace Nice.Game.Base
                 return;
             }
 
-            m_WrapChannels.Enqueue(new WrapChannel(Flag.Add, channel));
+            m_WrapChannels.Enqueue(new WrapChannel(WrapChannel.ADD, channel));
         }
 
         public void OnRemoveChannel(IChannel channel)
@@ -92,7 +93,7 @@ namespace Nice.Game.Base
                 return;
             }
 
-            m_WrapChannels.Enqueue(new WrapChannel(Flag.Remove, channel));
+            m_WrapChannels.Enqueue(new WrapChannel(WrapChannel.REMOVE, channel));
         }
 
         private void CheckWrapChannels()
@@ -102,7 +103,7 @@ namespace Nice.Game.Base
                 while (m_WrapChannels.TryDequeue(out WrapChannel wrap))
                 {
                     IChannel channel = wrap.Channel;
-                    if (wrap.Flag == Flag.Add)
+                    if (wrap.Flag == WrapChannel.ADD)
                     {
                         if (!m_Connections.ContainsKey(channel.ChannelId))
                         {
@@ -114,7 +115,7 @@ namespace Nice.Game.Base
                             }
                         }
                     }
-                    else if (wrap.Flag == Flag.Remove)
+                    else if (wrap.Flag == WrapChannel.REMOVE)
                     {
                         if (m_Connections.TryGetValue(channel.ChannelId, out Connection connection))
                         {
@@ -130,18 +131,15 @@ namespace Nice.Game.Base
             }
         }
 
-        private enum Flag
-        {
-            Add,
-            Remove
-        }
-
         private struct WrapChannel
         {
-            public Flag Flag;
+            public const int ADD = 1;
+            public const int REMOVE = 2;
+
+            public int Flag;
             public IChannel Channel;
 
-            public WrapChannel(Flag flag, IChannel channel)
+            public WrapChannel(int flag, IChannel channel)
             {
                 Flag = flag;
                 Channel = channel;

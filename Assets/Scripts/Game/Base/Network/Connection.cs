@@ -1,22 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Nice.Game.Base
 {
     internal class Connection : IConnection
     {
         private IChannel m_Channel;
-        private List<IProtocolHandler> m_Protocols;
+        private HDictionary<Type, AbsProtocolHandler> m_Protocols;
 
         public Connection(IChannel channel)
         {
             m_Channel = channel;
-            m_Protocols = new List<IProtocolHandler>();
-        }
-
-        internal virtual void OnUpdate()
-        {
-            m_Channel.OnUpdate();
+            m_Protocols = new HDictionary<Type, AbsProtocolHandler>();
         }
 
         public void Dispose()
@@ -31,14 +25,15 @@ namespace Nice.Game.Base
             m_Channel.Disconnect();
         }
 
-        public T RegisterProtocol<T>() where T : IProtocolHandler, new()
+        public T RegisterProtocol<T>() where T : AbsProtocolHandler, new()
         {
-            if (IsNotFind<T>())
+            Type t = typeof(T);
+            if (!m_Protocols.ContainsKey(t))
             {
                 T handler = new T();
                 handler.Connection = this;
                 handler.Register();
-                m_Protocols.Add(handler);
+                m_Protocols.Add(t, handler);
                 return handler;
             }
             return default;
@@ -83,30 +78,18 @@ namespace Nice.Game.Base
             get { return m_Channel.IsConnected; }
         }
 
-        private void ClearRegisterProtocols()
+        internal virtual void OnUpdate()
         {
-            int length = m_Protocols.Count;
-            for (int i = 0; i < length; ++i)
-            {
-                m_Protocols[i].UnRegister();
-            }
-            m_Protocols.Clear();
+            m_Channel.OnUpdate();
         }
 
-        private bool IsNotFind<T>() where T : IProtocolHandler
+        private void ClearRegisterProtocols()
         {
-            Type t = typeof(T);
-            bool isNotFind = true;
-            int length = m_Protocols.Count;
-            for (int i = 0; i < length; ++i)
+            foreach (AbsProtocolHandler protocol in m_Protocols)
             {
-                if (t == m_Protocols[i].GetType())
-                {
-                    isNotFind = false;
-                    break;
-                }
+                protocol.UnRegister();
             }
-            return isNotFind;
+            m_Protocols.Clear();
         }
     }
 }

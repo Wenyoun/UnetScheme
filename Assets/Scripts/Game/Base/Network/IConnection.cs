@@ -11,7 +11,7 @@ namespace Nice.Game.Base
 
         void Disconnect();
 
-        T RegisterProtocol<T>() where T : IProtocolHandler, new();
+        T RegisterProtocol<T>() where T : AbsProtocolHandler, new();
 
         void RegisterHandler(ushort cmd, ChannelMessageDelegate handler);
 

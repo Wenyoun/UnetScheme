@@ -16,7 +16,7 @@ namespace Zyq.Weaver
                 return;
             }
 
-            MethodReference getConnection = ResolveHelper.ResolveMethod(protocol, "get_Connection");
+            FieldReference connectionField = module.ImportReference(ResolveHelper.ResolveField(protocol.BaseType, "m_Connection"));
             {
                 //public void Register();
                 MethodDefinition registerMethod = ResolveHelper.ResolveMethod(protocol, "Register");
@@ -108,7 +108,7 @@ namespace Zyq.Weaver
                     }
 
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldarg_0));
-                    registerProcessor.Append(registerProcessor.Create(OpCodes.Call, getConnection));
+                    registerProcessor.Append(registerProcessor.Create(OpCodes.Ldfld, connectionField));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldc_I4, msgId));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldarg_0));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldftn, protoMethodImpl));
@@ -129,7 +129,7 @@ namespace Zyq.Weaver
                 foreach (ushort key in methods.Keys)
                 {
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ldarg_0));
-                    unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Callvirt, getConnection));
+                    unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ldfld, connectionField));
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ldc_I4, key));
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IConnectionUnregisterHandlerMethod)));
                 }

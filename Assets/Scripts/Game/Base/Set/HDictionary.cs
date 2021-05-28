@@ -18,6 +18,12 @@ namespace Nice.Game.Base
             m_Dict = new Dictionary<TKey, TValue>(capacity);
         }
 
+        public void Clear()
+        {
+            m_List.Clear();
+            m_Dict.Clear();
+        }
+
         public void Add(TKey k, TValue v)
         {
             if (!m_Dict.ContainsKey(k))
@@ -56,6 +62,11 @@ namespace Nice.Game.Base
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public int Count
+        {
+            get { return m_List.Count; }
         }
 
         private struct ListEnumerator<TValue> : IEnumerator<TValue>

@@ -7,42 +7,37 @@ namespace Nice.Game.Base
     {
         private World m_World;
         private List<uint> m_Removes;
-        private List<Entity> m_EntityList;
-        private Dictionary<uint, Entity> m_EntityDict;
+        private HDictionary<uint, Entity> m_Entities;
 
         public Entities(World world)
         {
             m_World = world;
             m_Removes = new List<uint>();
-            m_EntityList = new List<Entity>();
-            m_EntityDict = new Dictionary<uint, Entity>();
+            m_Entities = new HDictionary<uint, Entity>();
         }
 
         public void Dispose()
         {
             m_World = null;
             m_Removes.Clear();
-            m_EntityList.Clear();
-            m_EntityDict.Clear();
+            m_Entities.Clear();
         }
 
         public void OnUpdate(float delta)
         {
-            TickRemoveEntity();
-            int length = m_EntityList.Count;
-            for (int i = 0; i < length; ++i)
+            TickRemoveEntities();
+            foreach (Entity entity in m_Entities)
             {
-                m_EntityList[i].OnUpdate(delta);
+                entity.OnUpdate(delta);
             }
         }
 
         public void AddEntity(Entity entity)
         {
             uint entityId = entity.EntityId;
-            if (!m_EntityDict.ContainsKey(entityId))
+            if (!m_Entities.ContainsKey(entityId))
             {
-                m_EntityList.Add(entity);
-                m_EntityDict.Add(entityId, entity);
+                m_Entities.Add(entityId, entity);
                 entity.World = m_World;
                 entity.OnInit();
             }
@@ -60,7 +55,7 @@ namespace Nice.Game.Base
 
         public Entity GetEntity(uint entityId)
         {
-            if (m_EntityDict.TryGetValue(entityId, out Entity entity))
+            if (m_Entities.TryGetValue(entityId, out Entity entity))
             {
                 if (!entity.IsDispose)
                 {
@@ -72,19 +67,19 @@ namespace Nice.Game.Base
 
         public bool CopyEntities(List<Entity> list)
         {
-            int length = m_EntityList.Count;
-            for (int i = 0; i < length; ++i)
+            bool result = false;
+            foreach (Entity entity in m_Entities)
             {
-                Entity entity = m_EntityList[i];
                 if (!entity.IsDispose)
                 {
+                    result = true;
                     list.Add(entity);
                 }
             }
-            return true;
+            return result;
         }
 
-        private void TickRemoveEntity()
+        private void TickRemoveEntities()
         {
             int length = m_Removes.Count;
             if (length > 0)
@@ -95,9 +90,10 @@ namespace Nice.Game.Base
                     Entity entity = GetEntity(eid);
                     if (entity != null)
                     {
-                        m_EntityDict.Remove(eid);
-                        m_EntityList.Remove(entity);
-                        entity.OnRemove();
+                        if (m_Entities.Remove(eid))
+                        {
+                            entity.OnRemove();
+                        }
                     }
                 }
                 m_Removes.Clear();

@@ -16,7 +16,7 @@ namespace Zyq.Weaver
                 return;
             }
 
-            MethodReference getConnection = ResolveHelper.ResolveMethod(protocol, "get_Connection");
+            FieldReference connectionField = module.ImportReference(ResolveHelper.ResolveField(protocol.BaseType, "m_Connection"));
             {
                 //public void Register();
                 MethodDefinition registerMethod = ResolveHelper.ResolveMethod(protocol, "Register");
@@ -102,7 +102,7 @@ namespace Zyq.Weaver
                         }
 
                         processor.Append(processor.Create(OpCodes.Ldarg_0));
-                        processor.Append(processor.Create(OpCodes.Call, getConnection));
+                        processor.Append(processor.Create(OpCodes.Ldfld, connectionField));
 
                         for (int i = 0; i < indexs.Count; ++i)
                         {
@@ -115,7 +115,7 @@ namespace Zyq.Weaver
                     }
 
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldarg_0));
-                    registerProcessor.Append(registerProcessor.Create(OpCodes.Call, getConnection));
+                    registerProcessor.Append(registerProcessor.Create(OpCodes.Ldfld, connectionField));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldc_I4, key));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldarg_0));
                     registerProcessor.Append(registerProcessor.Create(OpCodes.Ldftn, protoMethodImpl));
@@ -137,7 +137,7 @@ namespace Zyq.Weaver
                 foreach (short key in methods.Keys)
                 {
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ldarg_0));
-                    unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Callvirt, getConnection));
+                    unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ldfld, connectionField));
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Ldc_I4, key));
                     unregisterProcessor.Append(unregisterProcessor.Create(OpCodes.Callvirt, module.ImportReference(WeaverProgram.IConnectionUnregisterHandlerMethod)));
                 }

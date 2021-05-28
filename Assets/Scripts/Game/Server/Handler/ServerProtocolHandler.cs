@@ -2,15 +2,13 @@
 
 namespace Nice.Game.Server
 {
-    public class ServerProtocolHandler : IProtocolHandler
+    public class ServerProtocolHandler : AbsProtocolHandler
     {
-        public IConnection Connection { get; set; }
-
-        public void Register()
+        public override void Register()
         {
         }
 
-        public void UnRegister()
+        public override void UnRegister()
         {
         }
     }
