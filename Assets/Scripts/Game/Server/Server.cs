@@ -2,40 +2,46 @@
 
 namespace Nice.Game.Server
 {
-    public class Server : ICompose, IConnectionHandler
+    public partial class Server : ICompose, IConnectionHandler
     {
-        private AbsWorld m_World;
+        private UpdaterRegister m_UpdateManager;
+        private ServerLogicManager m_LogicManager;
+        private ServerWorldManager m_WorldManager;
 
         public Server()
         {
-            m_World = new ServerWorld();
+            m_UpdateManager = new UpdaterRegister();
+            m_LogicManager = new ServerLogicManager();
+            m_WorldManager = new ServerWorldManager();
         }
 
         public void OnInit()
         {
-            m_World.OnInit();
             NetworkServerManager.Bind(50000, this);
         }
 
         public void OnRemove()
         {
+            m_WorldManager.Dispose();
+            m_LogicManager.Dispose();
+            m_UpdateManager.Dispose();
             NetworkServerManager.Dispose();
-            m_World.Dispose();
         }
 
         public void OnUpdate(float delta)
         {
-            m_World.OnUpdate(delta);
+            OnUpdater(delta);
+            OnUpdateWorld(delta);
         }
 
         public void OnFixedUpdate(float delta)
         {
-            m_World.OnFixedUpdate(delta);
+            OnFixedUpdateWorld(delta);
         }
 
         public void OnLateUpdate(float delta)
         {
-            m_World.OnLateUpdate(delta);
+            OnLateUpdateWorld(delta);
         }
 
         public void OnAddConnection(IConnection connection)

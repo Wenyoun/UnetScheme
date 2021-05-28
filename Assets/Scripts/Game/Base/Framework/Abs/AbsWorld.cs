@@ -1,6 +1,8 @@
-﻿namespace Nice.Game.Base
+﻿using System;
+
+namespace Nice.Game.Base
 {
-	public abstract partial class AbsWorld
+	public abstract partial class AbsWorld : IDisposable
 	{
 		private int m_Wid;
 		private bool m_Dispose;

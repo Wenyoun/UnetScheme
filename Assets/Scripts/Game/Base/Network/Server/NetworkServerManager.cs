@@ -1,6 +1,6 @@
 namespace Nice.Game.Base
 {
-    public class NetworkServerManager
+    public static class NetworkServerManager
     {
         private static NetworkServer m_Network;
 
