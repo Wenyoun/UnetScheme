@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Nice.Game.Base
+﻿namespace Nice.Game.Base
 {
-	public abstract partial class World
+	public abstract partial class AbsWorld
 	{
 		private int m_Wid;
 		private bool m_Dispose;
@@ -14,7 +12,7 @@ namespace Nice.Game.Base
 		private MessagerRegister m_Messager;
 		private FeatureRegister m_Features;
 
-		protected World(int wid)
+		protected AbsWorld(int wid)
 		{
 			m_Wid = wid;
 		}

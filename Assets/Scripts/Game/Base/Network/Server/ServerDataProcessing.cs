@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Concurrent;
 
 namespace Nice.Game.Base
 {
@@ -73,7 +72,7 @@ namespace Nice.Game.Base
             return packets.Count > 0;
         }
 
-        public void SendPackets(ServerChannel channel, ConcurrentQueue<Packet> packets)
+        public void SendPackets(ServerChannel channel, HConcurrentQueue<Packet> packets)
         {
             while (packets.TryDequeue(out Packet packet))
             {

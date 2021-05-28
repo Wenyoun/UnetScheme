@@ -5,10 +5,10 @@ namespace Nice.Game.Base
 {
     public sealed class FeatureRegister : IDisposable
     {
-        private World m_World;
+        private AbsWorld m_World;
         private List<IWorldFeature> m_Features;
 
-        public FeatureRegister(World world)
+        public FeatureRegister(AbsWorld world)
         {
             m_World = world;
             m_Features = new List<IWorldFeature>();

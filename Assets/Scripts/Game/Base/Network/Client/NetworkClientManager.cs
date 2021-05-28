@@ -4,14 +4,14 @@
     {
         private static NetworkClient m_Network;
 
-        public static void Connect(string host, int port, IConnectionHandle handle)
+        public static void Connect(string host, int port, IConnectionHandler handler)
         {
             if (m_Network != null)
             {
                 return;
             }
             m_Network = new NetworkClient();
-            m_Network.Connect(host, port, handle);
+            m_Network.Connect(host, port, handler);
         }
 
         public static void Disconnect()

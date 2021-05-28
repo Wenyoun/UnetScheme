@@ -78,11 +78,6 @@ namespace Nice.Game.Base
             get { return m_Channel.IsConnected; }
         }
 
-        internal virtual void OnUpdate()
-        {
-            m_Channel.OnUpdate();
-        }
-
         private void ClearRegisterProtocols()
         {
             foreach (AbsProtocolHandler protocol in m_Protocols)
@@ -90,6 +85,11 @@ namespace Nice.Game.Base
                 protocol.UnRegister();
             }
             m_Protocols.Clear();
+        }
+
+        internal void OnUpdate()
+        {
+            m_Channel.OnUpdate();
         }
     }
 }

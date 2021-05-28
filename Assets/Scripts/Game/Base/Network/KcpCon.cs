@@ -4,21 +4,27 @@ using System.Net;
 using System.Net.Sockets;
 using Net.KcpImpl;
 
-namespace Nice.Game.Base {
-    public abstract class KcpCon : IKcpCallback, IRentable, IDisposable {
+namespace Nice.Game.Base
+{
+    public abstract class KcpCon : IKcpCallback, IRentable, IDisposable
+    {
         #region pool
-        private class MemoryPool : IMemoryOwner<byte> {
+        private class MemoryPool : IMemoryOwner<byte>
+        {
             private Memory<byte> memory;
 
-            public MemoryPool(int size) {
+            public MemoryPool(int size)
+            {
                 memory = new Memory<byte>(new byte[size]);
             }
 
-            public Memory<byte> Memory {
+            public Memory<byte> Memory
+            {
                 get { return memory; }
             }
 
-            public void Dispose() {
+            public void Dispose()
+            {
                 memory = null;
             }
         }
@@ -35,10 +41,11 @@ namespace Nice.Game.Base {
         private bool m_IsConnected;
         private byte[] m_OutputBuffer;
 
-        protected KcpCon(uint conId, uint conv, Socket socket, EndPoint point) {
+        protected KcpCon(uint conId, uint conv, Socket socket, EndPoint point)
+        {
             m_Point = point;
             m_Socket = socket;
-            
+
             m_Kcp = new Kcp(conv, this, this);
             m_Kcp.NoDelay(1, 10, 2, 1);
 
@@ -50,12 +57,15 @@ namespace Nice.Game.Base {
             m_OutputBuffer = new byte[KcpConstants.Packet_Length];
         }
 
-        public IMemoryOwner<byte> RentBuffer(int length) {
+        public IMemoryOwner<byte> RentBuffer(int length)
+        {
             return new MemoryPool(length);
         }
 
-        public void Output(Memory<byte> memory, int length) {
-            if (m_Dispose) {
+        public void Output(Memory<byte> memory, int length)
+        {
+            if (m_Dispose)
+            {
                 return;
             }
 
@@ -67,15 +77,19 @@ namespace Nice.Game.Base {
         }
 
 
-        public int Send(byte[] buffer, int offset, int length) {
-            if (m_Dispose) {
+        public int Send(byte[] buffer, int offset, int length)
+        {
+            if (m_Dispose)
+            {
                 return -10;
             }
             return m_Kcp.Send(new Span<byte>(buffer, offset, length));
         }
 
-        public int RawSend(byte[] buffer, int offset, int length) {
-            if (m_Dispose) {
+        public int RawSend(byte[] buffer, int offset, int length)
+        {
+            if (m_Dispose)
+            {
                 return -10;
             }
 
@@ -88,16 +102,21 @@ namespace Nice.Game.Base {
             return length + KcpConstants.Head_Size;
         }
 
-        public int Recv(byte[] buffer, int offset, int length) {
-            if (m_Dispose) {
+        public int Recv(byte[] buffer, int offset, int length)
+        {
+            if (m_Dispose)
+            {
                 return -10;
             }
             return m_Kcp.Recv(new Span<byte>(buffer, offset, length));
         }
 
-        public void Dispose() {
-            lock (this) {
-                if (m_Dispose) {
+        public void Dispose()
+        {
+            lock (this)
+            {
+                if (m_Dispose)
+                {
                     return;
                 }
                 m_Dispose = true;
@@ -113,24 +132,30 @@ namespace Nice.Game.Base {
         }
 
         #region internal
-        internal void Flush() {
-            if (m_Dispose) {
+        internal void Flush()
+        {
+            if (m_Dispose)
+            {
                 return;
             }
 
             m_Kcp.Flush();
         }
 
-        internal void OnUpdate(long time) {
-            if (m_Dispose) {
+        internal void OnUpdate(long time)
+        {
+            if (m_Dispose)
+            {
                 return;
             }
 
             m_Kcp.Update(time);
         }
 
-        internal void Input(byte[] buffer, int offset, int length) {
-            if (m_Dispose) {
+        internal void Input(byte[] buffer, int offset, int length)
+        {
+            if (m_Dispose)
+            {
                 return;
             }
             m_Kcp.Input(new Span<byte>(buffer, offset, length));
@@ -138,22 +163,27 @@ namespace Nice.Game.Base {
         #endregion
 
         #region properties
-        public uint Conv {
+        public uint Conv
+        {
             get { return m_Conv; }
         }
 
-        public uint ConId {
+        public uint ConId
+        {
             get { return m_ConId; }
         }
 
-        public bool IsConnected {
+        public bool IsConnected
+        {
             get { return !m_Dispose && m_IsConnected; }
             internal set { m_IsConnected = !m_Dispose && value; }
         }
         #endregion
 
-        internal void SendDisconnect() {
-            if (m_Dispose) {
+        internal void SendDisconnect()
+        {
+            if (m_Dispose)
+            {
                 return;
             }
 
@@ -161,7 +191,8 @@ namespace Nice.Game.Base {
             ByteWriteMemory write = new ByteWriteMemory(buffer);
             write.Write(KcpConstants.Flag_Disconnect);
             write.Write(m_Conv);
-            for (int i = 0; i < 3; ++i) {
+            for (int i = 0; i < 3; ++i)
+            {
                 Send(buffer, 0, 8);
             }
             Flush();

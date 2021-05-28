@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 
 namespace Nice.Game.Base
 {
@@ -12,8 +11,8 @@ namespace Nice.Game.Base
 
         private KcpCon m_Con;
         private ServerHeartbeatProcessing m_Heartbeat;
-        private ConcurrentQueue<Packet> m_RecvPackets;
-        private ConcurrentQueue<Packet> m_SendPackets;
+        private HConcurrentQueue<Packet> m_RecvPackets;
+        private HConcurrentQueue<Packet> m_SendPackets;
 
         public ServerChannel(KcpCon con)
         {
@@ -23,8 +22,8 @@ namespace Nice.Game.Base
 
             m_Con = con;
             m_Heartbeat = new ServerHeartbeatProcessing();
-            m_RecvPackets = new ConcurrentQueue<Packet>();
-            m_SendPackets = new ConcurrentQueue<Packet>();
+            m_RecvPackets = new HConcurrentQueue<Packet>();
+            m_SendPackets = new HConcurrentQueue<Packet>();
         }
 
         public override void Dispose()
@@ -74,7 +73,7 @@ namespace Nice.Game.Base
 
         public override void Send(ushort cmd, ByteBuffer buffer, ChannelType channel)
         {
-            if (m_Dispose)
+            if (m_Dispose || !IsConnected)
             {
                 return;
             }

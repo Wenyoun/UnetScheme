@@ -5,11 +5,11 @@ namespace Nice.Game.Base
 {
     public class Entities : IDisposable
     {
-        private World m_World;
+        private AbsWorld m_World;
         private List<uint> m_Removes;
         private HDictionary<uint, Entity> m_Entities;
 
-        public Entities(World world)
+        public Entities(AbsWorld world)
         {
             m_World = world;
             m_Removes = new List<uint>();

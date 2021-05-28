@@ -36,5 +36,4 @@ namespace Nice.Game.Client
             m_World.OnLateUpdate(delta);
         }
     }
-    
 }

@@ -2,9 +2,9 @@
 
 namespace Nice.Game.Server
 {
-    public class Server : ICompose, IConnectionHandle
+    public class Server : ICompose, IConnectionHandler
     {
-        private World m_World;
+        private AbsWorld m_World;
 
         public Server()
         {
@@ -46,6 +46,7 @@ namespace Nice.Game.Server
 
         public void OnRemoveConnection(IConnection connection)
         {
+            connection.Disconnect();
         }
     }
 }

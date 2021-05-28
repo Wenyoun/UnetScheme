@@ -5,7 +5,7 @@
         private uint m_CopId;
         private Entity m_Entity;
 
-        public AbsCop()
+        protected AbsCop()
         {
             m_CopId = UniGenID.GenNextCopID();
         }

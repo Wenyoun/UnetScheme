@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Nice.Game.Base
 {
-    public abstract partial class World
+    public abstract partial class AbsWorld
     {
         public void AddEntity(Entity entity)
         {

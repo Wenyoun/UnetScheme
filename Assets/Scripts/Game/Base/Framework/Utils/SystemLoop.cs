@@ -10,33 +10,6 @@ namespace Nice.Game.Base
     {
         private static Action[] updates = new Action[0];
 
-        public static void AddUpdate(Action update)
-        {
-            int length = updates.Length;
-            Array.Resize(ref updates, length + 1);
-            updates[length] = update;
-        }
-
-        public static void RemoveUpdate(Action update)
-        {
-            int index = -1;
-            List<Action> list = new List<Action>(updates);
-            int length = list.Count;
-            for (int i = 0; i < length; ++i)
-            {
-                if (list[i] == update)
-                {
-                    index = i;
-                    break;
-                }
-            }
-            if (index >= 0)
-            {
-                list.RemoveAt(index);
-                updates = list.ToArray();
-            }
-        }
-
         [RuntimeInitializeOnLoadMethod]
         private static void OnInitLoadMethods()
         {
@@ -91,6 +64,33 @@ namespace Nice.Game.Base
             index = -1;
             targetLoopSystem = new PlayerLoopSystem();
             return false;
+        }
+
+        public static void AddUpdate(Action update)
+        {
+            int length = updates.Length;
+            Array.Resize(ref updates, length + 1);
+            updates[length] = update;
+        }
+
+        public static void RemoveUpdate(Action update)
+        {
+            int index = -1;
+            List<Action> list = new List<Action>(updates);
+            int length = list.Count;
+            for (int i = 0; i < length; ++i)
+            {
+                if (list[i] == update)
+                {
+                    index = i;
+                    break;
+                }
+            }
+            if (index >= 0)
+            {
+                list.RemoveAt(index);
+                updates = list.ToArray();
+            }
         }
     }
 }

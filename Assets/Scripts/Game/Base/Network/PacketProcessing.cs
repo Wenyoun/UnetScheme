@@ -2,18 +2,22 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace Nice.Game.Base {
-    internal static class PacketProcessing {
+namespace Nice.Game.Base
+{
+    internal static class PacketProcessing
+    {
         private const int CmdLength = 2;
         private const int MsgLength = 2;
         private const int CmdMsgLength = CmdLength + MsgLength;
 
-        public static int Send(byte[] buffer, Packet packet) {
+        public static int Send(byte[] buffer, Packet packet)
+        {
             //消息格式
             //2字节消息类型，2字节消息长度，N字节消数据
             int size = CmdMsgLength + packet.Buffer.ReadableLength;
 
-            if (size > buffer.Length) {
+            if (size > buffer.Length)
+            {
                 throw new ArgumentException($"PacketProcessing Send error total: {size} > {buffer.Length}");
             }
 
@@ -31,11 +35,12 @@ namespace Nice.Game.Base {
             return size;
         }
 
-
-        public static void Recv(byte[] data, int offset, int size, List<Packet> packets) {
+        public static void Recv(byte[] data, int offset, int size, List<Packet> packets)
+        {
             //消息格式
             //2字节消息类型，2字节消息长度，N字节消息数据
-            while (size > CmdMsgLength) {
+            while (size > CmdMsgLength)
+            {
                 //MsgLength个字节消息长度,CmdLength个字节消息类型长度,N字节消息数据长度
                 ByteReadMemory memory = new ByteReadMemory(data, offset, size);
 
@@ -47,7 +52,8 @@ namespace Nice.Game.Base {
                 ushort length = memory.ReadUShort();
                 size -= MsgLength;
 
-                if (length > size) {
+                if (length > size)
+                {
                     throw new ArgumentException($"PacketProcessing Recv error: {length} > {size}");
                 }
 

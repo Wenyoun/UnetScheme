@@ -2,9 +2,9 @@
 {
     public abstract class Entity
     {
-        private World m_World;
         private bool m_Dispose;
         private uint m_EntityId;
+        private AbsWorld m_World;
         
         private Cops m_Cops;
         private Attributes m_Attributes;
@@ -124,7 +124,7 @@
             internal set { m_Dispose = value; }
         }
 
-        public World World
+        public AbsWorld World
         {
             get { return m_World; }
             internal set { m_World = value; }

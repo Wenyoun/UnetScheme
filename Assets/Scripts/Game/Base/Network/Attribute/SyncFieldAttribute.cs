@@ -2,7 +2,7 @@
 
 namespace Nice.Game.Base
 {
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field)]
     public class SyncFieldAttribute : Attribute
     {
     }

@@ -1,4 +1,5 @@
 ﻿using Nice.Game.Base;
+
 namespace Base
 {
     public interface IView : ILifecycle, IUpdate, ICanUpdate

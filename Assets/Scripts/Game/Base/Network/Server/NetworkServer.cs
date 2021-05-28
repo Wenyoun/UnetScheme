@@ -5,7 +5,7 @@ namespace Nice.Game.Base
     internal class NetworkServer : IDisposable, IChannelListener
     {
         private bool m_Dispose;
-        private IConnectionHandle m_Handle;
+        private IConnectionHandler m_Handler;
         private ServerTransport m_Transport;
         private HDictionary<uint, Connection> m_Connections;
         private HConcurrentQueue<WrapChannel> m_WrapChannels;
@@ -34,17 +34,17 @@ namespace Nice.Game.Base
             m_Connections.Clear();
             m_WrapChannels.Clear();
             m_Transport.Dispose();
-            m_Handle = null;
+            m_Handler = null;
         }
 
-        public void Bind(int port, IConnectionHandle handle)
+        public void Bind(int port, IConnectionHandler handler)
         {
             if (m_Dispose)
             {
                 throw new ObjectDisposedException("NetworkServer already disposed!");
             }
 
-            m_Handle = handle;
+            m_Handler = handler;
             m_Transport.Bind(port, this);
         }
 
@@ -109,9 +109,9 @@ namespace Nice.Game.Base
                         {
                             Connection connection = new Connection(channel);
                             m_Connections.Add(channel.ChannelId, connection);
-                            if (m_Handle != null)
+                            if (m_Handler != null)
                             {
-                                m_Handle.OnAddConnection(connection);
+                                m_Handler.OnAddConnection(connection);
                             }
                         }
                     }
@@ -120,9 +120,9 @@ namespace Nice.Game.Base
                         if (m_Connections.TryGetValue(channel.ChannelId, out Connection connection))
                         {
                             m_Connections.Remove(channel.ChannelId);
-                            if (m_Handle != null)
+                            if (m_Handler != null)
                             {
-                                m_Handle.OnRemoveConnection(connection);
+                                m_Handler.OnRemoveConnection(connection);
                             }
                             connection.Dispose();
                         }

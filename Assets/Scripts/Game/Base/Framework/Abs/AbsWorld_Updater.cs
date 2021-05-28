@@ -1,6 +1,6 @@
 namespace Nice.Game.Base
 {
-    public abstract partial class World
+    public abstract partial class AbsWorld
     {
         public void RegisterUpdate(UpdateDelegate handler)
         {

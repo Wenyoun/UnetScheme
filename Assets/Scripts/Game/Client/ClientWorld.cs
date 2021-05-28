@@ -2,7 +2,7 @@
 
 namespace Nice.Game.Client
 {
-	public class ClientWorld : World, IConnectionHandle
+	public class ClientWorld : AbsWorld, IConnectionHandler
 	{
 		public ClientWorld(int wid) : base(wid)
 		{

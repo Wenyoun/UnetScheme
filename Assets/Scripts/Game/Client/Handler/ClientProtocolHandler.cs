@@ -4,9 +4,9 @@ namespace Nice.Game.Client
 {
     public class ClientProtocolHandler : AbsProtocolHandler
     {
-        private World m_World;
+        private AbsWorld m_World;
 
-        public void SetWorld(World world)
+        public void SetWorld(AbsWorld world)
         {
             m_World = world;
         }

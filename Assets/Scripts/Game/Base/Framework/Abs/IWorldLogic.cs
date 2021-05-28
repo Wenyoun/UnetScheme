@@ -2,16 +2,16 @@
 {
     public interface IWorldFeature
     {
-        void OnInit(World world);
+        void OnInit(AbsWorld world);
 
         void OnRemove();
     }
 
     public abstract class AbsWorldFeature : IWorldFeature
     {
-        protected World m_World;
+        protected AbsWorld m_World;
 
-        public void OnInit(World world)
+        public void OnInit(AbsWorld world)
         {
             m_World = world;
             Init();

@@ -2,7 +2,7 @@ using System;
 
 namespace Nice.Game.Base
 {
-    public abstract partial class World
+    public abstract partial class AbsWorld
     {
         public int RegisterTimer(float delay, Action func)
         {

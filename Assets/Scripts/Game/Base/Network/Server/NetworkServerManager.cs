@@ -4,7 +4,7 @@ namespace Nice.Game.Base
     {
         private static NetworkServer m_Network;
 
-        public static void Bind(int port, IConnectionHandle handle)
+        public static void Bind(int port, IConnectionHandler handler)
         {
             if (m_Network != null)
             {
@@ -12,7 +12,7 @@ namespace Nice.Game.Base
             }
             SystemLoop.AddUpdate(OnUpdate);
             m_Network = new NetworkServer();
-            m_Network.Bind(port, handle);
+            m_Network.Bind(port, handler);
         }
 
         public static void Dispose()

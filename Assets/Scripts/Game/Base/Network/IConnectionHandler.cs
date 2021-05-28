@@ -1,8 +1,9 @@
 ﻿namespace Nice.Game.Base
 {
-    public interface IConnectionHandle
+    public interface IConnectionHandler
     {
         void OnAddConnection(IConnection connection);
+
         void OnRemoveConnection(IConnection connection);
     }
 }

@@ -4,19 +4,9 @@ using System.Threading;
 
 namespace Nice.Game.Base
 {
-    internal class KcpConstants
-    {
-        public const int Conv_Size = 4;
-        public const int Head_Size = Conv_Size + 1;
-        public const int Packet_Length = 1300;
-        public const uint Flag_Connect = 0x0ffffff0;
-        public const uint Flag_Heartbeat = 0x0ffffff1;
-        public const uint Flag_Disconnect = 0x0fffffff;
-    }
-
     internal static class KcpHelper
     {
-        internal static int Encode32u(byte[] p, int offset, uint w)
+        public static int Encode32u(byte[] p, int offset, uint w)
         {
             p[0 + offset] = (byte) (w >> 0);
             p[1 + offset] = (byte) (w >> 8);
@@ -25,7 +15,7 @@ namespace Nice.Game.Base
             return 4;
         }
 
-        internal static uint Decode32u(byte[] p, int offset)
+        public static uint Decode32u(byte[] p, int offset)
         {
             uint result = 0;
             result |= (uint) (p[0 + offset] << 0);
@@ -35,7 +25,7 @@ namespace Nice.Game.Base
             return result;
         }
 
-        internal static void Encode64(byte[] p, int offset, long w)
+        public static void Encode64(byte[] p, int offset, long w)
         {
             p[0 + offset] = (byte) (w >> 0);
             p[1 + offset] = (byte) (w >> 8);
@@ -47,13 +37,13 @@ namespace Nice.Game.Base
             p[7 + offset] = (byte) (w >> 56);
         }
 
-        internal static long Decode64(byte[] p, int offset)
+        public static long Decode64(byte[] p, int offset)
         {
             long result = 0;
-            result |= p[0 + offset] << 0;
-            result |= p[1 + offset] << 8;
-            result |= p[2 + offset] << 16;
-            result |= p[3 + offset] << 24;
+            result |= (long) p[0 + offset] << 0;
+            result |= (long) p[1 + offset] << 8;
+            result |= (long) p[2 + offset] << 16;
+            result |= (long) p[3 + offset] << 24;
             result |= (long) p[4 + offset] << 32;
             result |= (long) p[5 + offset] << 40;
             result |= (long) p[6 + offset] << 48;
@@ -61,14 +51,7 @@ namespace Nice.Game.Base
             return result;
         }
 
-        internal static void Clear(this ConcurrentQueue<Packet> queue)
-        {
-            while (queue.TryDequeue(out Packet packet))
-            {
-            }
-        }
-
-        internal static void CreateThread(ParameterizedThreadStart start, object obj = null)
+        public static void CreateThread(ParameterizedThreadStart start, object obj = null)
         {
             Thread thread = new Thread(start);
             thread.Priority = ThreadPriority.Highest;

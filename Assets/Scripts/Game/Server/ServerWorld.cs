@@ -2,7 +2,7 @@
 
 namespace Nice.Game.Server
 {
-    public class ServerWorld : World
+    public class ServerWorld : AbsWorld
     {
         public ServerWorld() : base(1)
         {

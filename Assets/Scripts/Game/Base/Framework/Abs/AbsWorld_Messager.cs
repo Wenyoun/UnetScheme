@@ -3,7 +3,7 @@ using UnityEngine.Assertions.Must;
 
 namespace Nice.Game.Base
 {
-    public partial class World
+    public partial class AbsWorld
     {
         public void DispatchMessage(int id)
         {

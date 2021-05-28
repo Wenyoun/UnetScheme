@@ -3,9 +3,9 @@
     internal class NetworkClient : IClientListener
     {
         private Connection m_Connection;
-        private IConnectionHandle m_Handle;
+        private IConnectionHandler m_Handler;
 
-        public void Connect(string host, int port, IConnectionHandle handle)
+        public void Connect(string host, int port, IConnectionHandler handler)
         {
             if (m_Connection != null)
             {
@@ -13,7 +13,7 @@
             }
 
             SystemLoop.AddUpdate(OnUpdate);
-            m_Handle = handle;
+            m_Handler = handler;
             ClientChannel channel = new ClientChannel();
             channel.Connect(host, port, this);
             m_Connection = new Connection(channel);
@@ -55,9 +55,9 @@
                 return;
             }
 
-            if (m_Handle != null)
+            if (m_Handler != null)
             {
-                m_Handle.OnAddConnection(m_Connection);
+                m_Handler.OnAddConnection(m_Connection);
             }
         }
 
@@ -68,9 +68,9 @@
                 return;
             }
 
-            if (m_Handle != null)
+            if (m_Handler != null)
             {
-                m_Handle.OnRemoveConnection(m_Connection);
+                m_Handler.OnRemoveConnection(m_Connection);
             }
         }
 
