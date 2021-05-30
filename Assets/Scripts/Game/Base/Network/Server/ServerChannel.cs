@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Nice.Game.Base
 {
-    public class ServerChannel : AbsChannel
+    internal class ServerChannel : AbsChannel
     {
         private uint m_Conv;
         private uint m_ConId;

@@ -2,7 +2,7 @@
 
 namespace Nice.Game.Base
 {
-    public class ClientChannel : AbsChannel
+    internal class ClientChannel : AbsChannel
     {
         private bool m_Dispose;
         private IClientListener m_Listener;

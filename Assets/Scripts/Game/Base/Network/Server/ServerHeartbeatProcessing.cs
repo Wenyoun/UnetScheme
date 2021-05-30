@@ -6,18 +6,18 @@ namespace Nice.Game.Base
 
         public ServerHeartbeatProcessing()
         {
-            m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
+            m_RecvMills = TimeUtils.Get1970ToNowMilliseconds();
         }
 
         public void UpdateHeartbeat(ServerChannel channel, byte[] rawBuffer, int offset, int length)
         {
-            m_RecvMills = TimeUtil.Get1970ToNowMilliseconds();
+            m_RecvMills = TimeUtils.Get1970ToNowMilliseconds();
             channel.Send(rawBuffer, offset, length);
         }
 
         public void OnUpdate(ServerChannel channel, IChannelListener listener)
         {
-            long current = TimeUtil.Get1970ToNowMilliseconds();
+            long current = TimeUtils.Get1970ToNowMilliseconds();
             if (current - m_RecvMills > HeartbaetConstants.Timeout_Interval_Mills)
             {
                 if (listener != null)

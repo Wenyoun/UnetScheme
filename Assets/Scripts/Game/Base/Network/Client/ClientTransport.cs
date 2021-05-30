@@ -350,7 +350,7 @@ namespace Nice.Game.Base
                         process.SendPackets(m_Kcp, m_SendPackets);
                     }
 
-                    long time = TimeUtil.Get1970ToNowMilliseconds();
+                    long time = TimeUtils.Get1970ToNowMilliseconds();
                     m_Kcp.OnUpdate(time);
                     heartbeat.UpdateHeartbeat(this, m_Kcp, time);
 

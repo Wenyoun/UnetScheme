@@ -15,7 +15,7 @@ namespace Nice.Game.Base
         }
     }
 
-    public interface IChannel : IDisposable
+    internal interface IChannel : IDisposable
     {
         uint ChannelId { get; }
 
@@ -32,7 +32,7 @@ namespace Nice.Game.Base
         void Register(ushort cmd, ChannelMessageDelegate handler);
     }
 
-    public abstract class AbsChannel : IChannel
+    internal abstract class AbsChannel : IChannel
     {
         private Dictionary<ushort, ChannelMessageDelegate> m_Handlers;
 

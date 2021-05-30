@@ -5,34 +5,30 @@ namespace Nice.Game.Base
 {
     public class Cops : IDisposable
     {
-        private List<ICop> m_CopLts;
-        private Dictionary<Type, ICop> m_CopDys;
+        private HDictionary<Type, ICop> m_Cops;
 
         public Cops()
         {
-            m_CopLts = new List<ICop>();
-            m_CopDys = new Dictionary<Type, ICop>();
+            m_Cops = new HDictionary<Type, ICop>();
         }
 
         public void Dispose()
         {
-            int length = m_CopLts.Count;
-            for (int i = 0; i < length; ++i)
+            foreach (ICop cop in m_Cops)
             {
-                m_CopLts[i].OnRemove();
+                cop.OnRemove();
             }
-            m_CopLts.Clear();
-            m_CopDys.Clear();
+            m_Cops.Clear();
         }
 
         public T AddCop<T>(ICop cop, Entity entity) where T : ICop
         {
             Type type = cop.GetType();
-            if (!m_CopDys.ContainsKey(type))
+            if (!m_Cops.ContainsKey(type))
             {
-                m_CopLts.Add(cop);
-                m_CopDys.Add(type, cop);
+                m_Cops.Add(type, cop);
                 cop.Entity = entity;
+                cop.World = entity.World;
                 cop.OnInit();
             }
 
@@ -42,12 +38,12 @@ namespace Nice.Game.Base
         public T AddCop<T>(Entity entity) where T : ICop, new()
         {
             Type type = typeof(T);
-            if (!m_CopDys.ContainsKey(type))
+            if (!m_Cops.ContainsKey(type))
             {
                 T cop = new T();
-                m_CopLts.Add(cop);
-                m_CopDys.Add(type, cop);
+                m_Cops.Add(type, cop);
                 cop.Entity = entity;
+                cop.World = entity.World;
                 cop.OnInit();
                 return cop;
             }
@@ -58,21 +54,20 @@ namespace Nice.Game.Base
         public void RemoveCop<T>() where T : ICop
         {
             Type type = typeof(T);
-            if (m_CopDys.TryGetValue(type, out ICop cop))
+            if (m_Cops.TryGetValue(type, out ICop cop))
             {
-                m_CopLts.Remove(cop);
-                m_CopDys.Remove(type);
+                m_Cops.Remove(type);
                 cop.OnRemove();
             }
         }
 
         public T GetCop<T>() where T : ICop
         {
-            if (m_CopDys.TryGetValue(typeof(T), out ICop cop))
+            if (m_Cops.TryGetValue(typeof(T), out ICop cop))
             {
                 return (T) cop;
             }
-            return default(T);
+            return default;
         }
     }
 }

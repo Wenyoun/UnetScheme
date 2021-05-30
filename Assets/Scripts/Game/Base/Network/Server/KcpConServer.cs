@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace Nice.Game.Base
 {
-    public sealed class KcpConServer : KcpCon
+    internal sealed class KcpConServer : KcpCon
     {
         public KcpConServer(uint conId, uint conv, Socket socket, EndPoint point) : base(conId, conv, socket, point)
         {

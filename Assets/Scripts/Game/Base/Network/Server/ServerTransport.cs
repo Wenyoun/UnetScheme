@@ -156,7 +156,7 @@ namespace Nice.Game.Base
                 List<uint> removes = new List<uint>();
                 while (!m_Dispose)
                 {
-                    long time = TimeUtil.Get1970ToNowMilliseconds();
+                    long time = TimeUtils.Get1970ToNowMilliseconds();
                     using (IEnumerator<KeyValuePair<uint, ServerChannel>> its = m_Channels.GetEnumerator())
                     {
                         while (its.MoveNext())

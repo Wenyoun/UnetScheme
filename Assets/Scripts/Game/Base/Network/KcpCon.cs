@@ -6,7 +6,7 @@ using Net.KcpImpl;
 
 namespace Nice.Game.Base
 {
-    public abstract class KcpCon : IKcpCallback, IRentable, IDisposable
+    internal abstract class KcpCon : IKcpCallback, IRentable, IDisposable
     {
         #region pool
         private class MemoryPool : IMemoryOwner<byte>
